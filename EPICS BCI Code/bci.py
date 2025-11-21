@@ -307,7 +307,7 @@ translations = {
 }
 
 ########TITLE/HEADER FORMATTING###########
-title_canvas = tk.Canvas(root, width=1030, height=100, bg="#eeeeee", highlightthickness=2, highlightbackground="black")
+title_canvas = tk.Canvas(root, width=1026, height=100, bg="#eeeeee", highlightthickness=2, highlightbackground="black")
 title_canvas.place(x=10, y=10)
 
 title = create_label(title_canvas, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 25))

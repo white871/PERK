@@ -307,16 +307,19 @@ translations = {
 }
 
 ########TITLE/HEADER FORMATTING###########
-title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
+title_canvas = tk.Canvas(root, width=1030, height=100, bg="#eeeeee", highlightthickness=2, highlightbackground="black")
+title_canvas.place(x=10, y=10)
 
-perk_braille_img = load_img("Perk_Braille_Image_grey.png", size=(326,115))
-perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 5))
+title = create_label(title_canvas, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 25))
+
+perk_braille_img = load_img("EPICS BCI Code/PERK_braille_Image_grey.png", size=(272,96))
+perk_logo = create_label(title_canvas, 'nw', img=perk_braille_img, bd_width=0, location=(695, 5))
 ########################################
 #Creating Frames
 #######################################
 
 display_container = tk.Frame(root, bg="#FFFFFF", bd=3, relief="solid")
-display_container.place(x=530, y=130, width=470, height=500)
+display_container.place(x=530, y=140, width=470, height=500)
 
 live_feed_frame = create_display_frame(display_container, start_display=True)
 live_feed_label, line_canvas =  create_display_frame_header(live_feed_frame, "Live Text Feed", 'n', coords=(470/2, 10))
@@ -327,17 +330,17 @@ contraction_library_label, line_canvas =  create_display_frame_header(contractio
 #######################################################
 #Creating images and canvas for triangle selection box
 ######################################################
-triangle_image_1 = load_img("triangles_icon.png", size=(60,115))
-triangle_image_2 = load_img("triangles_icon_flipped.png", size=(60,115))
+triangle_image_1 = load_img("EPICS BCI Code/triangles_icon.png", size=(60,115))
+triangle_image_2 = load_img("EPICS BCI Code/triangles_icon_flipped.png", size=(60,115))
 
-triangle_canvas, triangle_img_obj = create_image_canvas(root, 60, 115, 0, 0, 'nw', triangle_image_1, location=(115, 220))
+triangle_canvas, triangle_img_obj = create_image_canvas(root, 60, 115, 0, 0, 'nw', triangle_image_1, location=(150, 230))
 
 triangle_buttons = []  # global list of all triangle buttons
 
 ########################################################
 #Live Feed Button
 #################################################################
-label_live_text_feed = create_label(root, 'w', txt="Live Text Feed",  font_txt="Roboto Condensed", font_size=20, bold='bold', italic='roman', backround='white', location=(224, 246))
+label_live_text_feed = create_label(root, 'w', txt="Live Text Feed",  font_txt="Roboto Condensed", font_size=20, bold='bold', italic='roman', backround='white', location=(224, 256))
 triangle_live_feed_coords = (12, 9, 12, 46, 48, 28)
 
 triangle_live_feed = create_triangle_button(
@@ -349,7 +352,7 @@ triangle_live_feed = create_triangle_button(
 #Contraction Library Button
 #################################################################
 triangle_contraction_library_coords = (12, 68, 12, 105, 48, 87)
-label_contraction_library = create_label(root, 'w', txt="Contraction Library",  font_txt="Roboto Condensed", font_size=20, bold='normal', italic='roman', backround='white', location=(224, 307))
+label_contraction_library = create_label(root, 'w', txt="Contraction Library",  font_txt="Roboto Condensed", font_size=20, bold='normal', italic='roman', backround='white', location=(224, 317))
 
 triangle_contraction_library = create_triangle_button(
     triangle_canvas, triangle_contraction_library_coords, label_contraction_library, img_obj=triangle_img_obj, 
@@ -360,31 +363,31 @@ triangle_contraction_library = create_triangle_button(
 #Brailler COnnected Section
 ###################################################
 
-Brailler_connected_image = load_img("Brailler_Connected_Icon.png", size=(100,100))
-brailler_icon, brailler_img_obj = create_image_canvas(root, 100, 100, 0, 0, 'nw', Brailler_connected_image, location=(50, 120))
-label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 170))
+Brailler_connected_image = load_img("EPICS BCI Code/Brailler_Connected_Icon.png", size=(100,100))
+brailler_icon, brailler_img_obj = create_image_canvas(root, 100, 100, 0, 0, 'nw', Brailler_connected_image, location=(50, 130))
+label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 180))
 brailler_circle = create_interactive_icon(brailler_icon, label_sub_title_1, (49, 52), 41)
 
 
-online_dot = load_img("green_circle.png", size=(40,40))
-dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(440, 170))
+online_dot = load_img("EPICS BCI Code/green_circle.png", size=(40,40))
+dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(440, 180))
 
 
 ######################################################################
 #Device Management Section
 ######################################################################
 
-home_image = load_img("Home_icon.png", size=(105,110))
-home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 430))
-label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 427))
+home_image = load_img("EPICS BCI Code/Home_icon.png", size=(105,110))
+home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 440))
+label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 437))
 home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41)
 
 #############################################################
 #Settings Section
 ##############################################################
-settings_image = load_img("settings_icon.png", size=(113,100))
-settings_icon, settings_img_obj = create_image_canvas(root, 113, 100, 0, 0, 'center', settings_image, location=(100, 580))
-label_sub_title_3 = create_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 577))
+settings_image = load_img("EPICS BCI Code/settings_icon.png", size=(113,100))
+settings_icon, settings_img_obj = create_image_canvas(root, 113, 100, 0, 0, 'center', settings_image, location=(100, 590))
+label_sub_title_3 = create_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 587))
 settings_circle = create_interactive_icon(settings_icon, label_sub_title_3, (54, 49), 41)
 
 
@@ -542,15 +545,15 @@ def export_file_action():
 button_canvas = tk.Canvas(live_feed_frame, width=464, height=72, bg="#FFFFFF", highlightthickness=0)
 button_canvas.place(x=0, y=422)
 
-new_file_img = load_img("New_file_button.png", size=(120, 35))
+new_file_img = load_img("EPICS BCI Code/New_file_button.png", size=(120, 35))
 new_file_icon = make_interactive_image(button_canvas, new_file_img, 20, 18, on_click=new_file_action)
 
-export_text_file_img = load_img("export_text_file_button.png", size=(161, 37))
+export_text_file_img = load_img("EPICS BCI Code/export_text_file_button.png", size=(161, 37))
 export_text_file_icon = make_interactive_image(button_canvas, export_text_file_img, 155, 15, on_click=export_file_action)
 
 
-braille_selection_box_img = load_img("braille_selection_box_unselected.png", size=(113, 39))
-braille_selection_box_img_2 = load_img("braille_selection_box_selected.png", size=(105, 42))
+braille_selection_box_img = load_img("EPICS BCI Code/braille_selection_box_unselected.png", size=(113, 39))
+braille_selection_box_img_2 = load_img("EPICS BCI Code/braille_selection_box_selected.png", size=(105, 42))
 braille_selection_box_icon = make_interactive_image(button_canvas, braille_selection_box_img, 330, 15, on_click=toggle_braille_selection)
 
 

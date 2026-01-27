@@ -267,7 +267,7 @@ create_label(
     root,
     anchr="se",
     img=gear_icon,
-    location=(900, 650)
+    location=(800, 650)
 )
 
 create_label(
@@ -278,7 +278,7 @@ create_label(
     font_size=20,
     bold="normal",
     backround="white",
-    location=(980, 650)
+    location=(900, 650)
 )
 
 root.mainloop()

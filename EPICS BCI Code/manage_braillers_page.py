@@ -187,11 +187,11 @@ title_header_canvas.place(x=5, y=5, anchor="nw")
 
 title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
 
-perk_braille_img = load_img("PERK_Braille_Image_transparent.png", size=(302,110))
+perk_braille_img = load_img("EPICS BCI Code\Images\PERK_braille_Image_grey.png", size=(302,110))
 perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
 # Manage Braillers row
-home_icon = load_img("Brailler_Connected_Icon.png", size=(65, 65))
+home_icon = load_img("EPICS BCI Code\Images\Home_icon.png", size=(65, 65))
 create_label(
     root,
     anchr="nw",
@@ -243,7 +243,7 @@ for i, name in enumerate(braillers):
     )
 
 # Bottom actions
-bt_icon = load_img("Bluetooth_icon.png", size=(65, 65))
+bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(65, 65))
 create_label(
     root,
     anchr="sw",
@@ -262,7 +262,7 @@ create_label(
     location=(135, 650)
 )
 
-gear_icon = load_img("settings_icon.png", size=(65, 65))
+gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(65, 65))
 create_label(
     root,
     anchr="se",

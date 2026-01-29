@@ -9,7 +9,7 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - Set both the hostname and password to "Perk", SSH MUST be enabled. To use the Pi, you need a HDMI to microHDMI cable and a mouse and keyboard, and a USB-C cable to power the Pi.
 ### Enabling USB-Gadget
 - To allow the Pi to work with the executible, the executible must be able to SSH into the Pi using the power USB-C port.
-- First, go to boot/firmware/config.txt, ensure the line "dtoverlay=dwc2" is in the file
+- First, go to boot/firmware/config.txt, add the line "dtoverlay=dwc2" at the very bottom
 - Then, go to boot/firmware/cmdline.txt, add "module-line=dwc2,g_ether" after "rootwait"
 - Reboot the Pi. Type "sudo reboot now" in terminal to properly do this.
 - When the OS is rebooted, type in "ifconfig -a". If a "usb0" interface does not show up, type "sudo modprobe g_ether", run "ifconfig -a" again.

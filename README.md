@@ -15,7 +15,7 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - When the OS is rebooted, type in "ifconfig -a". If a "usb0" interface does not show up, type "sudo modprobe g_ether", run "ifconfig -a" again.
 - If the usb0 interface disappears after rebooting, edit the /etc/modules file, add "dwc2" and "g_ether".
 - Your computer should detect an "Ethernet Gadget" (Check device manager for windows under "Network Adapters", or "Network" on MacOS).
-- You can now ssh into the Pi without an internet connection. Open up terminal and type "ssh perk@raspberrypi.local".
+- You can now ssh into the Pi without an internet connection. Open up terminal and type "ssh perk@perk.local".
 ### Enabling I2S
 - To use the speaker, you must enable the I2S protocol in the config file. Uncomment "dtparam=i2s=on" and "dtparam=audio=on"
 - Finally, add "dtoverlay = hifiberry-dacplus"

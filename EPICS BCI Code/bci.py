@@ -3,9 +3,10 @@ from tkinter import filedialog, messagebox
 import tkinter.font as tkfont
 from PIL import Image, ImageTk
 import random
+import json
+from utility_functions import load_img, create_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
 root = tk.Tk()
-
 
 # Set geometry
 root.geometry("1050x700")
@@ -14,207 +15,13 @@ root.configure(bg="#FFFFFF")
 
 file_path = "Data\\brailler_output.txt"
 
-#################################################
-#Functions we reuse a whole lot
-#################################################
-def load_img(path, size=(80,80)):
-    img = Image.open(path)
-    img = img.resize(size, Image.Resampling.LANCZOS)
-    return ImageTk.PhotoImage(img)
-
-def create_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None, bold=None, italic=None, backround=None, bd_width=None, location=(0, 0)):
-    if img==None:
-        label = tk.Label(root, text=txt, font=(font_txt, font_size, bold, italic), bg=backround)
-    elif txt==None:
-        label = tk.Label(root, image=img, borderwidth=bd_width)
-    label.place(x=location[0], y=location[1], anchor = anchr)
-    return label
-
-def create_image_canvas(root, wdth, hght, highlightthick, border, anchr, img, location=(0, 0)):
-    canvas = tk.Canvas(root, width=wdth, height=hght, highlightthickness=highlightthick, bd=border)
-    canvas.place(x=location[0], y=location[1], anchor=anchr)
-    img_obj = canvas.create_image(0, 0, anchor='nw', image=img)
-    return canvas, img_obj
-
-
-def create_triangle_button(
-    canvas, coords, label, img_obj=None, 
-    img_on_click=None, selected=False, on_select=None):
-    """
-    Creates a triangle-shaped button on a canvas with hover and click interactions.
-    Args:
-        canvas: the Tkinter Canvas to draw on
-        coords: tuple of triangle coordinates
-        img_obj: canvas image object to change when clicked
-        img_on_click: dict {True_image, False_image} to swap on click
-        selected: initial selected state
-   """
-    # Draw the triangle
-    triangle_id = canvas.create_polygon(coords, fill="", outline="")
-
-    button_data = {
-        "tri": triangle_id,
-        "label": label,
-        "selected": selected,
-        "img_obj": img_obj,
-        "img_on_click": img_on_click
-    }
-    
-    triangle_buttons.append(button_data)
-
-    def update_fonts_and_images():
-        """Deselect all others, select this one, and update images."""
-        for btn in triangle_buttons:
-            if btn["tri"] == triangle_id:
-                btn["selected"] = True
-                btn["label"].config(font=("Roboto Condensed", 20, 'bold', 'roman'))
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["True"])
-                if on_select:
-                    on_select()
-            else:
-                btn["selected"] = False
-                btn["label"].config(font=("Roboto Condensed", 20, 'normal', 'roman'))
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["False"])
-
-
-
-    # Hover effects
-    def on_enter(event):
-        canvas.itemconfig(triangle_id, outline="gray", width=3)
-        if not button_data["selected"]:
-            label.config(font=("Roboto Condensed", 20, 'bold', 'italic'))
-
-    def on_leave(event):
-        canvas.itemconfig(triangle_id, outline="", width=1)
-        if not button_data["selected"]:
-            label.config(font=("Roboto Condensed", 20, 'normal', 'roman'))
-
-    def on_click(event):
-        update_fonts_and_images()
-
-    # Bind events
-    canvas.tag_bind(triangle_id, "<Enter>", on_enter)
-    canvas.tag_bind(triangle_id, "<Leave>", on_leave)
-    canvas.tag_bind(triangle_id, "<Button-1>", on_click)
-
-    label.bind("<Enter>", on_enter)
-    label.bind("<Leave>", on_leave)
-    label.bind("<Button-1>", on_click)
-
-    if selected:
-        update_fonts_and_images()
-    return triangle_id
-
-def create_interactive_icon(canvas, label,
-    circle_center, circle_radius):
-    """
-    Creates an interactive canvas with image and a circular hover area,
-    plus a label that reacts on hover and click.
-    Returns canvas, circle_id, label
-    """
-    # Create circular hover area
-    x, y = circle_center
-    r = circle_radius
-    circle_id = canvas.create_oval(x-r, y-r, x+r, y+r, fill="", outline="", width=3)
-
-    # Cursor detection
-    def cursor_in_circle(event):
-        dx = event.x - x
-        dy = event.y - y
-        return dx*dx + dy*dy <= r*r
-
-    # Hover motion
-    def hover_motion(event):
-        if cursor_in_circle(event):
-            canvas.itemconfig(circle_id, outline="gray", width=4)
-            label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
-        else:
-            canvas.itemconfig(circle_id, outline="", width=2)
-            label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
-
-    # Click
-    def on_click(event):
-        if cursor_in_circle(event):
-            print(f"{label} clicked!")
-
-    # Bind events
-    canvas.bind("<Motion>", hover_motion)
-    canvas.bind("<Button-1>", on_click)
-    
-    def sublabel_on_enter(event):
-        canvas.itemconfig(circle_id, outline="gray", width=4)
-        label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
-
-    def sublabel_on_leave(event):
-        canvas.itemconfig(circle_id, outline="", width=2)
-        label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
-
-    def sublabel_on_click(event):
-        print('Circle Clicked!')
-
-    label.bind("<Enter>", sublabel_on_enter)      # mouse enters
-    label.bind("<Leave>", sublabel_on_leave)      # mouse leaves
-    label.bind("<Button-1>", sublabel_on_click)   # left mouse click
-
-    return circle_id
-
-def make_interactive_image(canvas, image, x, y, highlight_color="gray", on_click = None):
-    """
-    Makes a canvas image interactive with hover highlighting and click action.
-
-    Args:
-        canvas: Tkinter Canvas where the image is placed
-        img_obj: canvas image object (returned from create_image)
-        highlight_color: border color on hover
-        on_click: function to call on click
-    """
-    # Create a rectangle around the image for highlighting
-    label_img = tk.Label(canvas, image=image, bd=0, bg="#FFFFFF", highlightthickness=0)
-    label_img.place(x=x, y=y, anchor='nw')
-
-    def on_enter(event):
-        label_img.config(highlightbackground=highlight_color,highlightthickness=2)
-
-    def on_leave(event):
-        label_img.config(highlightthickness=0)
-
-    def click(event):
-        if on_click:
-            on_click()
-
-    # Bind events
-    label_img.bind("<Enter>", on_enter)
-    label_img.bind("<Leave>", on_leave)
-    label_img.bind("<Button-1>", click)
-    
-    return label_img
+current_mode = "live"
 
 def show_live_feed():
     live_feed_frame.tkraise()
 
 def show_contraction_library():
     contraction_library_frame.tkraise()
-
-def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto Condensed", 22, 'bold'), bg="#FFFFFF"):
-    label = tk.Label(parent, text=text, font=font, bg=bg)
-    label.place(x=coords[0], y=coords[1], anchor=anchor)
-    
-    line_canvas = tk.Canvas(parent, height=2, bg="white", highlightthickness=0)
-    line_canvas.place(x=10, y=50, width=450, height = 2)
-    line_canvas.create_line(0, 1, 440, 1)   # x1, y1, x2, y2
-
-    return label, line_canvas
-
-def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=False):
-    frame = tk.Frame(parent, bg=bg)
-    frame.place(relwidth=rel_fill[0], relheight=rel_fill[1])
-    if start_display:
-        frame.tkraise()
-    return frame
-
-current_mode = "live"
 
 def toggle_braille_selection():
     global current_mode, file_path
@@ -552,18 +359,162 @@ braille_selection_box_icon = make_interactive_image(button_canvas, braille_selec
 ########################################################
 #DIsplay box when contraction library Button Selected
 #####################################################
-# Contraction Library placeholder text
-placeholder_text = "This function is currently being implemented."
+def update_enabled(contraction, var):
+    enabled_contractions[contraction]['enabled'] = var.get()
+    # Optionally, write back to file
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
 
-# Create a frame for the message inside the contraction library frame
-placeholder_label = tk.Label(
+
+enabled_contractions_path = "EPICS BCI Code\\Data\\enabled_contractions.txt"
+
+# Load the file if it exists
+try:
+    with open(enabled_contractions_path, "r", encoding="utf-8") as f:
+        enabled_contractions = json.load(f)
+except FileNotFoundError:
+    enabled_contractions = {}
+
+#Search bar for contraction library
+search_var = tk.StringVar()
+placeholder_text = "Search here:"
+search_var.set(placeholder_text)  # placeholder
+
+def on_search_focus_in(event):
+    if search_var.get() == placeholder_text:
+        search_var.set("")
+        search_entry.config(fg="black")
+
+def on_search_focus_out(event):
+    if search_var.get().strip() == "":
+        search_var.set(placeholder_text)
+        search_entry.config(fg="gray")
+
+        search_entry.selection_clear()
+        root.focus()  # move focus somewhere else, here root
+
+# def update_contraction_display(*args):
+#     search_term = search_var.get().lower()
+#     # Loop through all contraction labels inside the scrollable frame
+#     for label, contraction in contraction_labels:
+#         if search_term in contraction.lower() and search_term != "Search here:":
+#             label.place_forget()  # temporarily hide
+#             label.pack(fill="x", padx=5, pady=2)
+#         else:
+#             label.pack_forget()
+
+# Entry widget for search
+search_entry = tk.Entry(
     contraction_library_frame,
-    text=placeholder_text,
-    font=("Roboto Condensed", 16, 'italic'),
-    bg="white",
-    wraplength=440,   # wrap text nicely inside the frame
-    justify="left"
+    textvariable=search_var,
+    font=("Roboto Condensed", 16),
+    fg="gray",
+    bd=1,
+    relief="solid"
 )
-placeholder_label.place(x=15, y=80)  # Position below the header
+search_entry.place(x=10, y=63, width=440, height=30)
+search_entry.bind("<FocusIn>", on_search_focus_in)
+search_entry.bind("<FocusOut>", on_search_focus_out)
+
+contraction_library_frame.bind("<Button-1>", on_search_focus_out)
+
+# Scrollable frame for contraction list
+contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
+contraction_list_frame.place(x=15, y=100, width=435, height=380)
+
+canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
+scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
+scrollable_frame = tk.Frame(canvas, bg="white")
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+def _on_mousewheel(event):
+    # For Windows, event.delta is multiples of 120
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+contraction_labels = []
+contraction_vars = {}  # To keep track of each checkbox variable
+original_contractions_order = sorted(enabled_contractions.keys(), key=str.lower)
+contraction_labels_dict = {}
+
+for contraction in original_contractions_order:
+    data = enabled_contractions[contraction]
+    var = tk.IntVar(value=data['enabled'])
+    contraction_vars[contraction] = var
+
+    # Checkbox with label showing contraction + braille
+    cb = tk.Checkbutton(
+        scrollable_frame,
+        text=f"{contraction.capitalize()}   ({data['braille']})",
+        variable=var,
+        onvalue=1,
+        offvalue=0,
+        anchor="w",
+        bg="white",
+        font=("Roboto Condensed", 14),
+        command=lambda c=contraction, v=var: update_enabled(c, v)
+    )
+    cb.pack(fill="x", padx=5, pady=2)
+
+    contraction_labels.append((var, cb, contraction))
+    contraction_labels_dict[contraction] = (var, cb, contraction)
+
+def update_contraction_display(*args):
+    search_term = search_var.get().lower().strip()
+
+    # Hide all checkboxes first
+    for contraction in original_contractions_order:
+        var, chk, name = contraction_labels_dict[contraction]
+        chk.pack_forget()
+
+    # Determine which contractions to show
+    if search_term == "" or search_term == placeholder_text.lower():
+        # Show all in alphabetical order
+        for contraction in sorted(original_contractions_order, key=str.lower):
+            var, chk, name = contraction_labels_dict[contraction]
+            chk.pack(fill="x", padx=5, pady=2)
+        canvas.yview_moveto(0)
+        return
+
+    # Otherwise, filter dynamically
+    filtered_contractions = [
+        contraction for contraction in original_contractions_order
+        if search_term in contraction.lower()
+    ]
+
+    filtered_contractions.sort(key=str.lower)
+
+    first_match_widget = None
+    for contraction in filtered_contractions:
+        var, chk, name = contraction_labels_dict[contraction]
+        chk.pack(fill="x", padx=5, pady=2)
+        if not first_match_widget:
+            first_match_widget = chk
+
+    # Scroll to first match if exists
+    if first_match_widget:
+        canvas.update_idletasks()
+        canvas.yview_moveto(first_match_widget.winfo_y() / scrollable_frame.winfo_height())
+    else:
+        canvas.yview_moveto(0)
+
+
+
+# Bind the search_var so it updates automatically
+search_var.trace_add("write", update_contraction_display)
+
 
 root.mainloop()

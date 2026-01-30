@@ -166,8 +166,8 @@ def transliterateBin(inputB):
                     translatedOutput = translatedOutput[:number_i] + a_to_n[translatedOutput[number_i]] + translatedOutput[number_i + 1:]
                     number_i += 1
                 translatedOutput = translatedOutput.replace("./numeric indicator", "", 1)
-        except:
-            pass
+    except:
+        pass
 
     translatedOutput = translatedOutput.strip()
     f_out = open('transliterateOutput.txt', 'w')

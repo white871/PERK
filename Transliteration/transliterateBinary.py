@@ -10,6 +10,8 @@ with open('brailletobinary.txt', 'r', encoding = "utf-8") as f:
     data = f.read()
 b2b = ast.literal_eval(data)
 
+enabled_contractions = {}
+
 def transliterateBin(inputB):
     global brailleLib
     global b2b
@@ -17,8 +19,17 @@ def transliterateBin(inputB):
     global translatedOutput
     global i
     global lastOutput
+    global enabled_contractions
     
-    
+    with open('enabled_contractions.txt', 'r') as f:
+        data = f.read()
+    enabled_data = ast.literal_eval(data)
+
+    enabled_contractions = {
+        word for word, info in enabled_data.items()
+        if info["enabled"] ==1
+    }
+
     inputarr = []
     i = 0
 
@@ -65,16 +76,25 @@ def transliterateBin(inputB):
                         i += howLong
                         translated = True
                     if "_" in possibleOut:
+                        contraction_word = possibleOut.replace("_","")
+
+                        if contraction_word not in enabled_contractions:
+                            continue
+
                         if i > 0 and i < len(inputarr) - 1:
                             expand = False
                             if (inputarr[i - 1] == "000000") and (inputarr[i + howLong] == "000000"):
                                 expand = True
                             if (inputarr[i + howLong] in brailleLib.keys()):
-                                if (inputarr[i - 1] == "000000" or "./" in lastOutput) and (not brailleLib[inputarr[i + howLong]][0].replace("^", "").replace("_", "").isalnum()):
+                                if (inputarr[i - 1] == "000000" or "./" in lastOutput) and \
+                                    (not brailleLib[inputarr[i + howLong]][0]
+                                     .replace("^", "")
+                                     .replace("_", "")
+                                     .isalnum()):
                                     expand = True
                             if (expand):
-                                translatedOutput += possibleOut.replace("_", "")
-                                lastOutput = possibleOut.replace("_", "")
+                                translatedOutput += contraction_word
+                                lastOutput = contraction_word
                                 i += howLong
                                 translated = True
                     if possibleOut.startswith('^') and possibleOut.endswith('^') and not translated:

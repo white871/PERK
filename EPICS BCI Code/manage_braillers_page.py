@@ -169,6 +169,17 @@ def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=
         frame.tkraise()
     return frame
 
+def toggle_brailler_popup(brailler_name):
+    global current_brailler
+
+    if current_brailler==brailler_name:
+        brailler_popup.place_forget()
+        current_brailler=None
+        return
+    current_brailler=brailler_name
+    brailler_popup.place(x=50, y=520, width=950, height=50)
+    brailler_popup.tkraise()
+
 braillers = [
     "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
     "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
@@ -191,12 +202,12 @@ perk_braille_img = load_img("EPICS BCI Code\Images\PERK_braille_Image_grey.png",
 perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
 # Manage Braillers row
-home_icon = load_img("EPICS BCI Code\Images\Home_icon.png", size=(65, 65))
+home_icon = load_img("EPICS BCI Code\Images\Home_icon.png", size=(75, 75))
 create_label(
     root,
     anchr="nw",
     img=home_icon,
-    location=(60, 160)
+    location=(30, 150)
 )
 
 create_label(
@@ -204,10 +215,10 @@ create_label(
     anchr="nw",
     txt="Manage Braillers",
     font_txt="Roboto Condensed",
-    font_size=22,
+    font_size=25,
     bold="normal",
     backround="white",
-    location=(135, 170)
+    location=(105, 170)
 )
 
 create_label(
@@ -215,7 +226,7 @@ create_label(
     anchr="ne",
     txt="Pair All",
     font_txt="Roboto Condensed",
-    font_size=20,
+    font_size=25,
     bold="normal",
     backround="white",
     location=(980, 170)
@@ -224,14 +235,14 @@ create_label(
 # Brailler list (3-column layout)
 start_x = 110
 start_y = 250
-x_gap = 300
-y_gap = 55
+x_gap = 350
+y_gap = 100
 
 for i, name in enumerate(braillers):
     row = i // 3
     col = i % 3
 
-    create_label(
+    lbl= create_label(
         root,
         anchr="nw",
         txt=name,
@@ -242,13 +253,16 @@ for i, name in enumerate(braillers):
         location=(start_x + col * x_gap, start_y + row * y_gap)
     )
 
+    lbl.config(cursor="hand2")
+    lbl.bind("<Button-1>", lambda e, n=name: toggle_brailler_popup(n))
+
 # Bottom actions
-bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(65, 65))
+bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(75, 75))
 create_label(
     root,
     anchr="sw",
     img=bt_icon,
-    location=(60, 650)
+    location=(30, 650)
 )
 
 create_label(
@@ -256,18 +270,18 @@ create_label(
     anchr="sw",
     txt="Start Pairing Process",
     font_txt="Roboto Condensed",
-    font_size=20,
+    font_size=25,
     bold="normal",
     backround="white",
-    location=(135, 650)
+    location=(105, 640)
 )
 
-gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(65, 65))
+gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(75, 75))
 create_label(
     root,
     anchr="se",
     img=gear_icon,
-    location=(800, 650)
+    location=(855, 650)
 )
 
 create_label(
@@ -275,10 +289,46 @@ create_label(
     anchr="se",
     txt="Settings",
     font_txt="Roboto Condensed",
-    font_size=20,
+    font_size=25,
     bold="normal",
     backround="white",
-    location=(900, 650)
+    location=(970, 640)
 )
+
+#Brailler popup stuff
+current_brailler=None
+
+brailler_popup=create_display_frame(
+    root, 
+    rel_fill=(0,0),
+    bg="#eeeeee",
+    start_display=False
+)
+
+brailler_popup.place(x=50, y=530, width=950, height=50)
+brailler_popup.place_forget()
+
+brailler_popup.config(
+    highlightbackground="black",
+    highlightthickness=2
+)
+
+popup_buttons=[]
+button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
+x_positions=[60, 250, 530, 730]
+
+for name, x in zip(button_names, x_positions):
+    lbl=create_label(
+        brailler_popup, 
+        anchr="nw",
+        txt=name, 
+        font_txt="Roboto Condensed", 
+        font_size=18, 
+        bold="normal", 
+        backround="#eeeeee",
+        location=(x, 5)
+        )
+    lbl.config(cursor="hand2")
+    popup_buttons.append(lbl)
 
 root.mainloop()

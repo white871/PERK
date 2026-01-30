@@ -553,6 +553,12 @@ braille_selection_box_icon = make_interactive_image(button_canvas, braille_selec
 ########################################################
 #DIsplay box when contraction library Button Selected
 #####################################################
+def update_enabled(contraction, var):
+    enabled_contractions[contraction]['enabled'] = var.get()
+    # Optionally, write back to file
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
+
 
 enabled_contractions_path = "EPICS BCI Code\\Data\\enabled_contractions.txt"
 
@@ -604,10 +610,105 @@ search_entry.place(x=10, y=63, width=440, height=30)
 search_entry.bind("<FocusIn>", on_search_focus_in)
 search_entry.bind("<FocusOut>", on_search_focus_out)
 
-
-
 contraction_library_frame.bind("<Button-1>", on_search_focus_out)
 
-#search_var.trace_add("write", update_contraction_display)
+# Scrollable frame for contraction list
+contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
+contraction_list_frame.place(x=15, y=100, width=435, height=380)
+
+canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
+scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
+scrollable_frame = tk.Frame(canvas, bg="white")
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(
+        scrollregion=canvas.bbox("all")
+    )
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+def _on_mousewheel(event):
+    # For Windows, event.delta is multiples of 120
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+contraction_labels = []
+contraction_vars = {}  # To keep track of each checkbox variable
+original_contractions_order = sorted(enabled_contractions.keys(), key=str.lower)
+contraction_labels_dict = {}
+
+for contraction in original_contractions_order:
+    data = enabled_contractions[contraction]
+    var = tk.IntVar(value=data['enabled'])
+    contraction_vars[contraction] = var
+
+    # Checkbox with label showing contraction + braille
+    cb = tk.Checkbutton(
+        scrollable_frame,
+        text=f"{contraction.capitalize()}   ({data['braille']})",
+        variable=var,
+        onvalue=1,
+        offvalue=0,
+        anchor="w",
+        bg="white",
+        font=("Roboto Condensed", 14),
+        command=lambda c=contraction, v=var: update_enabled(c, v)
+    )
+    cb.pack(fill="x", padx=5, pady=2)
+
+    contraction_labels.append((var, cb, contraction))
+    contraction_labels_dict[contraction] = (var, cb, contraction)
+
+   
+def update_contraction_display(*args):
+    search_term = search_var.get().lower().strip()
+
+
+    # If search bar is empty or has placeholder, show all in original order
+    if search_term == "" or search_term == placeholder_text.lower():
+        for contraction in sorted(original_contractions_order, key=str.lower):
+            var, chk, name = contraction_labels_dict[contraction]
+            chk.pack(fill="x", padx=5, pady=2)
+        canvas.yview_moveto(0)
+        return
+
+    filtered_contractions = [
+        contraction for contraction in original_contractions_order
+        if search_term in contraction.lower()
+    ]
+    filtered_contractions.sort(key=str.lower)
+
+    first_match_widget = None
+
+    # Otherwise, filter dynamically
+    for contraction in filtered_contractions:
+        var, chk, name = contraction_labels_dict[contraction]
+        chk.pack(fill="x", padx=5, pady=2)
+        if not first_match_widget:
+            first_match_widget = chk
+
+    for contraction in original_contractions_order:
+        if contraction not in filtered_contractions:
+            var, chk, name = contraction_labels_dict[contraction]
+            chk.pack_forget()
+
+    if first_match_widget:
+        canvas.update_idletasks()
+        canvas.yview_moveto(first_match_widget.winfo_y() / scrollable_frame.winfo_height())
+    else:
+        canvas.yview_moveto(0)
+
+
+
+# Bind the search_var so it updates automatically
+search_var.trace_add("write", update_contraction_display)
+
 
 root.mainloop()

@@ -180,6 +180,44 @@ def toggle_brailler_popup(brailler_name):
     brailler_popup.place(x=50, y=520, width=950, height=50)
     brailler_popup.tkraise()
 
+
+def on_brailler_click(label, name):
+    global current_brailler_label
+
+    # If clicking the same label → unbold + hide popup
+    if current_brailler_label == label:
+        label.config(font=("Roboto Condensed", 18, "normal", "roman"))
+        label.is_bold = False
+
+        brailler_popup.place_forget()
+        current_brailler_label = None
+        return
+
+    # If clicking a different brailler
+    if current_brailler_label:
+        current_brailler_label.config(
+            font=("Roboto Condensed", 18, "normal", "roman")
+        )
+        current_brailler_label.is_bold = False
+
+    # Bold new one
+    label.config(font=("Roboto Condensed", 18, "bold", "roman"))
+    label.is_bold = True
+
+    brailler_popup.place(x=50, y=520, width=950, height=50)
+    brailler_popup.tkraise()
+
+    current_brailler_label = label
+
+def set_brailler_status(name, connected):
+    if name not in brailler_status_dots:
+        return
+
+    canvas, dot = brailler_status_dots[name]
+    color = STATUS_GREEN if connected else STATUS_RED
+    canvas.itemconfig(dot, fill=color)
+
+
 braillers = [
     "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
     "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
@@ -232,17 +270,26 @@ create_label(
     location=(980, 170)
 )
 
-# Brailler list (3-column layout)
+# Brailler list 
 start_x = 110
 start_y = 250
 x_gap = 350
 y_gap = 100
+brailler_status_dots = {}
+STATUS_RADIUS = 6
+STATUS_GREEN = "#93c47d"
+STATUS_RED = "#e06666"
+status_dots = {}
+
 
 for i, name in enumerate(braillers):
     row = i // 3
     col = i % 3
 
-    lbl= create_label(
+    x = start_x + col * x_gap
+    y = start_y + row * y_gap
+
+    lbl = create_label(
         root,
         anchr="nw",
         txt=name,
@@ -250,11 +297,40 @@ for i, name in enumerate(braillers):
         font_size=18,
         bold="normal",
         backround="white",
-        location=(start_x + col * x_gap, start_y + row * y_gap)
+        location=(x, y)
     )
 
+    lbl.is_bold = False
     lbl.config(cursor="hand2")
-    lbl.bind("<Button-1>", lambda e, n=name: toggle_brailler_popup(n))
+    lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n))
+
+    dot_canvas = tk.Canvas(
+        root,
+        width=STATUS_RADIUS * 2,
+        height=STATUS_RADIUS * 2,
+        bg="white",
+        highlightthickness=0
+    )
+    dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")  
+
+    dot = dot_canvas.create_oval(
+        0, 0,
+        STATUS_RADIUS * 2,
+        STATUS_RADIUS * 2,
+        outline=""
+    )
+
+    brailler_status_dots[name] = (dot_canvas, dot)
+
+set_brailler_status("Mark's Brailler", False)
+set_brailler_status("Nash's Brailler", False)
+set_brailler_status("Ayona's Brailler", True)
+set_brailler_status("Joe's Brailler", False)
+set_brailler_status("Lucy's Brailler", True)
+set_brailler_status("Diana's Brailler", False)
+set_brailler_status("Mohammad's Brailler", True)
+set_brailler_status("Sarvesh's Brailler", True)
+set_brailler_status("Felix's Brailler", False)
 
 # Bottom actions
 bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(75, 75))
@@ -296,7 +372,7 @@ create_label(
 )
 
 #Brailler popup stuff
-current_brailler=None
+current_brailler_label=None
 
 brailler_popup=create_display_frame(
     root, 
@@ -310,7 +386,7 @@ brailler_popup.place_forget()
 
 brailler_popup.config(
     highlightbackground="black",
-    highlightthickness=2
+    highlightthickness=1
 )
 
 popup_buttons=[]

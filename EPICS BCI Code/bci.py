@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox
 import tkinter.font as tkfont
 from PIL import Image, ImageTk
 import random
+import json
 
 root = tk.Tk()
 
@@ -552,18 +553,61 @@ braille_selection_box_icon = make_interactive_image(button_canvas, braille_selec
 ########################################################
 #DIsplay box when contraction library Button Selected
 #####################################################
-# Contraction Library placeholder text
-placeholder_text = "This function is currently being implemented."
 
-# Create a frame for the message inside the contraction library frame
-placeholder_label = tk.Label(
+enabled_contractions_path = "EPICS BCI Code\\Data\\enabled_contractions.txt"
+
+# Load the file if it exists
+try:
+    with open(enabled_contractions_path, "r", encoding="utf-8") as f:
+        enabled_contractions = json.load(f)
+except FileNotFoundError:
+    enabled_contractions = {}
+
+#Search bar for contraction library
+search_var = tk.StringVar()
+placeholder_text = "Search here:"
+search_var.set(placeholder_text)  # placeholder
+
+def on_search_focus_in(event):
+    if search_var.get() == placeholder_text:
+        search_var.set("")
+        search_entry.config(fg="black")
+
+def on_search_focus_out(event):
+    if search_var.get().strip() == "":
+        search_var.set(placeholder_text)
+        search_entry.config(fg="gray")
+
+        search_entry.selection_clear()
+        root.focus()  # move focus somewhere else, here root
+
+# def update_contraction_display(*args):
+#     search_term = search_var.get().lower()
+#     # Loop through all contraction labels inside the scrollable frame
+#     for label, contraction in contraction_labels:
+#         if search_term in contraction.lower() and search_term != "Search here:":
+#             label.place_forget()  # temporarily hide
+#             label.pack(fill="x", padx=5, pady=2)
+#         else:
+#             label.pack_forget()
+
+# Entry widget for search
+search_entry = tk.Entry(
     contraction_library_frame,
-    text=placeholder_text,
-    font=("Roboto Condensed", 16, 'italic'),
-    bg="white",
-    wraplength=440,   # wrap text nicely inside the frame
-    justify="left"
+    textvariable=search_var,
+    font=("Roboto Condensed", 16),
+    fg="gray",
+    bd=1,
+    relief="solid"
 )
-placeholder_label.place(x=15, y=80)  # Position below the header
+search_entry.place(x=10, y=63, width=440, height=30)
+search_entry.bind("<FocusIn>", on_search_focus_in)
+search_entry.bind("<FocusOut>", on_search_focus_out)
+
+
+
+contraction_library_frame.bind("<Button-1>", on_search_focus_out)
+
+#search_var.trace_add("write", update_contraction_display)
 
 root.mainloop()

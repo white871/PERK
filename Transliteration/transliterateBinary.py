@@ -21,7 +21,7 @@ def transliterateBin(inputB):
     global lastOutput
     global enabled_contractions
     
-    with open('enabled_contractions.txt', 'r') as f:
+    with open('EPICS BCI Code\\Data\\enabled_contractions.txt', 'r') as f:
         data = f.read()
     enabled_data = ast.literal_eval(data)
 

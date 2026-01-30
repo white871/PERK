@@ -182,7 +182,7 @@
     "could": {
         "binary": "100100100110",
         "braille": "⠉⠙",
-        "enabled": 0
+        "enabled": 1
     },
     "day": {
         "binary": "000010100110",
@@ -477,7 +477,7 @@
     "question": {
         "binary": "000010111110",
         "braille": "⠐⠟",
-        "enabled": 1
+        "enabled": 0
     },
     "quick": {
         "binary": "111110101000",

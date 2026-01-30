@@ -666,39 +666,39 @@ for contraction in original_contractions_order:
     contraction_labels.append((var, cb, contraction))
     contraction_labels_dict[contraction] = (var, cb, contraction)
 
-   
 def update_contraction_display(*args):
     search_term = search_var.get().lower().strip()
 
+    # Hide all checkboxes first
+    for contraction in original_contractions_order:
+        var, chk, name = contraction_labels_dict[contraction]
+        chk.pack_forget()
 
-    # If search bar is empty or has placeholder, show all in original order
+    # Determine which contractions to show
     if search_term == "" or search_term == placeholder_text.lower():
+        # Show all in alphabetical order
         for contraction in sorted(original_contractions_order, key=str.lower):
             var, chk, name = contraction_labels_dict[contraction]
             chk.pack(fill="x", padx=5, pady=2)
         canvas.yview_moveto(0)
         return
 
+    # Otherwise, filter dynamically
     filtered_contractions = [
         contraction for contraction in original_contractions_order
         if search_term in contraction.lower()
     ]
+
     filtered_contractions.sort(key=str.lower)
 
     first_match_widget = None
-
-    # Otherwise, filter dynamically
     for contraction in filtered_contractions:
         var, chk, name = contraction_labels_dict[contraction]
         chk.pack(fill="x", padx=5, pady=2)
         if not first_match_widget:
             first_match_widget = chk
 
-    for contraction in original_contractions_order:
-        if contraction not in filtered_contractions:
-            var, chk, name = contraction_labels_dict[contraction]
-            chk.pack_forget()
-
+    # Scroll to first match if exists
     if first_match_widget:
         canvas.update_idletasks()
         canvas.yview_moveto(first_match_widget.winfo_y() / scrollable_frame.winfo_height())

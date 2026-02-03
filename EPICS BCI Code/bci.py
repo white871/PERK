@@ -39,79 +39,10 @@ def toggle_braille_selection():
 
     update_live_feed(force_full_refresh=True)
 
-translations = {
-    "000000": "⠀",  # U+2800
-    "000001": "⠠",  # U+2820
-    "000010": "⠐",  # U+2810
-    "000011": "⠰",  # U+2830
-    "000100": "⠈",  # U+2808
-    "000101": "⠨",  # U+2828
-    "000110": "⠘",  # U+2818
-    "000111": "⠸",  # U+2838
+translations_path = "EPICS BCI Code\\Data\\translations.txt"
 
-    "001000": "⠄",  # U+2804
-    "001001": "⠤",  # U+2824
-    "001010": "⠔",  # U+2814
-    "001011": "⠴",  # U+2834
-    "001100": "⠌",  # U+280C
-    "001101": "⠬",  # U+282C
-    "001110": "⠜",  # U+281C
-    "001111": "⠼",  # U+283C
-
-    "010000": "⠂",  # U+2802
-    "010001": "⠢",  # U+2822
-    "010010": "⠒",  # U+2812
-    "010011": "⠲",  # U+2832
-    "010100": "⠊",  # U+280A
-    "010101": "⠪",  # U+282A
-    "010110": "⠚",  # U+281A
-    "010111": "⠺",  # U+283A
-
-    "011000": "⠆",  # U+2806
-    "011001": "⠦",  # U+2826
-    "011010": "⠖",  # U+2816
-    "011011": "⠶",  # U+2836
-    "011100": "⠎",  # U+280E
-    "011101": "⠮",  # U+282E
-    "011110": "⠞",  # U+281E
-    "011111": "⠾",  # U+283E
-
-    "100000": "⠁",  # U+2801
-    "100001": "⠡",  # U+2821
-    "100010": "⠑",  # U+2811
-    "100011": "⠱",  # U+2831
-    "100100": "⠉",  # U+2809
-    "100101": "⠩",  # U+2829
-    "100110": "⠙",  # U+2819
-    "100111": "⠹",  # U+2839
-
-    "101000": "⠅",  # U+2805
-    "101001": "⠥",  # U+2825
-    "101010": "⠕",  # U+2815
-    "101011": "⠵",  # U+2835
-    "101100": "⠍",  # U+280D
-    "101101": "⠭",  # U+282D
-    "101110": "⠝",  # U+281D
-    "101111": "⠽",  # U+283D
-
-    "110000": "⠃",  # U+2803
-    "110001": "⠣",  # U+2823
-    "110010": "⠓",  # U+2813
-    "110011": "⠳",  # U+2833
-    "110100": "⠋",  # U+280B
-    "110101": "⠫",  # U+282B
-    "110110": "⠛",  # U+281B
-    "110111": "⠻",  # U+283B
-
-    "111000": "⠇",  # U+2807
-    "111001": "⠧",  # U+2827
-    "111010": "⠗",  # U+2817
-    "111011": "⠷",  # U+2837
-    "111100": "⠏",  # U+280F
-    "111101": "⠯",  # U+282F
-    "111110": "⠟",  # U+281F
-    "111111": "⠿",  # U+283F
-}
+with open(translations_path, "r", encoding="utf-8") as f:
+    translations = json.load(f)
 
 ########TITLE/HEADER FORMATTING###########
 title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
@@ -393,17 +324,6 @@ def on_search_focus_out(event):
         search_entry.selection_clear()
         root.focus()  # move focus somewhere else, here root
 
-# def update_contraction_display(*args):
-#     search_term = search_var.get().lower()
-#     # Loop through all contraction labels inside the scrollable frame
-#     for label, contraction in contraction_labels:
-#         if search_term in contraction.lower() and search_term != "Search here:":
-#             label.place_forget()  # temporarily hide
-#             label.pack(fill="x", padx=5, pady=2)
-#         else:
-#             label.pack_forget()
-
-# Entry widget for search
 search_entry = tk.Entry(
     contraction_library_frame,
     textvariable=search_var,

@@ -332,7 +332,7 @@ search_entry = tk.Entry(
     bd=1,
     relief="solid"
 )
-search_entry.place(x=10, y=63, width=440, height=30)
+search_entry.place(x=10, y=63, width=315, height=60)
 search_entry.bind("<FocusIn>", on_search_focus_in)
 search_entry.bind("<FocusOut>", on_search_focus_out)
 
@@ -340,7 +340,7 @@ contraction_library_frame.bind("<Button-1>", on_search_focus_out)
 
 # Scrollable frame for contraction list
 contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
-contraction_list_frame.place(x=15, y=100, width=435, height=380)
+contraction_list_frame.place(x=15, y=130, width=435, height=350)
 
 canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
 scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
@@ -431,7 +431,40 @@ def update_contraction_display(*args):
     else:
         canvas.yview_moveto(0)
 
+def select_all_contractions():
+    for contraction, var in contraction_vars.items():
+        var.set(1)
+        enabled_contractions[contraction]['enabled'] = 1
 
+    # Save once (not per checkbox)
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
+
+
+def deselect_all_contractions():
+    for contraction, var in contraction_vars.items():
+        var.set(0)
+        enabled_contractions[contraction]['enabled'] = 0
+
+    # Save once
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
+
+select_all_btn = tk.Button(
+    contraction_library_frame,
+    text="Select All",
+    font=("Roboto Condensed", 14),
+    command=select_all_contractions
+)
+select_all_btn.place(x=331, y=63, width=120, height=28)
+
+deselect_all_btn = tk.Button(
+    contraction_library_frame,
+    text="Deselect All",
+    font=("Roboto Condensed", 14),
+    command=deselect_all_contractions
+)
+deselect_all_btn.place(x=331, y=95, width=120, height=28)
 
 # Bind the search_var so it updates automatically
 search_var.trace_add("write", update_contraction_display)

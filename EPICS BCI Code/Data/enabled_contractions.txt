@@ -182,7 +182,7 @@
     "could": {
         "binary": "100100100110",
         "braille": "⠉⠙",
-        "enabled": 1
+        "enabled": 0
     },
     "day": {
         "binary": "000010100110",

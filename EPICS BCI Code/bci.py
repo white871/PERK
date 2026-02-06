@@ -135,7 +135,7 @@ text_frame.place(x=10, y=60, width=450, height=text_frame_height)
 
 #Scrollbar first (right side)
 scrollbar = tk.Scrollbar(text_frame, orient="vertical")
-scrollbar.pack(side="right", fill="y", padx=(0, 6))
+scrollbar.pack(side="right", fill="y", padx=(5, 6))
 
 # Text box second (takes remaining space)
 text_display = tk.Text(

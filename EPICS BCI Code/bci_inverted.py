@@ -61,10 +61,10 @@ display_container = tk.Frame(root, bg="#000000", bd=3, relief="solid")
 display_container.place(x=530, y=145, width=470, height=500)
 
 live_feed_frame = create_display_frame(display_container, bg="#000000", start_display=True, inverted=True)
-live_feed_label, line_canvas =  create_display_frame_header(live_feed_frame, "Live Text Feed", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF")
+live_feed_label, line_canvas =  create_display_frame_header(live_feed_frame, "Live Text Feed", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF", line_color="#FFFFFF")
 
 contraction_library_frame = create_display_frame(display_container, bg="#000000", inverted=True)
-contraction_library_label, line_canvas =  create_display_frame_header(contraction_library_frame, "Contraction Library", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF")
+contraction_library_label, line_canvas =  create_display_frame_header(contraction_library_frame, "Contraction Library", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF", line_color="#FFFFFF")
 
 #######################################################
 #Creating images and canvas for triangle selection box
@@ -275,7 +275,7 @@ def export_file_action():
     except Exception as e:
         print("Export failed:", e)
 
-button_canvas = tk.Canvas(live_feed_frame, width=464, height=72, bg="#000000", highlightthickness=0)
+button_canvas = tk.Canvas(live_feed_frame, width=450, height=68, bg="#000000", highlightthickness=0)
 button_canvas.place(x=0, y=422)
 
 new_file_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\New_file_button_inverted.png", size=(120, 35))
@@ -329,8 +329,11 @@ search_entry = tk.Entry(
     contraction_library_frame,
     textvariable=search_var,
     font=("Roboto Condensed", 16),
-    fg="gray",
-    bd=1,
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
+    bd=0,
     relief="solid"
 )
 search_entry.place(x=10, y=63, width=315, height=60)
@@ -343,9 +346,9 @@ contraction_library_frame.bind("<Button-1>", on_search_focus_out)
 contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
 contraction_list_frame.place(x=15, y=130, width=435, height=350)
 
-canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
+canvas = tk.Canvas(contraction_list_frame, bg="black", highlightthickness=0)
 scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
-scrollable_frame = tk.Frame(canvas, bg="white")
+scrollable_frame = tk.Frame(canvas, bg="black")
 
 scrollable_frame.bind(
     "<Configure>",
@@ -384,7 +387,11 @@ for contraction in original_contractions_order:
         onvalue=1,
         offvalue=0,
         anchor="w",
-        bg="white",
+        fg="white",
+        bg="#000000",
+        selectcolor="#000000", 
+        highlightbackground="white",
+        highlightthickness=1,
         font=("Roboto Condensed", 14),
         command=lambda c=contraction, v=var: update_enabled(c, v)
     )
@@ -455,6 +462,10 @@ select_all_btn = tk.Button(
     contraction_library_frame,
     text="Select All",
     font=("Roboto Condensed", 14),
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
     command=select_all_contractions
 )
 select_all_btn.place(x=331, y=63, width=120, height=28)
@@ -463,12 +474,15 @@ deselect_all_btn = tk.Button(
     contraction_library_frame,
     text="Deselect All",
     font=("Roboto Condensed", 14),
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
     command=deselect_all_contractions
 )
 deselect_all_btn.place(x=331, y=95, width=120, height=28)
 
 # Bind the search_var so it updates automatically
 search_var.trace_add("write", update_contraction_display)
-
 
 root.mainloop()

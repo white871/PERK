@@ -200,13 +200,12 @@ def make_interactive_image(canvas, image, x, y, highlight_color="gray", on_click
     
     return label_img
 
-def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto Condensed", 22, 'bold'), bg="#FFFFFF", fg="#000000"):
+def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto Condensed", 22, 'bold'), bg="#FFFFFF", fg="#000000", line_color="#000000"):
     label = tk.Label(parent, text=text, font=font, bg=bg, fg=fg)
     label.place(x=coords[0], y=coords[1], anchor=anchor)
     
-    line_canvas = tk.Canvas(parent, height=2, bg="white", highlightthickness=0)
-    line_canvas.place(x=10, y=50, width=450, height = 2)
-    line_canvas.create_line(0, 1, 430, 1)   # x1, y1, x2, y2
+    line_canvas = tk.Canvas(parent, bg=line_color, highlightthickness=0)
+    line_canvas.place(x=10, y=50, width=445, height=1)
 
     return label, line_canvas
 
@@ -214,7 +213,7 @@ def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=
     if inverted ==False:
         frame = tk.Frame(parent, bg=bg)
     elif inverted== True:
-        frame = tk.Frame(parent, bg=bg, highlightbackground="#FFFFFF", highlightthickness=2, relief="solid", bd=4)
+        frame = tk.Frame(parent, bg=bg, highlightbackground="#FFFFFF", highlightthickness=2, relief="solid", bd=0)
     frame.place(relwidth=rel_fill[0], relheight=rel_fill[1])
     if start_display:
         frame.tkraise()

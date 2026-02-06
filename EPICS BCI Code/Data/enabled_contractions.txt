@@ -2,12 +2,12 @@
     "about": {
         "binary": "100000110000",
         "braille": "⠁⠃",
-        "enabled": 1
+        "enabled": 0
     },
     "above": {
         "binary": "100000110000111001",
         "braille": "⠁⠃⠧",
-        "enabled": 1
+        "enabled": 0
     },
     "according": {
         "binary": "100000100100",
@@ -37,7 +37,7 @@
     "again": {
         "binary": "100000110110",
         "braille": "⠁⠛",
-        "enabled": 1
+        "enabled": 0
     },
     "against": {
         "binary": "100000110110001100",

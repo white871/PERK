@@ -2,7 +2,7 @@
     "about": {
         "binary": "100000110000",
         "braille": "⠁⠃",
-        "enabled": 0
+        "enabled": 1
     },
     "above": {
         "binary": "100000110000111001",

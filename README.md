@@ -15,7 +15,7 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - User: perk, password: perk
 - Wi-fi: Doesn't really matter, but do connect it to wifi for installing packages
 - Remote Access: enable SSH, and select "Use password authentication"
-- RPI connect doesn't matter
+- RPI connect doesn't matter \n
 The proper config files should be in this repository for reference, but you can follow these steps if otherwise.
 #### To allow the Pi to work with the executible, the executible must be able to SSH into the Pi using the power USB-C port.
 ### Enabling USB-Gadget  (SD Card)

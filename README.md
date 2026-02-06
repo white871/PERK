@@ -5,19 +5,40 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 
 ## Setting Up a New Pi
 ### Installing Raspberry Pi OS
-- If setting up a Raspberry Pi 4 is required, download the Pi imager here: https://www.raspberrypi.com/software/. You also need a blank micro-SD card to install the Pi OS on.
-- Set both the hostname and password to "Perk", SSH MUST be enabled. To use the Pi, you need a HDMI to microHDMI cable and a mouse and keyboard, and a USB-C cable to power the Pi.
-### Enabling USB-Gadget
-- To allow the Pi to work with the executible, the executible must be able to SSH into the Pi using the power USB-C port.
+- If setting up a Raspberry Pi 4 is required, download the Pi imager here: https://www.raspberrypi.com/software/.
+- You also need a blank micro-SD card to install the Pi OS on.
+- Below is what each configuration you MUST follow in each tab
+- Device & OS: Select the correct model, then select Raspberry Pi OS (64-bit)
+- Storage: It should be the SD card you inserted into your computer
+- Hostname: perk
+- Localization: Washington, D.C. for capital city; New_York for Time zone; and us for Keyboard layout (this is important, if you select the incorrect keyboard layout you most likely WILL have issues with your keyboard when typing in the Pi's terminal)
+- User: perk, password: perk
+- Wi-fi: Doesn't really matter, but do connect it to wifi for installing packages
+- Remote Access: enable SSH, and select "Use password authentication"
+- RPI connect doesn't matter <br> <br>
+The proper config files should be in this repository for reference, but you can follow these steps if otherwise.
+#### To allow the Pi to work with the executible, the executible must be able to SSH into the Pi using the power USB-C port.
+### Enabling USB-Gadget  (SD Card)
+- Note: as of 2026 with RPI Trixie, there's now a simpler way to enable USB-gadget on a Pi without accessing the OS, however the ethernet driver for windows is screwed up. 
+- Access the SD card, and open "user-data" with a text editor (like notepad)
+- Find the section that has "rpi:" with "enable_ssh:" below it
+- <img width="244" height="58" alt="image" src="https://github.com/user-attachments/assets/46e6e9bd-0a51-4786-91c1-1d54ca724813" />
+- Enter enable_usb_gadget: true
+- If these steps do not work, then follow the steps below
+### Enabling USB-Gadget  (OS)
 - First, go to boot/firmware/config.txt, add the line "dtoverlay=dwc2" at the very bottom
+- Comment out "otg_mode=1"
 - Then, go to boot/firmware/cmdline.txt, add "module-line=dwc2,g_ether" after "rootwait"
 - Reboot the Pi. Type "sudo reboot now" in terminal to properly do this.
 - When the OS is rebooted, type in "ifconfig -a". If a "usb0" interface does not show up, type "sudo modprobe g_ether", run "ifconfig -a" again.
 - If the usb0 interface disappears after rebooting, edit the /etc/modules file, add "dwc2" and "g_ether".
 - Your computer should detect an "Ethernet Gadget" (Check device manager for windows under "Network Adapters", or "Network" on MacOS).
 - You can now ssh into the Pi without an internet connection. Open up terminal and type "ssh perk@perk.local".
+For more information on setting up RPI gadget mode, you can look at this guide: https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/
 ### Enabling I2S
-- To use the speaker, you must enable the I2S protocol in the config file. Uncomment "dtparam=i2s=on" and "dtparam=audio=on"
-- Finally, add "dtoverlay = hifiberry-dacplus"
+- To use the speaker, you must enable the I2S protocol in the config file.
+- Uncomment "dtparam=12s=on" and comment "dtparam=audio=on"
+- Comment the vc4-kms-v3d dtoverlay and max_framebuffers, set disable_fw_kms_setup to 0
+- Finally, add "dtoverlay = max98357a"
 - Reboot the Pi
 - Keep in mind that pins 18, 19, 38, and 40 are now occupied for this protocol. Avoid using these pins for other external devices.

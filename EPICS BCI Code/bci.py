@@ -39,79 +39,10 @@ def toggle_braille_selection():
 
     update_live_feed(force_full_refresh=True)
 
-translations = {
-    "000000": "⠀",  # U+2800
-    "000001": "⠠",  # U+2820
-    "000010": "⠐",  # U+2810
-    "000011": "⠰",  # U+2830
-    "000100": "⠈",  # U+2808
-    "000101": "⠨",  # U+2828
-    "000110": "⠘",  # U+2818
-    "000111": "⠸",  # U+2838
+translations_path = "EPICS BCI Code\\Data\\translations.txt"
 
-    "001000": "⠄",  # U+2804
-    "001001": "⠤",  # U+2824
-    "001010": "⠔",  # U+2814
-    "001011": "⠴",  # U+2834
-    "001100": "⠌",  # U+280C
-    "001101": "⠬",  # U+282C
-    "001110": "⠜",  # U+281C
-    "001111": "⠼",  # U+283C
-
-    "010000": "⠂",  # U+2802
-    "010001": "⠢",  # U+2822
-    "010010": "⠒",  # U+2812
-    "010011": "⠲",  # U+2832
-    "010100": "⠊",  # U+280A
-    "010101": "⠪",  # U+282A
-    "010110": "⠚",  # U+281A
-    "010111": "⠺",  # U+283A
-
-    "011000": "⠆",  # U+2806
-    "011001": "⠦",  # U+2826
-    "011010": "⠖",  # U+2816
-    "011011": "⠶",  # U+2836
-    "011100": "⠎",  # U+280E
-    "011101": "⠮",  # U+282E
-    "011110": "⠞",  # U+281E
-    "011111": "⠾",  # U+283E
-
-    "100000": "⠁",  # U+2801
-    "100001": "⠡",  # U+2821
-    "100010": "⠑",  # U+2811
-    "100011": "⠱",  # U+2831
-    "100100": "⠉",  # U+2809
-    "100101": "⠩",  # U+2829
-    "100110": "⠙",  # U+2819
-    "100111": "⠹",  # U+2839
-
-    "101000": "⠅",  # U+2805
-    "101001": "⠥",  # U+2825
-    "101010": "⠕",  # U+2815
-    "101011": "⠵",  # U+2835
-    "101100": "⠍",  # U+280D
-    "101101": "⠭",  # U+282D
-    "101110": "⠝",  # U+281D
-    "101111": "⠽",  # U+283D
-
-    "110000": "⠃",  # U+2803
-    "110001": "⠣",  # U+2823
-    "110010": "⠓",  # U+2813
-    "110011": "⠳",  # U+2833
-    "110100": "⠋",  # U+280B
-    "110101": "⠫",  # U+282B
-    "110110": "⠛",  # U+281B
-    "110111": "⠻",  # U+283B
-
-    "111000": "⠇",  # U+2807
-    "111001": "⠧",  # U+2827
-    "111010": "⠗",  # U+2817
-    "111011": "⠷",  # U+2837
-    "111100": "⠏",  # U+280F
-    "111101": "⠯",  # U+282F
-    "111110": "⠟",  # U+281F
-    "111111": "⠿",  # U+283F
-}
+with open(translations_path, "r", encoding="utf-8") as f:
+    translations = json.load(f)
 
 ########TITLE/HEADER FORMATTING###########
 title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
@@ -393,17 +324,6 @@ def on_search_focus_out(event):
         search_entry.selection_clear()
         root.focus()  # move focus somewhere else, here root
 
-# def update_contraction_display(*args):
-#     search_term = search_var.get().lower()
-#     # Loop through all contraction labels inside the scrollable frame
-#     for label, contraction in contraction_labels:
-#         if search_term in contraction.lower() and search_term != "Search here:":
-#             label.place_forget()  # temporarily hide
-#             label.pack(fill="x", padx=5, pady=2)
-#         else:
-#             label.pack_forget()
-
-# Entry widget for search
 search_entry = tk.Entry(
     contraction_library_frame,
     textvariable=search_var,
@@ -412,7 +332,7 @@ search_entry = tk.Entry(
     bd=1,
     relief="solid"
 )
-search_entry.place(x=10, y=63, width=440, height=30)
+search_entry.place(x=10, y=63, width=315, height=60)
 search_entry.bind("<FocusIn>", on_search_focus_in)
 search_entry.bind("<FocusOut>", on_search_focus_out)
 
@@ -420,7 +340,7 @@ contraction_library_frame.bind("<Button-1>", on_search_focus_out)
 
 # Scrollable frame for contraction list
 contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
-contraction_list_frame.place(x=15, y=100, width=435, height=380)
+contraction_list_frame.place(x=15, y=130, width=435, height=350)
 
 canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
 scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
@@ -511,7 +431,40 @@ def update_contraction_display(*args):
     else:
         canvas.yview_moveto(0)
 
+def select_all_contractions():
+    for contraction, var in contraction_vars.items():
+        var.set(1)
+        enabled_contractions[contraction]['enabled'] = 1
 
+    # Save once (not per checkbox)
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
+
+
+def deselect_all_contractions():
+    for contraction, var in contraction_vars.items():
+        var.set(0)
+        enabled_contractions[contraction]['enabled'] = 0
+
+    # Save once
+    with open(enabled_contractions_path, "w", encoding="utf-8") as f:
+        json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
+
+select_all_btn = tk.Button(
+    contraction_library_frame,
+    text="Select All",
+    font=("Roboto Condensed", 14),
+    command=select_all_contractions
+)
+select_all_btn.place(x=331, y=63, width=120, height=28)
+
+deselect_all_btn = tk.Button(
+    contraction_library_frame,
+    text="Deselect All",
+    font=("Roboto Condensed", 14),
+    command=deselect_all_contractions
+)
+deselect_all_btn.place(x=331, y=95, width=120, height=28)
 
 # Bind the search_var so it updates automatically
 search_var.trace_add("write", update_contraction_display)

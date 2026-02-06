@@ -7,7 +7,7 @@
     "above": {
         "binary": "100000110000111001",
         "braille": "⠁⠃⠧",
-        "enabled": 0
+        "enabled": 1
     },
     "according": {
         "binary": "100000100100",
@@ -37,7 +37,7 @@
     "again": {
         "binary": "100000110110",
         "braille": "⠁⠛",
-        "enabled": 0
+        "enabled": 1
     },
     "against": {
         "binary": "100000110110001100",

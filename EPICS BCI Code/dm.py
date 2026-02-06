@@ -491,9 +491,7 @@ settings_circle = create_interactive_icon(settings_icon, label_sub_title_1, (54,
 # load all the images, but don't show
 filter_images = {
     "default": load_img("EPICS BCI Code/Images/circles_icon1.png", size=(45,160)),
-    "grayscale": load_img("EPICS BCI Code/Images/circles_icon2.png", size=(45,160)),
-    "inverted": load_img("EPICS BCI Code/Images/circles_icon3.png", size=(45,160)),
-    "inverted_grayscale": load_img("EPICS BCI Code/Images/circles_icon4.png", size=(45,160))
+    "inverted": load_img("EPICS BCI Code/Images/circles_icon2.png", size=(45,160)),
 }
 
 # make my preview canvas

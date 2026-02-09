@@ -186,6 +186,7 @@ def create_interactive_icon(canvas, label,
 def create_circle_button(
     canvas, center, radius, label, img_obj=None, 
     img_on_click=None, selected=False, on_select=None):
+
     """
     Creates a triangle-shaped button on a canvas with hover and click interactions.
     Args:
@@ -222,7 +223,7 @@ def create_circle_button(
                     font=("Roboto Condensed", 25, "bold", "roman")
                 )
                 if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"])
+                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]]) #WHAT
                 if on_select:
                     on_select()
             else:
@@ -231,7 +232,7 @@ def create_circle_button(
                     font=("Roboto Condensed", 25, "normal", "roman")
                 )
                 if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"])
+                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]])
 
     # Cursor detection
     def cursor_in_circle(event):
@@ -253,8 +254,8 @@ def create_circle_button(
         update_selection()
 
     # Bind events
-    canvas.bind("<Motion>", hover_motion)
-    canvas.bind("<Button-1>", on_select)
+    canvas.tag_bind(circle_id, "<Motion>", hover_motion)
+    canvas.tag_bind(circle_id, "<Button-1>", on_click_circle)
     
     def sublabel_on_enter(event):
         canvas.itemconfig(circle_id, outline="gray", width=4)
@@ -490,14 +491,19 @@ settings_circle = create_interactive_icon(settings_icon, label_sub_title_1, (54,
 
 # load all the images, but don't show
 filter_images = {
-    "default": load_img("EPICS BCI Code/Images/circles_icon1.png", size=(45,160)),
-    "inverted": load_img("EPICS BCI Code/Images/circles_icon2.png", size=(45,160)),
+    "default": load_img("EPICS BCI Code/Images/circles_icon1.png", size=(39,85)),
+    "inverted": load_img("EPICS BCI Code/Images/circles_icon2.png", size=(39,85)),
 }
+default_image = {
+    True: "default",
+    False: "inverted"
+}
+
 
 # make my preview canvas
 preview_canvas, canvas_img_obj = create_image_canvas(
     filters_frame,
-    45, 160, 0, 0, "nw", filter_images["default"]
+    39, 85, 0, 0, "nw", filter_images["default"]
 )
 preview_canvas.place(x=15, y=68)
 
@@ -549,27 +555,6 @@ def inverted_filter_load():
             fr.config(bg="#222222")
         except tk.TclError:
             pass
-    '''for cnv in all_canvases:
-        try:
-            cnv.config(bg="#222222")
-        except tk.TclError:
-            pass
-
-        for item in cnv.find_all():
-            item_type = cnv.type(item)
-            if item_type in ("rectangle", "oval", "polygon", "line"):
-                cnv.itemconfig(item, fill="#555555")  # dark gray shapes
-            elif item_type == "image":
-                # Invert the original image
-                if hasattr(cnv, "original_images") and item in cnv.original_images:
-                    pil_img = cnv.original_images[item]
-                    inverted_img = ImageOps.invert(pil_img.convert("RGB"))
-                    tk_img = ImageTk.PhotoImage(inverted_img)
-                    cnv.itemconfig(item, image=tk_img)
-                    # Store reference to prevent garbage collection
-                    if not hasattr(cnv, "tk_images"):
-                        cnv.tk_images = {}
-                    cnv.tk_images[item] = tk_img'''
                     
 
 def inverted_grayscale_filter_load():
@@ -579,30 +564,32 @@ def inverted_grayscale_filter_load():
 ########################################################
 #Default Section
 ###################################################
-default_image = filter_images["default"]
+#default_image = filter_images["default"]
+default_image = {True: "default", False: "inverted"}
 default_label =  create_label(filters_frame, 'w', txt="Default",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,90))
 default_circle = create_circle_button(preview_canvas, (20,23), 12, default_label, canvas_img_obj, default_image, selected=True, on_select=default_filter_load)
 
 ########################################################
 #Grayscale Section
 ###################################################
-grayscale_image = filter_images["grayscale"]
+'''grayscale_image = filter_images["grayscale"]
 grayscale_label = create_label(filters_frame, 'w', txt="Grayscale", font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60, 130))
-grayscale_circle = create_circle_button(preview_canvas, (20, 65.4), 12, grayscale_label, canvas_img_obj, grayscale_image, selected=False, on_select=grayscale_filter_load)
+grayscale_circle = create_circle_button(preview_canvas, (20, 65.4), 12, grayscale_label, canvas_img_obj, grayscale_image, selected=False, on_select=grayscale_filter_load)'''
 
 ########################################################
 #Inverted Section
 ###################################################
-inverted_image = filter_images["inverted"]
-inverted_label =  create_label(filters_frame, 'w', txt="Inverted",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,170))
-inverted_circle = create_circle_button(preview_canvas, (20, 107.25), 12, inverted_label, canvas_img_obj, inverted_image, selected=False, on_select=inverted_filter_load)
+#inverted_image = filter_images["inverted"]
+inverted_image = {"True": "inverted", "False": "default"}
+inverted_label =  create_label(filters_frame, 'w', txt="Inverted",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,130))
+inverted_circle = create_circle_button(preview_canvas, (20, 65.4), 12, inverted_label, canvas_img_obj, inverted_image, selected=False, on_select=inverted_filter_load)
 
 ########################################################
 #Inverted Grayscale Section
 ###################################################
-inverted_grayscale_image= filter_images["inverted_grayscale"]
+'''inverted_grayscale_image= filter_images["inverted_grayscale"]
 inverted_grayscale_label =  create_label(filters_frame, 'w', txt="Inverted Grayscale",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,210))
-inverted_grayscale_circle = create_circle_button(preview_canvas, (20, 145), 12, inverted_grayscale_label, canvas_img_obj, inverted_grayscale_image, selected=False, on_select=inverted_grayscale_filter_load)
+inverted_grayscale_circle = create_circle_button(preview_canvas, (20, 145), 12, inverted_grayscale_label, canvas_img_obj, inverted_grayscale_image, selected=False, on_select=inverted_grayscale_filter_load)'''
 
 ######################################################################
 #Device Management Section

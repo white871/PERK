@@ -14,6 +14,7 @@ def HallEffectRead():
     global binArray
     global spaceBarPressed
     global newLinePressed
+    
     while(True):
         if newLine.value:
             newLinePressed = 1
@@ -37,13 +38,16 @@ def HallEffectRead():
             currentBinary = '000000'
             f_bin = open("tempBin.txt", "w")
             for line in binArray:
-                f_bin.write(line + "\n")
+                f_bin.write(line)
+                f_bin.write("\n")
             f_bin.close()
         time.sleep(0.1)    
             
     
     
 def transliterate():
+    global lastWordList
+    tts_thread = threading.Thread(target = TTS, args = lastWord)
     f_bin = open("tempBin.txt", "r")
     for line in f_bin.readlines():
         lastWord = transliterateBin(line)
@@ -51,7 +55,10 @@ def transliterate():
         f_out.write("\n")
         f_out.close()
     f_bin.close()
-    TTS(lastWord)
+    lastWordList.append(lastWord)
+    while (len(lastWordList) > 0):
+        lastWord = lastWordList.pop(0)
+        tts_thread.start()
 
 def TTS(word):
     with wave.open("output.wav", "wb") as f:
@@ -60,6 +67,7 @@ def TTS(word):
 
 model = "en_US-amy-low.onnx"
 currentLine = 0
+lastWordList = []
 voice = PiperVoice.load(model)
 open("output.txt", 'w').close()
 with wave.open("output.wav", "wb") as f:

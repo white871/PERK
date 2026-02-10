@@ -48,76 +48,81 @@ def create_circle_button(
         "label": label,
         "selected": selected,
         "img_obj": img_obj,
+        "img_canvas": canvas,
         "img_on_click": img_on_click,
         "on_select": on_select
     }
 
     circle_buttons.append(button_state)
 
-    
-    def update_selection():
-        for btn in circle_buttons:
-            if btn["circle"] == circle_id:
-                btn["selected"] = True
-                btn["label"].config(
-                    font=("Roboto Condensed", 25, "bold", "roman")
-                )
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]]) #WHAT
-                if on_select:
-                    on_select()
-            else:
-                btn["selected"] = False
-                btn["label"].config(
-                    font=("Roboto Condensed", 25, "normal", "roman")
-                )
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]])
-
-    # Cursor detection
-    def cursor_in_circle(event):
-        dx = event.x - x
-        dy = event.y - y
-        return dx*dx + dy*dy <= r*r
-
-    # Hover motion
-    def hover_motion(event):
-        if cursor_in_circle(event):
-            canvas.itemconfig(circle_id, outline="gray", width=4)
-            label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
-        else:
-            canvas.itemconfig(circle_id, outline="", width=2)
-            label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
-
-
-    def on_click_circle(event):
-        update_selection()
-
-    # Bind events
-    canvas.tag_bind(circle_id, "<Motion>", hover_motion)
-    canvas.tag_bind(circle_id, "<Button-1>", on_click_circle)
-    
     def sublabel_on_enter(event):
         canvas.itemconfig(circle_id, outline="gray", width=4)
-        label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
+        label.config(font=("Roboto Condensed", 18, 'bold', 'italic'))
 
     def sublabel_on_leave(event):
         canvas.itemconfig(circle_id, outline="", width=2)
-        label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
+        label.config(font=("Roboto Condensed", 18, 'normal', 'roman'))
 
     def sublabel_on_click(event):
+        canvas_click(event)
         print('Circle Clicked!')
-        on_select()
 
     label.bind("<Enter>", sublabel_on_enter)
     label.bind("<Leave>", sublabel_on_leave)
     label.bind("<Button-1>", sublabel_on_click)
 
-    if selected:
-         update_selection()
+
+    if selected and img_obj and img_on_click:
+        canvas.itemconfig(img_obj, image=img_on_click[True])
 
     return circle_id
-        
+
+
+#################################################
+# Canvas Dispatcher Functions
+#################################################
+
+def canvas_motion(event):
+    for btn in circle_buttons:
+        x1, y1, x2, y2 = btn["img_canvas"].coords(btn["circle"])
+        cx = (x1 + x2) / 2
+        cy = (y1 + y2) / 2
+        r = (x2 - x1) / 2
+        dx = event.x - cx
+        dy = event.y - cy
+
+        if dx*dx + dy*dy <= r*r:
+            btn["img_canvas"].itemconfig(btn["circle"], outline="gray", width=4)
+            btn["label"].config(font=("Roboto Condensed", 18, 'bold', 'italic'))
+        else:
+            btn["img_canvas"].itemconfig(btn["circle"], outline="", width=2)
+            btn["label"].config(font=("Roboto Condensed", 18, 'normal', 'roman'))
+
+def canvas_click(event):
+    for btn in circle_buttons:
+        x1, y1, x2, y2 = btn["img_canvas"].coords(btn["circle"])
+        cx = (x1 + x2) / 2
+        cy = (y1 + y2) / 2
+        r = (x2 - x1) / 2
+        dx = event.x - cx
+        dy = event.y - cy
+
+        if dx*dx + dy*dy <= r*r:
+            # Select this button
+            btn["selected"] = True
+            btn["label"].config(font=("Roboto Condensed", 18, "bold", "roman"))
+            if btn["img_obj"] and btn["img_on_click"]:
+                btn["img_canvas"].itemconfig(btn["img_obj"], image=btn["img_on_click"][True])
+            if btn["on_select"]:
+                btn["on_select"]()
+        else:
+            # Deselect others
+            btn["selected"] = False
+            btn["label"].config(font=("Roboto Condensed", 18, "normal", "roman"))
+            if btn["img_obj"] and btn["img_on_click"]:
+                btn["img_canvas"].itemconfig(btn["img_obj"], image=btn["img_on_click"][False])
+
+
              
 def show_text_visibility():
     text_visibility_frame.tkraise()
@@ -174,11 +179,16 @@ filter_images = {
     "default": load_img("EPICS BCI Code/Images/circles_icon1.png", size=(39,85)),
     "inverted": load_img("EPICS BCI Code/Images/circles_icon2.png", size=(39,85)),
 }
+
 default_image = {
-    True: "default",
-    False: "inverted"
+    True: filter_images["default"],
+    False: filter_images["inverted"]
 }
 
+inverted_image = {
+    True: filter_images["inverted"],
+    False: filter_images["default"]
+}
 
 # make my preview canvas
 preview_canvas, canvas_img_obj = create_image_canvas(
@@ -189,26 +199,25 @@ preview_canvas.place(x=15, y=68)
 
 
 def default_filter_load():
+    print("Default filter applied!")
     return
 
 def inverted_filter_load():
+    print("Inverted filter applied!")
     return
 
 ########################################################
-#Default Section
+#Default and Inverted Section
 ###################################################
-#default_image = filter_images["default"]
-default_image = {True: "default", False: "inverted"}
-default_label =  create_label(filters_frame, 'w', txt="Default",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,90))
-default_circle = create_circle_button(preview_canvas, (20,23), 12, default_label, canvas_img_obj, default_image, selected=True, on_select=default_filter_load)
 
-########################################################
-#Inverted Section
-###################################################
-#inverted_image = filter_images["inverted"]
-inverted_image = {"True": "inverted", "False": "default"}
-inverted_label =  create_label(filters_frame, 'w', txt="Inverted",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(60,130))
-inverted_circle = create_circle_button(preview_canvas, (20, 65.4), 12, inverted_label, canvas_img_obj, inverted_image, selected=False, on_select=inverted_filter_load)
+default_label =  create_label(filters_frame, 'w', txt="Default",  font_txt="Roboto Condensed", font_size=18, bold='normal', italic='roman', backround='white', location=(60,90))
+default_circle = create_circle_button(preview_canvas, (18.5, 23), 12, default_label, canvas_img_obj, default_image, selected=True, on_select=default_filter_load)
+
+inverted_label =  create_label(filters_frame, 'w', txt="Inverted",  font_txt="Roboto Condensed", font_size=18, bold='normal', italic='roman', backround='white', location=(60,130))
+inverted_circle = create_circle_button(preview_canvas, (18.5, 65.4), 12, inverted_label, canvas_img_obj, inverted_image, selected=False, on_select=inverted_filter_load)
+
+preview_canvas.bind("<Motion>", canvas_motion)
+preview_canvas.bind("<Button-1>", canvas_click)
 
 ######################################################################
 #Device Management Section

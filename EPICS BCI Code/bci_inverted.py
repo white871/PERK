@@ -4,14 +4,14 @@ import tkinter.font as tkfont
 from PIL import Image, ImageTk
 import random
 import json
-from utility_functions import load_img, create_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
 root = tk.Tk()
 
 # Set geometry
 root.geometry("1050x700")
 root.resizable(False, False)
-root.configure(bg="#FFFFFF")
+root.configure(bg="#000000")
 
 file_path = "Data\\brailler_output.txt"
 
@@ -45,32 +45,32 @@ with open(translations_path, "r", encoding="utf-8") as f:
     translations = json.load(f)
 
 ########TITLE/HEADER FORMATTING###########
-title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
+title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#000000", highlightbackground="#FFFFFF", highlightthickness=1, relief="solid", bd=2)
 title_header_canvas.place(x=5, y=5, anchor="nw")
 
-title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
+title = create_inverted_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#000000', location=(50, 30))
 
-perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_braille_Image_grey.png", size=(302,110))
+perk_braille_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\PERK_braille_Image_inverted.png", size=(302,110))
 perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
 ########################################
 #Creating Frames
 #######################################
 
-display_container = tk.Frame(root, bg="#FFFFFF", bd=3, relief="solid")
+display_container = tk.Frame(root, bg="#000000", bd=3, relief="solid")
 display_container.place(x=530, y=145, width=470, height=500)
 
-live_feed_frame = create_display_frame(display_container, start_display=True)
-live_feed_label, line_canvas =  create_display_frame_header(live_feed_frame, "Live Text Feed", 'n', coords=(470/2, 10))
+live_feed_frame = create_display_frame(display_container, bg="#000000", start_display=True, inverted=True)
+live_feed_label, line_canvas =  create_display_frame_header(live_feed_frame, "Live Text Feed", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF", line_color="#FFFFFF")
 
-contraction_library_frame = create_display_frame(display_container)
-contraction_library_label, line_canvas =  create_display_frame_header(contraction_library_frame, "Contraction Library", 'n', coords=(470/2, 10))
+contraction_library_frame = create_display_frame(display_container, bg="#000000", inverted=True)
+contraction_library_label, line_canvas =  create_display_frame_header(contraction_library_frame, "Contraction Library", 'n', coords=(470/2, 10), bg="#000000", fg="#FFFFFF", line_color="#FFFFFF")
 
 #######################################################
 #Creating images and canvas for triangle selection box
 ######################################################
-triangle_image_1 = load_img("EPICS BCI Code\\Images\\triangles_icon.png", size=(60,115))
-triangle_image_2 = load_img("EPICS BCI Code\\Images\\triangles_icon_flipped.png", size=(60,115))
+triangle_image_1 = load_img("EPICS BCI Code\\Images\\Inverted Images\\triangles_icon_inverted.png", size=(60,115))
+triangle_image_2 = load_img("EPICS BCI Code\\Images\\Inverted Images\\triangles_icon_flipped_inverted.png", size=(60,115))
 
 triangle_canvas, triangle_img_obj = create_image_canvas(root, 60, 115, 0, 0, 'nw', triangle_image_1, location=(155, 235))
 
@@ -79,7 +79,7 @@ triangle_buttons = []  # global list of all triangle buttons
 ########################################################
 #Live Feed Button
 #################################################################
-label_live_text_feed = create_label(root, 'w', txt="Live Text Feed",  font_txt="Roboto Condensed", font_size=20, bold='bold', italic='roman', backround='white', location=(224, 261))
+label_live_text_feed = create_inverted_label(root, 'w', txt="Live Text Feed",  font_txt="Roboto Condensed", font_size=20, bold='bold', italic='roman', backround='#000000', location=(224, 261))
 triangle_live_feed_coords = (12, 9, 12, 46, 48, 28)
 
 triangle_live_feed = create_triangle_button(
@@ -91,7 +91,7 @@ triangle_live_feed = create_triangle_button(
 #Contraction Library Button
 #################################################################
 triangle_contraction_library_coords = (12, 68, 12, 105, 48, 87)
-label_contraction_library = create_label(root, 'w', txt="Contraction Library",  font_txt="Roboto Condensed", font_size=20, bold='normal', italic='roman', backround='white', location=(224, 322))
+label_contraction_library = create_inverted_label(root, 'w', txt="Contraction Library",  font_txt="Roboto Condensed", font_size=20, bold='normal', italic='roman', backround='#000000', location=(224, 322))
 
 triangle_contraction_library = create_triangle_button(
     triangle_canvas, triangle_contraction_library_coords, label_contraction_library, img_obj=triangle_img_obj, 
@@ -101,48 +101,49 @@ triangle_contraction_library = create_triangle_button(
 ###############################################
 #Brailler COnnected Section
 ###################################################
-Brailler_connected_image = load_img("EPICS BCI Code\\Images\\Brailler_Connected_Icon.png", size=(100,100))
+Brailler_connected_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\Brailler_Connected_Icon_inverted.png", size=(100,100))
 brailler_icon, brailler_img_obj = create_image_canvas(root, 100, 100, 0, 0, 'nw', Brailler_connected_image, location=(50, 135))
-label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 185))
-brailler_circle = create_interactive_icon(brailler_icon, label_sub_title_1, (49, 52), 41)
+label_sub_title_1 = create_inverted_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='#000000', location=(165, 185))
+brailler_circle = create_interactive_icon(brailler_icon, label_sub_title_1, (49, 52), 41, True)
 
-online_dot = load_img("EPICS BCI Code\\Images\\green_circle.png", size=(40,40))
+online_dot = load_img("EPICS BCI Code\\Images\\Inverted Images\\green_circle_inverted.png", size=(40,40))
 dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(440, 185))
 
 ######################################################################
 #Device Management Section
 ######################################################################
-home_image = load_img("EPICS BCI Code\\Images\\Home_icon.png", size=(105,110))
+home_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\Home_icon_inverted.png", size=(105,110))
 home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 445))
-label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 442))
-home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41)
+label_sub_title_2 = create_inverted_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='#000000', location=(165, 442))
+home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41, True)
 
 #############################################################
 #Settings Section
 ##############################################################
-settings_image = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(113,100))
+settings_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\settings_icon_inverted.png", size=(113,100))
 settings_icon, settings_img_obj = create_image_canvas(root, 113, 100, 0, 0, 'center', settings_image, location=(100, 595))
-label_sub_title_3 = create_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 592))
-settings_circle = create_interactive_icon(settings_icon, label_sub_title_3, (54, 49), 41)
+label_sub_title_3 = create_inverted_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='#000000', location=(165, 592))
+settings_circle = create_interactive_icon(settings_icon, label_sub_title_3, (54, 49), 41, True)
 
 ##############################################
 #DIsplay box when Live Feed Button Selected
 ###############################################
 #Create text box for live display
 text_frame_height = 500-72-60
-text_frame = tk.Frame(live_feed_frame, bg="white")
-text_frame.place(x=10, y=60, width=450, height=text_frame_height)
+text_frame = tk.Frame(live_feed_frame, bg="#000000")
+text_frame.place(x=10, y=60, width=445, height=text_frame_height)
 
 #Scrollbar first (right side)
 scrollbar = tk.Scrollbar(text_frame, orient="vertical")
-scrollbar.pack(side="right", fill="y", padx=(5, 6))
+scrollbar.pack(side="right", fill="y", padx=(4, 6))
 
 # Text box second (takes remaining space)
 text_display = tk.Text(
     text_frame,
     wrap="word",
     font=("Roboto Condensed", 14),
-    bg="white",
+    fg="#FFFFFF",
+    bg="#000000",
     bd=0,
     highlightthickness=0,
     relief="flat",
@@ -274,17 +275,17 @@ def export_file_action():
     except Exception as e:
         print("Export failed:", e)
 
-button_canvas = tk.Canvas(live_feed_frame, width=464, height=72, bg="#FFFFFF", highlightthickness=0)
+button_canvas = tk.Canvas(live_feed_frame, width=450, height=68, bg="#000000", highlightthickness=0)
 button_canvas.place(x=0, y=422)
 
-new_file_img = load_img("EPICS BCI Code\\Images\\New_file_button.png", size=(120, 35))
+new_file_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\New_file_button_inverted.png", size=(120, 35))
 new_file_icon = make_interactive_image(button_canvas, new_file_img, 20, 18, on_click=new_file_action)
 
-export_text_file_img = load_img("EPICS BCI Code\\Images\\export_text_file_button.png", size=(161, 37))
+export_text_file_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\export_text_file_button_inverted.png", size=(161, 37))
 export_text_file_icon = make_interactive_image(button_canvas, export_text_file_img, 155, 15, on_click=export_file_action)
 
-braille_selection_box_img = load_img("EPICS BCI Code\\Images\\braille_selection_box_unselected.png", size=(113, 39))
-braille_selection_box_img_2 = load_img("EPICS BCI Code\\Images\\braille_selection_box_selected.png", size=(105, 42))
+braille_selection_box_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\braille_selection_box_unselected_inverted.png", size=(113, 39))
+braille_selection_box_img_2 = load_img("EPICS BCI Code\\Images\\Inverted Images\\braille_selection_box_selected_inverted.png", size=(105, 42))
 braille_selection_box_icon = make_interactive_image(button_canvas, braille_selection_box_img, 330, 15, on_click=toggle_braille_selection)
 
 ########################################################
@@ -328,8 +329,11 @@ search_entry = tk.Entry(
     contraction_library_frame,
     textvariable=search_var,
     font=("Roboto Condensed", 16),
-    fg="gray",
-    bd=1,
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
+    bd=0,
     relief="solid"
 )
 search_entry.place(x=10, y=63, width=315, height=60)
@@ -342,9 +346,9 @@ contraction_library_frame.bind("<Button-1>", on_search_focus_out)
 contraction_list_frame = tk.Frame(contraction_library_frame, bg="white")
 contraction_list_frame.place(x=15, y=130, width=435, height=350)
 
-canvas = tk.Canvas(contraction_list_frame, bg="white", highlightthickness=0)
+canvas = tk.Canvas(contraction_list_frame, bg="black", highlightthickness=0)
 scrollbar = tk.Scrollbar(contraction_list_frame, orient="vertical", command=canvas.yview)
-scrollable_frame = tk.Frame(canvas, bg="white")
+scrollable_frame = tk.Frame(canvas, bg="black")
 
 scrollable_frame.bind(
     "<Configure>",
@@ -383,7 +387,11 @@ for contraction in original_contractions_order:
         onvalue=1,
         offvalue=0,
         anchor="w",
-        bg="white",
+        fg="white",
+        bg="#000000",
+        selectcolor="#000000", 
+        highlightbackground="white",
+        highlightthickness=1,
         font=("Roboto Condensed", 14),
         command=lambda c=contraction, v=var: update_enabled(c, v)
     )
@@ -454,6 +462,10 @@ select_all_btn = tk.Button(
     contraction_library_frame,
     text="Select All",
     font=("Roboto Condensed", 14),
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
     command=select_all_contractions
 )
 select_all_btn.place(x=331, y=63, width=120, height=28)
@@ -462,12 +474,15 @@ deselect_all_btn = tk.Button(
     contraction_library_frame,
     text="Deselect All",
     font=("Roboto Condensed", 14),
+    fg="white",
+    bg="#000000",
+    highlightbackground="white",
+    highlightthickness=1,
     command=deselect_all_contractions
 )
 deselect_all_btn.place(x=331, y=95, width=120, height=28)
 
 # Bind the search_var so it updates automatically
 search_var.trace_add("write", update_contraction_display)
-
 
 root.mainloop()

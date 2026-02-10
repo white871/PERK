@@ -16,6 +16,14 @@ def create_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None,
     label.place(x=location[0], y=location[1], anchor = anchr)
     return label
 
+def create_inverted_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None, bold=None, italic=None, backround=None, bd_width=None, location=(0, 0)):
+    if img==None:
+        label = tk.Label(root, text=txt, fg="white", font=(font_txt, font_size, bold, italic), bg=backround)
+    elif txt==None:
+        label = tk.Label(root, image=img, borderwidth=bd_width)
+    label.place(x=location[0], y=location[1], anchor = anchr)
+    return label
+
 def create_image_canvas(root, wdth, hght, highlightthick, border, anchr, img, location=(0, 0)):
     canvas = tk.Canvas(root, width=wdth, height=hght, highlightthickness=highlightthick, bd=border)
     canvas.place(x=location[0], y=location[1], anchor=anchr)
@@ -95,7 +103,7 @@ def create_triangle_button(
     return triangle_id
 
 def create_interactive_icon(canvas, label,
-    circle_center, circle_radius):
+    circle_center, circle_radius, inverted=False):
     """
     Creates an interactive canvas with image and a circular hover area,
     plus a label that reacts on hover and click.
@@ -115,10 +123,16 @@ def create_interactive_icon(canvas, label,
     # Hover motion
     def hover_motion(event):
         if cursor_in_circle(event):
-            canvas.itemconfig(circle_id, outline="gray", width=4)
+            if inverted == False:
+                canvas.itemconfig(circle_id, outline="gray", width=4)
+            elif inverted == True:
+                canvas.itemconfig(circle_id, outline="white", width=3)
             label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
         else:
-            canvas.itemconfig(circle_id, outline="", width=2)
+            if inverted == False:
+                canvas.itemconfig(circle_id, outline="", width=2)
+            elif inverted == True:
+                canvas.itemconfig(circle_id, outline="", width=2)
             label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
 
     # Click
@@ -131,11 +145,19 @@ def create_interactive_icon(canvas, label,
     canvas.bind("<Button-1>", on_click)
     
     def sublabel_on_enter(event):
-        canvas.itemconfig(circle_id, outline="gray", width=4)
+        if inverted == False:
+            canvas.itemconfig(circle_id, outline="gray", width=4)
+        elif inverted == True:
+            canvas.itemconfig(circle_id, outline="white", width=4)
+        
         label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
 
     def sublabel_on_leave(event):
-        canvas.itemconfig(circle_id, outline="", width=2)
+        if inverted == False:
+            canvas.itemconfig(circle_id, outline="", width=2)
+        elif inverted == True:
+            canvas.itemconfig(circle_id, outline="", width=2)
+
         label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
 
     def sublabel_on_click(event):
@@ -178,18 +200,20 @@ def make_interactive_image(canvas, image, x, y, highlight_color="gray", on_click
     
     return label_img
 
-def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto Condensed", 22, 'bold'), bg="#FFFFFF"):
-    label = tk.Label(parent, text=text, font=font, bg=bg)
+def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto Condensed", 22, 'bold'), bg="#FFFFFF", fg="#000000", line_color="#000000"):
+    label = tk.Label(parent, text=text, font=font, bg=bg, fg=fg)
     label.place(x=coords[0], y=coords[1], anchor=anchor)
     
-    line_canvas = tk.Canvas(parent, height=2, bg="white", highlightthickness=0)
-    line_canvas.place(x=10, y=50, width=450, height = 2)
-    line_canvas.create_line(0, 1, 440, 1)   # x1, y1, x2, y2
+    line_canvas = tk.Canvas(parent, bg=line_color, highlightthickness=0)
+    line_canvas.place(x=10, y=50, width=445, height=1)
 
     return label, line_canvas
 
-def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=False):
-    frame = tk.Frame(parent, bg=bg)
+def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=False, inverted=False):
+    if inverted ==False:
+        frame = tk.Frame(parent, bg=bg)
+    elif inverted== True:
+        frame = tk.Frame(parent, bg=bg, highlightbackground="#FFFFFF", highlightthickness=2, relief="solid", bd=0)
     frame.place(relwidth=rel_fill[0], relheight=rel_fill[1])
     if start_display:
         frame.tkraise()

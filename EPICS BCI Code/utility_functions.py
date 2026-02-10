@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 triangle_buttons = []
+circle_buttons = []
 
 def load_img(path, size=(80,80)):
     img = Image.open(path)
@@ -218,3 +219,100 @@ def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=
     if start_display:
         frame.tkraise()
     return frame
+
+
+###### Making circle buttons ######
+def create_circle_button(
+    canvas, center, radius, label, img_obj=None, 
+    img_on_click=None, selected=False, on_select=None):
+
+    """
+    Creates a triangle-shaped button on a canvas with hover and click interactions.
+    Args:
+        canvas: the Tkinter Canvas to draw on
+        center: the center coordinates of the circle
+        radius: the radius of the circle
+        img_obj: canvas image object to change when clicked
+        img_on_click: dict {True_image, False_image} to swap on click
+        selected: initial selected state
+   """
+    x, y = center
+    r = radius
+    #draw circle
+    circle_id = canvas.create_oval(x - r, y - r, x + r, y + r, fill="", outline="", width=2)
+    
+    button_state = {
+        "circle": circle_id,
+        "label": label,
+        "selected": selected,
+        "img_obj": img_obj,
+        "img_on_click": img_on_click,
+        "on_select": on_select
+    }
+
+    circle_buttons.append(button_state)
+
+    
+    def update_selection():
+        for btn in circle_buttons:
+            if btn["circle"] == circle_id:
+                btn["selected"] = True
+                btn["label"].config(
+                    font=("Roboto Condensed", 25, "bold", "roman")
+                )
+                if btn["img_obj"] and btn["img_on_click"]:
+                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]]) #WHAT
+                if on_select:
+                    on_select()
+            else:
+                btn["selected"] = False
+                btn["label"].config(
+                    font=("Roboto Condensed", 25, "normal", "roman")
+                )
+                if btn["img_obj"] and btn["img_on_click"]:
+                    canvas.itemconfig(btn["img_obj"], image=filter_images[btn["img_on_click"][btn["selected"]]])
+
+    # Cursor detection
+    def cursor_in_circle(event):
+        dx = event.x - x
+        dy = event.y - y
+        return dx*dx + dy*dy <= r*r
+
+    # Hover motion
+    def hover_motion(event):
+        if cursor_in_circle(event):
+            canvas.itemconfig(circle_id, outline="gray", width=4)
+            label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
+        else:
+            canvas.itemconfig(circle_id, outline="", width=2)
+            label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
+
+
+    def on_click_circle(event):
+        update_selection()
+
+    # Bind events
+    canvas.tag_bind(circle_id, "<Motion>", hover_motion)
+    canvas.tag_bind(circle_id, "<Button-1>", on_click_circle)
+    
+    def sublabel_on_enter(event):
+        canvas.itemconfig(circle_id, outline="gray", width=4)
+        label.config(font=("Roboto Condensed", 25, 'bold', 'italic'))
+
+    def sublabel_on_leave(event):
+        canvas.itemconfig(circle_id, outline="", width=2)
+        label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
+
+    def sublabel_on_click(event):
+        print('Circle Clicked!')
+        on_select()
+
+    label.bind("<Enter>", sublabel_on_enter)
+    label.bind("<Leave>", sublabel_on_leave)
+    label.bind("<Button-1>", sublabel_on_click)
+
+    if selected:
+         update_selection()
+
+    return circle_id
+        

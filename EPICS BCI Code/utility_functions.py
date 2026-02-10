@@ -104,7 +104,7 @@ def create_triangle_button(
     return triangle_id
 
 def create_interactive_icon(canvas, label,
-    circle_center, circle_radius, inverted=False):
+    circle_center, circle_radius, inverted=False, on_select=None):
     """
     Creates an interactive canvas with image and a circular hover area,
     plus a label that reacts on hover and click.
@@ -139,6 +139,8 @@ def create_interactive_icon(canvas, label,
     # Click
     def on_click(event):
         if cursor_in_circle(event):
+            if on_select:
+                on_select()
             print(f"{label} clicked!")
 
     # Bind events
@@ -162,6 +164,8 @@ def create_interactive_icon(canvas, label,
         label.config(font=("Roboto Condensed", 25, 'normal', 'roman'))
 
     def sublabel_on_click(event):
+        if on_select:
+            on_select()
         print('Circle Clicked!')
 
     label.bind("<Enter>", sublabel_on_enter)      # mouse enters

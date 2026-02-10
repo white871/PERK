@@ -103,8 +103,7 @@ triangle_contraction_library = create_triangle_button(
 ###################################################
 Brailler_connected_image = load_img("EPICS BCI Code\\Images\\Brailler_Connected_Icon.png", size=(100,100))
 brailler_icon, brailler_img_obj = create_image_canvas(root, 100, 100, 0, 0, 'nw', Brailler_connected_image, location=(50, 135))
-label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 185))
-brailler_circle = create_interactive_icon(brailler_icon, label_sub_title_1, (49, 52), 41)
+label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='bold', italic='roman', backround='white', location=(165, 185))
 
 online_dot = load_img("EPICS BCI Code\\Images\\green_circle.png", size=(40,40))
 dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(440, 185))

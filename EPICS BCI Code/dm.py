@@ -209,7 +209,7 @@ def load_settings_page(root):
     home_image = load_img("EPICS BCI Code/Images/Home_icon.png", size=(105,110))
     home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 340))
     label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 337))
-    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 52), 41)
+    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 52), 41, on_select=lambda: load_manage_braillers_page(root))
 
     ########################################################
     #Settings Section
@@ -415,7 +415,7 @@ def load_settings_page_inverted(root):
     home_image = load_img("EPICS BCI Code/Images/Inverted Images/Home_icon_inverted.png", size=(105,110))
     home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 340))
     label_sub_title_2 = create_inverted_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='black', location=(165, 337))
-    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 52), 41, on_select=load_manage_braillers_page)
+    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 52), 41)
 
     ########################################################
     #Settings Section
@@ -430,6 +430,9 @@ def load_settings_page_inverted(root):
 
 
 def load_manage_braillers_page(root):
+    for widget in root.winfo_children():
+            widget.destroy()
+
     def toggle_brailler_popup(brailler_name):
         global current_brailler
 
@@ -486,9 +489,6 @@ def load_manage_braillers_page(root):
     ]
 
     # Main window
-    root = tk.Tk()
-    root.geometry("1050x700")
-    root.resizable(False, False)
     root.configure(bg="#FFFFFF")
 
     # Header
@@ -509,7 +509,7 @@ def load_manage_braillers_page(root):
         location=(30, 150)
     )
 
-    create_label(
+    home_label = create_label(
         root,
         anchr="nw",
         txt="Manage Braillers",

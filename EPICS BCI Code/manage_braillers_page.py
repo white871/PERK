@@ -11,8 +11,7 @@ def load_img(path, size=(80,80)):
     return ImageTk.PhotoImage(img)
 
 def create_label(
-    root,
-    anchr,
+    root, anchr,
     txt=None,
     img=None,
     font_txt="Roboto Condensed",
@@ -21,13 +20,7 @@ def create_label(
     italic="roman",
     backround="white",
     bd_width=0,
-    location=(0, 0)
-):
-    # Force valid font styles (Tkinter-safe)
-    if bold not in ("normal", "bold"):
-        bold = "normal"
-    if italic not in ("roman", "italic"):
-        italic = "roman"
+    location=(0, 0)):
 
     if img is None:
         label = tk.Label(

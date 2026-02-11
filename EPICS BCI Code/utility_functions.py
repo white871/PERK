@@ -9,12 +9,34 @@ def load_img(path, size=(80,80)):
     img = img.resize(size, Image.Resampling.LANCZOS)
     return ImageTk.PhotoImage(img)
 
-def create_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None, bold=None, italic=None, backround=None, bd_width=None, location=(0, 0)):
-    if img==None:
-        label = tk.Label(root, text=txt, font=(font_txt, font_size, bold, italic), bg=backround)
-    elif txt==None:
-        label = tk.Label(root, image=img, borderwidth=bd_width)
-    label.place(x=location[0], y=location[1], anchor = anchr)
+def create_label(
+    root, anchr,
+    txt=None,
+    img=None,
+    font_txt="Roboto Condensed",
+    font_size=16,
+    bold="normal",
+    italic="roman",
+    backround="white",
+    bd_width=0,
+    location=(0, 0)):
+
+    if img is None:
+        label = tk.Label(
+            root,
+            text=txt,
+            font=(font_txt, font_size, bold, italic),
+            bg=backround
+        )
+    else:
+        label = tk.Label(
+            root,
+            image=img,
+            borderwidth=bd_width,
+            bg=backround
+        )
+
+    label.place(x=location[0], y=location[1], anchor=anchr)
     return label
 
 def create_inverted_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None, bold=None, italic=None, backround=None, bd_width=None, location=(0, 0)):
@@ -141,7 +163,6 @@ def create_interactive_icon(canvas, label,
         if cursor_in_circle(event):
             if on_select:
                 on_select()
-            print(f"{label} clicked!")
 
     # Bind events
     canvas.bind("<Motion>", hover_motion)

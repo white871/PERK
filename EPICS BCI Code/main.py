@@ -12,3 +12,5 @@ root.geometry("1050x700")
 root.resizable(False, False)
 
 load_settings_page(root)
+
+print("test")

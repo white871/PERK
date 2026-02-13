@@ -65,6 +65,7 @@ def transliterate():
         tts_thread.start()
 
 def TTS(word):
+    global voice
     with wave.open("output.wav", "wb") as f:
         voice.synthesize_wav(word, f)
         subprocess.run('aplay output.wav', shell = True)
@@ -79,6 +80,7 @@ with wave.open("output.wav", "wb") as f:
     subprocess.run('aplay output.wav', shell = True)
 spaceBarPressed = 0
 newLinePressed = 0
+binArray = []
 hallEffect = [gpiozero.DigitalInputDevice(f"BOARD{pin}", pull_up = True) for pin in [22, 24, 26, 28, 21, 23, 27, 29]]
 spacebar = gpiozero.DigitalInputDevice("BOARD21", pull_up = True)
 newline = gpiozero.DigitalInputDevice("BOARD25", pull_up = True)

@@ -11,8 +11,7 @@ def load_img(path, size=(80,80)):
     return ImageTk.PhotoImage(img)
 
 def create_label(
-    root,
-    anchr,
+    root, anchr,
     txt=None,
     img=None,
     font_txt="Roboto Condensed",
@@ -21,13 +20,7 @@ def create_label(
     italic="roman",
     backround="white",
     bd_width=0,
-    location=(0, 0)
-):
-    # Force valid font styles (Tkinter-safe)
-    if bold not in ("normal", "bold"):
-        bold = "normal"
-    if italic not in ("roman", "italic"):
-        italic = "roman"
+    location=(0, 0)):
 
     if img is None:
         label = tk.Label(
@@ -169,18 +162,6 @@ def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=
         frame.tkraise()
     return frame
 
-def toggle_brailler_popup(brailler_name):
-    global current_brailler
-
-    if current_brailler==brailler_name:
-        brailler_popup.place_forget()
-        current_brailler=None
-        return
-    current_brailler=brailler_name
-    brailler_popup.place(x=50, y=520, width=950, height=50)
-    brailler_popup.tkraise()
-
-
 def on_brailler_click(label, name):
     global current_brailler_label
 
@@ -204,7 +185,7 @@ def on_brailler_click(label, name):
     label.config(font=("Roboto Condensed", 18, "bold", "roman"))
     label.is_bold = True
 
-    brailler_popup.place(x=50, y=520, width=950, height=50)
+    brailler_popup.place(x=50, y=540, width=950, height=50)
     brailler_popup.tkraise()
 
     current_brailler_label = label
@@ -221,8 +202,10 @@ def set_brailler_status(name, connected):
 braillers = [
     "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
     "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
-    "Ayona's Brailler", "Felix's Brailler", "Joe's Brailler"
-]
+    "Ayona's Brailler", "Felix's Brailler", "Joe's Brailler", 
+    "Mary's Brailler", "Jane's Brailler", "Josh's Brailler", 
+    "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
+    ]
 
 # Main window
 root = tk.Tk()
@@ -236,19 +219,19 @@ title_header_canvas.place(x=5, y=5, anchor="nw")
 
 title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
 
-perk_braille_img = load_img("EPICS BCI Code\Images\PERK_braille_Image_grey.png", size=(302,110))
+perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_braille_Image_grey.png", size=(302,110))
 perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
 # Manage Braillers row
-home_icon = load_img("EPICS BCI Code\Images\Home_icon.png", size=(75, 75))
-create_label(
-    root,
-    anchr="nw",
-    img=home_icon,
-    location=(30, 150)
+home_icon = load_img("EPICS BCI Code\\Images\\Home_icon.png", size=(75, 75))
+home_image = create_label(
+root,
+anchr="nw",
+img=home_icon,
+location=(30, 150)
 )
 
-create_label(
+Braillers_logo = create_label(
     root,
     anchr="nw",
     txt="Manage Braillers",
@@ -259,7 +242,7 @@ create_label(
     location=(105, 170)
 )
 
-create_label(
+pair_button = create_label(
     root,
     anchr="ne",
     txt="Pair All",
@@ -274,7 +257,7 @@ create_label(
 start_x = 110
 start_y = 250
 x_gap = 350
-y_gap = 100
+y_gap = 60
 brailler_status_dots = {}
 STATUS_RADIUS = 6
 STATUS_GREEN = "#93c47d"
@@ -331,17 +314,23 @@ set_brailler_status("Diana's Brailler", False)
 set_brailler_status("Mohammad's Brailler", True)
 set_brailler_status("Sarvesh's Brailler", True)
 set_brailler_status("Felix's Brailler", False)
+set_brailler_status("Mary's Brailler", False)
+set_brailler_status("Jane's Brailler", True)
+set_brailler_status("Josh's Brailler", False)
+set_brailler_status("Chloe's Brailler", True)
+set_brailler_status("Ashley's Brailler", False)
+set_brailler_status("Gina's Brailler", True)
 
 # Bottom actions
 bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(75, 75))
-create_label(
+bt_label = create_label(
     root,
     anchr="sw",
     img=bt_icon,
-    location=(30, 650)
+    location=(30, 670)
 )
 
-create_label(
+pairing_label = create_label(
     root,
     anchr="sw",
     txt="Start Pairing Process",
@@ -349,18 +338,18 @@ create_label(
     font_size=25,
     bold="normal",
     backround="white",
-    location=(105, 640)
+    location=(105, 660)
 )
 
 gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(75, 75))
-create_label(
+gear_label = create_label(
     root,
     anchr="se",
     img=gear_icon,
-    location=(855, 650)
+    location=(855, 670)
 )
 
-create_label(
+settings_label = create_label(
     root,
     anchr="se",
     txt="Settings",
@@ -368,7 +357,7 @@ create_label(
     font_size=25,
     bold="normal",
     backround="white",
-    location=(970, 640)
+    location=(970, 660)
 )
 
 #Brailler popup stuff
@@ -380,9 +369,6 @@ brailler_popup=create_display_frame(
     bg="#eeeeee",
     start_display=False
 )
-
-brailler_popup.place(x=50, y=530, width=950, height=50)
-brailler_popup.place_forget()
 
 brailler_popup.config(
     highlightbackground="black",

@@ -162,19 +162,6 @@ def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=
         frame.tkraise()
     return frame
 
-
-def toggle_brailler_popup(brailler_name):
-    global current_brailler
-
-    if current_brailler==brailler_name:
-        brailler_popup.place_forget()
-        current_brailler=None
-        return
-    current_brailler=brailler_name
-    brailler_popup.place(x=50, y=520, width=950, height=50)
-    brailler_popup.tkraise()
-
-
 def on_brailler_click(label, name):
     global current_brailler_label
 
@@ -198,7 +185,7 @@ def on_brailler_click(label, name):
     label.config(font=("Roboto Condensed", 18, "bold", "roman"))
     label.is_bold = True
 
-    brailler_popup.place(x=50, y=520, width=950, height=50)
+    brailler_popup.place(x=50, y=540, width=950, height=50)
     brailler_popup.tkraise()
 
     current_brailler_label = label
@@ -340,7 +327,7 @@ bt_label = create_label(
     root,
     anchr="sw",
     img=bt_icon,
-    location=(30, 650)
+    location=(30, 670)
 )
 
 pairing_label = create_label(
@@ -351,7 +338,7 @@ pairing_label = create_label(
     font_size=25,
     bold="normal",
     backround="white",
-    location=(105, 640)
+    location=(105, 660)
 )
 
 gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(75, 75))
@@ -359,7 +346,7 @@ gear_label = create_label(
     root,
     anchr="se",
     img=gear_icon,
-    location=(855, 650)
+    location=(855, 670)
 )
 
 settings_label = create_label(
@@ -370,7 +357,7 @@ settings_label = create_label(
     font_size=25,
     bold="normal",
     backround="white",
-    location=(970, 640)
+    location=(970, 660)
 )
 
 #Brailler popup stuff
@@ -382,9 +369,6 @@ brailler_popup=create_display_frame(
     bg="#eeeeee",
     start_display=False
 )
-
-brailler_popup.place(x=50, y=530, width=950, height=50)
-brailler_popup.place_forget()
 
 brailler_popup.config(
     highlightbackground="black",

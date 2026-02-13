@@ -16,10 +16,10 @@ def disconnecting_popup():
     disconnecting.resizable(False, False)
 
     label = PERK.Label(disconnecting, text="Brailler Disconnected!",
-                     font=("Arial", 12))
+                     font=("Roboto Condensed", 15))
     label.pack(pady=20)
 
-    connect_btn = PERK.Button(disconnecting, text="Ok")
+    connect_btn = PERK.Button(disconnecting, text="Ok", command = close_popup)
     connect_btn.pack(side="left", padx=50)
 
     '''connect_btn = PERK.Button(disconnecting, text="Ok",
@@ -51,7 +51,7 @@ def close_popup():
 root = PERK.Tk()
 root.geometry("350x275")
 
-open_btn = PERK.Button(root, text="Disconnect this brailler?",
+open_btn = PERK.Button(root, text="Disconnect brailler?",
                      command=disconnecting_popup)
 open_btn.pack(pady=100)
 

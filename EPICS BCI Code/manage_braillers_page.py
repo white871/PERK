@@ -231,19 +231,19 @@ def load_manage_braillers_page(root):
 
     title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
 
-    perk_braille_img = load_img("EPICS BCI Code\Images\PERK_braille_Image_grey.png", size=(302,110))
+    perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_braille_Image_grey.png", size=(302,110))
     perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
     # Manage Braillers row
-    home_icon = load_img("EPICS BCI Code\Images\Home_icon.png", size=(75, 75))
-    create_label(
+    home_icon = load_img("EPICS BCI Code\\Images\\Home_icon.png", size=(75, 75))
+    home_image = create_label(
         root,
         anchr="nw",
         img=home_icon,
         location=(30, 150)
     )
 
-    create_label(
+    Braillers_logo = create_label(
         root,
         anchr="nw",
         txt="Manage Braillers",
@@ -254,7 +254,7 @@ def load_manage_braillers_page(root):
         location=(105, 170)
     )
 
-    create_label(
+    pair_button = create_label(
         root,
         anchr="ne",
         txt="Pair All",
@@ -328,15 +328,15 @@ def load_manage_braillers_page(root):
     set_brailler_status("Felix's Brailler", False)
 
     # Bottom actions
-    bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(75, 75))
-    create_label(
+    bt_icon = load_img("EPICS BCI Code\\Images\\Bluetooth_icon.png", size=(75, 75))
+    bt_icon = create_label(
         root,
         anchr="sw",
         img=bt_icon,
         location=(30, 650)
     )
 
-    create_label(
+    pairing_label = create_label(
         root,
         anchr="sw",
         txt="Start Pairing Process",
@@ -347,15 +347,15 @@ def load_manage_braillers_page(root):
         location=(105, 640)
     )
 
-    gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(75, 75))
-    create_label(
+    gear_icon = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(75, 75))
+    gear_icon = create_label(
         root,
         anchr="se",
         img=gear_icon,
         location=(855, 650)
     )
 
-    create_label(
+    settings_label = create_label(
         root,
         anchr="se",
         txt="Settings",

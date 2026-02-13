@@ -3,7 +3,7 @@ import gpiozero
 import threading
 
 hallEffect = []
-for pin in [22, 28, 26, 24, 21, 23, 27, 29]:
+for pin in [22, 24, 26, 28, 21, 23, 27, 29]:
     hallEffect.append(gpiozero.DigitalInputDevice(f"BOARD{pin}", pull_up = True))
 
 def hallEffectRefresh():

@@ -30,6 +30,7 @@ class App:
 
     def show_settings(self):
         self.clear()
+        root.geometry("1050x700")
         load_settings_page(self.root, self)
 
     def show_settings_inverted(self):
@@ -39,6 +40,7 @@ class App:
 
     def show_manage_braillers(self):
         self.clear()
+        root.geometry("1050x750")
         load_manage_braillers_page(self.root, self)
 
 

@@ -9,7 +9,26 @@ from utility_functions import load_img, create_label, create_inverted_label, cre
 def load_manage_braillers_page(root, app):
     current_brailler_label = None
 
-    def on_brailler_click(label, name, current_brailler_label):
+    #Brailler popup stuff
+    brailler_popup=create_display_frame(
+        root, 
+        rel_fill=(0,0),
+        bg="#eeeeee",
+        start_display=False
+    )
+
+    brailler_popup.config(
+        highlightbackground="black",
+        highlightthickness=1
+    )
+
+    popup_buttons=[]
+    button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
+    x_positions=[60, 250, 530, 730]
+
+
+    def on_brailler_click(label, name):
+        nonlocal current_brailler_label
 
         # If clicking the same label → unbold + hide popup
         if current_brailler_label == label:
@@ -118,7 +137,7 @@ def load_manage_braillers_page(root, app):
 
         lbl.is_bold = False
         lbl.config(cursor="hand2")
-        lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n, current_brailler_label))
+        lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n))
 
         dot_canvas = tk.Canvas(
             root,
@@ -157,33 +176,19 @@ def load_manage_braillers_page(root, app):
     set_brailler_status("Ashley's Brailler", False)
     set_brailler_status("Gina's Brailler", True)
 
+    def on_settings_click():
+        app.show_settings()
+
     # Bottom actions
     bluetooth_image = load_img("EPICS BCI Code\\Images\\Bluetooth_icon.png", size=(110, 98))
-    bluetooth_icon, bluetooth_img_obj = create_image_canvas(root, 110, 98, 0, 0, 'center', bluetooth_image, location=(90, 620))
-    pairing_label = create_label(root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(140, 640))
+    bluetooth_icon, bluetooth_img_obj = create_image_canvas(root, 110, 98, 0, 0, 'center', bluetooth_image, location=(90, 645))
+    pairing_label = create_label(root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(140, 665))
     bluetooth_circle = create_interactive_icon(bluetooth_icon, pairing_label, (52, 50), 38, on_select=None)
 
-    gear_icon = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(75, 75))
-    gear_label = create_label(root,anchr="se",img=gear_icon,location=(855, 650))
-
-    settings_label = create_label(root,anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 640))
-
-    #Brailler popup stuff
-    brailler_popup=create_display_frame(
-        root, 
-        rel_fill=(0,0),
-        bg="#eeeeee",
-        start_display=False
-    )
-
-    brailler_popup.config(
-        highlightbackground="black",
-        highlightthickness=1
-    )
-
-    popup_buttons=[]
-    button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
-    x_positions=[60, 250, 530, 730]
+    settings_image = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(105, 97))
+    settings_icon, settings_img_obj = create_image_canvas(root, 105, 97, 0, 0, 'center', settings_image, location=(805, 645))
+    settings_label = create_label(root, anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 665))
+    settings_circle = create_interactive_icon(settings_icon, settings_label, (51, 48), 38, on_select=lambda: on_settings_click())
 
     for name, x in zip(button_names, x_positions):
         lbl=create_label(

@@ -156,12 +156,12 @@ def load_manage_braillers_page(root, app):
     set_brailler_status("Gina's Brailler", True)
 
     # Bottom actions
-    bluetooth_image = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(110, 98))
+    bluetooth_image = load_img("EPICS BCI Code\\Images\\Bluetooth_icon.png", size=(110, 98))
     bluetooth_icon, bluetooth_img_obj = create_image_canvas(root, 110, 98, 0, 0, 'center', bluetooth_image, location=(90, 620))
     pairing_label = create_label(root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(140, 640))
     bluetooth_circle = create_interactive_icon(bluetooth_icon, pairing_label, (52, 50), 38, on_select=None)
 
-    gear_icon = load_img("EPICS BCI Code\Images\settings_icon.png", size=(75, 75))
+    gear_icon = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(75, 75))
     gear_label = create_label(root,anchr="se",img=gear_icon,location=(855, 650))
 
     settings_label = create_label(root,anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 640))

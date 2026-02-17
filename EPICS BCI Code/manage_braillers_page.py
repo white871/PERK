@@ -1,4 +1,5 @@
 import tkinter as tk
+import math
 import tkinter.font as tkfont
 from PIL import Image, ImageTk
 
@@ -207,6 +208,7 @@ braillers = [
     "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
     ]
 
+
 # Main window
 root = tk.Tk()
 root.geometry("1050x700")
@@ -254,23 +256,86 @@ pair_button = create_label(
 )
 
 # Brailler list 
-start_x = 110
+#start_x = 110
+#start_y = 250
+#x_gap = 350
+#y_gap = 60
+#brailler_status_dots = {}
+#STATUS_RADIUS = 6
+#STATUS_GREEN = "#93c47d"
+#STATUS_RED = "#e06666"
+#status_dots = {}
+
+
+#for i, name in enumerate(braillers):
+#    row = i // 3
+#    col = i % 3
+
+#    x = start_x + col * x_gap
+#    y = start_y + row * y_gap
+
+#    lbl = create_label(
+#        root,
+#        anchr="nw",
+#        txt=name,
+#        font_txt="Roboto Condensed",
+#        font_size=18,
+#        bold="normal",
+#        backround="white",
+#        location=(x, y)
+#    )
+
+#    lbl.is_bold = False
+#    lbl.config(cursor="hand2")
+#    lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n))
+
+#    dot_canvas = tk.Canvas(
+#        root,
+#        width=STATUS_RADIUS * 2,
+#        height=STATUS_RADIUS * 2,
+#       bg="white",
+#        highlightthickness=0
+#    )
+#    dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")  
+
+#    dot = dot_canvas.create_oval(
+#        0, 0,
+#        STATUS_RADIUS * 2,
+#        STATUS_RADIUS * 2,
+#        outline=""
+#    )
+
+#    brailler_status_dots[name] = (dot_canvas, dot)
+
 start_y = 250
-x_gap = 350
-y_gap = 60
+bottom_limit = 620   # where bottom buttons start
+available_height = bottom_limit - start_y
+
+max_columns = 3
+total_braillers = len(braillers)
+
+
+total_rows = math.ceil(total_braillers / max_columns)
+
+row_height = available_height / total_rows   # THIS is the key
+
+window_width = 1250
+left_margin = 110
+right_margin = 110
+usable_width = window_width - left_margin - right_margin
+column_width = usable_width / max_columns
+
 brailler_status_dots = {}
 STATUS_RADIUS = 6
 STATUS_GREEN = "#93c47d"
 STATUS_RED = "#e06666"
-status_dots = {}
-
 
 for i, name in enumerate(braillers):
-    row = i // 3
-    col = i % 3
+    row = i // max_columns
+    col = i % max_columns
 
-    x = start_x + col * x_gap
-    y = start_y + row * y_gap
+    x = left_margin + col * column_width
+    y = start_y + row * row_height
 
     lbl = create_label(
         root,
@@ -294,7 +359,7 @@ for i, name in enumerate(braillers):
         bg="white",
         highlightthickness=0
     )
-    dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")  
+    dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
 
     dot = dot_canvas.create_oval(
         0, 0,
@@ -304,6 +369,8 @@ for i, name in enumerate(braillers):
     )
 
     brailler_status_dots[name] = (dot_canvas, dot)
+
+
 
 set_brailler_status("Mark's Brailler", False)
 set_brailler_status("Nash's Brailler", False)
@@ -321,7 +388,7 @@ set_brailler_status("Chloe's Brailler", True)
 set_brailler_status("Ashley's Brailler", False)
 set_brailler_status("Gina's Brailler", True)
 
-# Bottom actions
+#Bottom actions
 bt_icon = load_img("EPICS BCI Code\Images\Bluetooth_icon.png", size=(75, 75))
 bt_label = create_label(
     root,

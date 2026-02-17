@@ -33,7 +33,7 @@ def toggle_braille_selection():
         text_display.config(font=("Cascadia Mono", 20))
     else:
         current_mode = "live"
-        file_path = "Data\\braille_output.txt"
+        file_path = "Data\\brailler_output.txt"
         braille_selection_box_icon.config(image=braille_selection_box_img)
         text_display.config(font=("Roboto Condensed", 14))
 

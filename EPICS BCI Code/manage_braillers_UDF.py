@@ -3,24 +3,13 @@ from tkinter import filedialog
 import tkinter.font as tkfont
 from PIL import Image, ImageTk, ImageOps
 import random
-from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, create_display_frame_header, create_display_frame, make_interactive_image
+import math
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
 def load_manage_braillers_page(root, app):
-    
-    def toggle_brailler_popup(brailler_name):
-        global current_brailler
+    current_brailler_label = None
 
-        if current_brailler==brailler_name:
-            brailler_popup.place_forget()
-            current_brailler=None
-            return
-        current_brailler=brailler_name
-        brailler_popup.place(x=50, y=520, width=950, height=50)
-        brailler_popup.tkraise()
-
-
-    def on_brailler_click(label, name):
-        global current_brailler_label
+    def on_brailler_click(label, name, current_brailler_label):
 
         # If clicking the same label → unbold + hide popup
         if current_brailler_label == label:
@@ -42,7 +31,7 @@ def load_manage_braillers_page(root, app):
         label.config(font=("Roboto Condensed", 18, "bold", "roman"))
         label.is_bold = True
 
-        brailler_popup.place(x=50, y=520, width=950, height=50)
+        brailler_popup.place(x=50, y=540, width=950, height=50)
         brailler_popup.tkraise()
 
         current_brailler_label = label
@@ -54,7 +43,6 @@ def load_manage_braillers_page(root, app):
         canvas, dot = brailler_status_dots[name]
         color = STATUS_GREEN if connected else STATUS_RED
         canvas.itemconfig(dot, fill=color)
-
 
     braillers = [
         "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
@@ -86,25 +74,36 @@ def load_manage_braillers_page(root, app):
     pair_all_image = load_img("EPICS BCI Code\\Images\\pair_all_button.png", size=(105, 44))
     pair_all_button = make_interactive_image(root, pair_all_image, 890, 160, on_click=None)
 
-    
-    # Brailler list 
-    start_x = 110
+        
     start_y = 250
-    x_gap = 350
-    y_gap = 60
+    bottom_limit = 550   # where bottom buttons start
+    available_height = bottom_limit - start_y
+
+    max_columns = 3
+    total_braillers = len(braillers)
+
+
+    total_rows = math.ceil(total_braillers / max_columns)
+
+    row_height = available_height / total_rows   # THIS is the key
+
+    window_width = 1250
+    left_margin = 110
+    right_margin = 110
+    usable_width = window_width - left_margin - right_margin
+    column_width = usable_width / max_columns
+
     brailler_status_dots = {}
     STATUS_RADIUS = 6
     STATUS_GREEN = "#93c47d"
     STATUS_RED = "#e06666"
-    status_dots = {}
-
 
     for i, name in enumerate(braillers):
-        row = i // 3
-        col = i % 3
+        row = i // max_columns
+        col = i % max_columns
 
-        x = start_x + col * x_gap
-        y = start_y + row * y_gap
+        x = left_margin + col * column_width
+        y = start_y + row * row_height
 
         lbl = create_label(
             root,
@@ -119,7 +118,7 @@ def load_manage_braillers_page(root, app):
 
         lbl.is_bold = False
         lbl.config(cursor="hand2")
-        lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n))
+        lbl.bind("<Button-1>", lambda e, l=lbl, n=name: on_brailler_click(l, n, current_brailler_label))
 
         dot_canvas = tk.Canvas(
             root,
@@ -128,7 +127,7 @@ def load_manage_braillers_page(root, app):
             bg="white",
             highlightthickness=0
         )
-        dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")  
+        dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
 
         dot = dot_canvas.create_oval(
             0, 0,
@@ -139,6 +138,9 @@ def load_manage_braillers_page(root, app):
 
         brailler_status_dots[name] = (dot_canvas, dot)
 
+
+
+    
     set_brailler_status("Mark's Brailler", False)
     set_brailler_status("Nash's Brailler", False)
     set_brailler_status("Ayona's Brailler", True)
@@ -167,14 +169,17 @@ def load_manage_braillers_page(root, app):
     settings_label = create_label(root,anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 640))
 
     #Brailler popup stuff
-    current_brailler_label=None
+    brailler_popup=create_display_frame(
+        root, 
+        rel_fill=(0,0),
+        bg="#eeeeee",
+        start_display=False
+    )
 
-    brailler_popup=create_display_frame(root, rel_fill=(0,0),bg="#eeeeee",start_display=False)
-
-    brailler_popup.place(x=50, y=530, width=950, height=50)
-    brailler_popup.place_forget()
-
-    brailler_popup.config(highlightbackground="black", highlightthickness=1)
+    brailler_popup.config(
+        highlightbackground="black",
+        highlightthickness=1
+    )
 
     popup_buttons=[]
     button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
@@ -193,5 +198,6 @@ def load_manage_braillers_page(root, app):
             )
         lbl.config(cursor="hand2")
         popup_buttons.append(lbl)
+
 
     root.mainloop()

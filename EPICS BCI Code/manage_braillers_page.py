@@ -204,8 +204,7 @@ braillers = [
     "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
     "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
     "Ayona's Brailler", "Felix's Brailler", "Joe's Brailler", 
-    "Mary's Brailler", "Jane's Brailler", "Josh's Brailler", 
-    "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
+
     ]
 
 
@@ -308,7 +307,7 @@ pair_button = create_label(
 #    brailler_status_dots[name] = (dot_canvas, dot)
 
 start_y = 250
-bottom_limit = 620   # where bottom buttons start
+bottom_limit = 550   # where bottom buttons start
 available_height = bottom_limit - start_y
 
 max_columns = 3

@@ -3,7 +3,7 @@ from tkinter import filedialog
 import tkinter.font as tkfont
 from PIL import Image, ImageTk, ImageOps
 import random
-from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, create_display_frame_header, create_display_frame
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame_header, create_display_frame
 
 def load_settings_page(root, app):
     # Set geometry

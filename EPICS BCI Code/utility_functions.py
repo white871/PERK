@@ -9,11 +9,7 @@ def load_img(path, size=(80,80)):
     img = img.resize(size, Image.Resampling.LANCZOS)
     return ImageTk.PhotoImage(img)
 
-def create_label(
-    root, anchr,
-    txt=None,
-    img=None,
-    font_txt="Roboto Condensed",
+def create_label(root, anchr,txt=None,img=None,font_txt="Roboto Condensed",
     font_size=16,
     bold="normal",
     italic="roman",
@@ -39,7 +35,7 @@ def create_label(
     label.place(x=location[0], y=location[1], anchor=anchr)
     return label
 
-def create_inverted_label(root, anchr, txt=None, img=None, font_txt=None, font_size=None, bold=None, italic=None, backround=None, bd_width=None, location=(0, 0)):
+def create_inverted_label(root, anchr, txt=None, img=None, font_txt="Roboto Condensed", font_size=16, bold="normal", italic="roman", backround="black", bd_width=0, location=(0, 0)):
     if img==None:
         label = tk.Label(root, text=txt, fg="white", font=(font_txt, font_size, bold, italic), bg=backround)
     elif txt==None:
@@ -81,21 +77,36 @@ def create_triangle_button(
     triangle_buttons.append(button_data)
 
     def update_fonts_and_images():
-        """Deselect all others, select this one, and update images."""
+        'Deselect all others, select this one, and update images.'
+
+        # Remove destroyed widgets first
+        global triangle_buttons
+        triangle_buttons = [
+            btn for btn in triangle_buttons
+            if btn["label"].winfo_exists()
+        ]
+
         for btn in triangle_buttons:
             if btn["tri"] == triangle_id:
                 btn["selected"] = True
-                btn["label"].config(font=("Roboto Condensed", 20, 'bold', 'roman'))
+
+                if btn["label"].winfo_exists():
+                    btn["label"].config(font=("Roboto Condensed", 20, 'bold', 'roman'))
+
                 if btn["img_obj"] and btn["img_on_click"]:
                     canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["True"])
+
                 if on_select:
                     on_select()
+
             else:
                 btn["selected"] = False
-                btn["label"].config(font=("Roboto Condensed", 20, 'normal', 'roman'))
+
+                if btn["label"].winfo_exists():
+                    btn["label"].config(font=("Roboto Condensed", 20, 'normal', 'roman'))
+
                 if btn["img_obj"] and btn["img_on_click"]:
                     canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["False"])
-
 
 
     # Hover effects

@@ -6,7 +6,7 @@ import random
 import math
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
-def load_manage_braillers_page(root, app):
+def load_manage_braillers_page_inverted(root, app):
     current_brailler_label = None
     current_brailler_name = None
 
@@ -14,12 +14,12 @@ def load_manage_braillers_page(root, app):
     brailler_popup=create_display_frame(
         root, 
         rel_fill=(0,0),
-        bg="#eeeeee",
+        bg="#000000",
         start_display=False
     )
 
     brailler_popup.config(
-        highlightbackground="black",
+        highlightbackground="white",
         highlightthickness=1
     )
 
@@ -74,23 +74,23 @@ def load_manage_braillers_page(root, app):
         ]
 
     # Main window
-    root.configure(bg="#FFFFFF")
+    root.configure(bg="#000000")
 
     # Header
-    title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
+    title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#000000", highlightthickness=0, relief="solid", bd=2)
     title_header_canvas.place(x=5, y=5, anchor="nw")
 
-    title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
+    title = create_inverted_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#000000', location=(50, 30))
 
-    perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_braille_Image_grey.png", size=(302,110))
+    perk_braille_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\PERK_Braille_Image_inverted.png", size=(302,110))
     perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
     # Manage Braillers row
-    home_image = load_img("EPICS BCI Code\\Images\\Home_icon.png", size=(95, 100))
+    home_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\Home_icon_inverted.png", size=(95, 100))
     home_icon, home_img_obj = create_image_canvas(root, 95, 100, 0, 0, 'center', home_image, location=(90, 185))
-    Braillers_logo = create_label(root, anchr="nw", txt="Manage Braillers",font_txt="Roboto Condensed",font_size=25,bold="bold",backround="white",location=(140, 165))
+    Braillers_logo = create_inverted_label(root, anchr="nw", txt="Manage Braillers",font_txt="Roboto Condensed",font_size=25,bold="bold",backround="black",location=(140, 165))
 
-    pair_all_image = load_img("EPICS BCI Code\\Images\\pair_all_button.png", size=(105, 44))
+    pair_all_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\pair_all_button_inverted.png", size=(105, 44))
     pair_all_button = make_interactive_image(root, pair_all_image, 890, 160, on_click=None)
 
         
@@ -124,14 +124,14 @@ def load_manage_braillers_page(root, app):
         x = left_margin + col * column_width
         y = start_y + row * row_height
 
-        lbl = create_label(
+        lbl = create_inverted_label(
             root,
             anchr="nw",
             txt=name,
             font_txt="Roboto Condensed",
             font_size=18,
             bold="normal",
-            backround="white",
+            backround="black",
             location=(x, y)
         )
 
@@ -143,7 +143,7 @@ def load_manage_braillers_page(root, app):
             root,
             width=STATUS_RADIUS * 2,
             height=STATUS_RADIUS * 2,
-            bg="white",
+            bg="black",
             highlightthickness=0
         )
         dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
@@ -180,15 +180,15 @@ def load_manage_braillers_page(root, app):
         app.show_settings()
 
     # Bottom actions
-    bluetooth_image = load_img("EPICS BCI Code\\Images\\Bluetooth_icon.png", size=(110, 98))
+    bluetooth_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\Bluetooth_icon_inverted.png", size=(110, 98))
     bluetooth_icon, bluetooth_img_obj = create_image_canvas(root, 110, 98, 0, 0, 'center', bluetooth_image, location=(90, 645))
-    pairing_label = create_label(root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(140, 665))
-    bluetooth_circle = create_interactive_icon(bluetooth_icon, pairing_label, (52, 50), 38, on_select=None)
+    pairing_label = create_inverted_label(root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="black",location=(140, 665))
+    bluetooth_circle = create_interactive_icon(bluetooth_icon, pairing_label, (52, 50), 38, True, on_select=None)
 
-    settings_image = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(105, 97))
+    settings_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\settings_icon_inverted.png", size=(105, 97))
     settings_icon, settings_img_obj = create_image_canvas(root, 105, 97, 0, 0, 'center', settings_image, location=(805, 645))
-    settings_label = create_label(root, anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 665))
-    settings_circle = create_interactive_icon(settings_icon, settings_label, (51, 48), 38, on_select=lambda: on_settings_click())
+    settings_label = create_inverted_label(root, anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="black",location=(970, 665))
+    settings_circle = create_interactive_icon(settings_icon, settings_label, (51, 48), 38, True, on_select=lambda: on_settings_click())
 
     def on_live_feed_click():
         app.show_text_page(current_brailler_name)
@@ -234,14 +234,14 @@ def load_manage_braillers_page(root, app):
         submit_btn.pack(pady=5)
 
     for name, x in zip(button_names, x_positions):
-        lbl=create_label(
+        lbl=create_inverted_label(
             brailler_popup, 
             anchr="nw",
             txt=name, 
             font_txt="Roboto Condensed", 
             font_size=18, 
             bold="normal", 
-            backround="#eeeeee",
+            backround="#000000",
             location=(x, 5)
             )
         lbl.config(cursor="hand2")

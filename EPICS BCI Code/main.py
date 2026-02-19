@@ -8,7 +8,9 @@ from utility_functions import load_img, create_label, create_image_canvas, creat
 from dm import load_settings_page
 from dm_inverted import load_settings_page_inverted
 from manage_braillers import load_manage_braillers_page
-
+from manage_braillers_inverted import load_manage_braillers_page_inverted
+from bci import load_ind_brailler
+from bci_inverted import load_ind_brailler_inverted
 
 class App:
     def __init__(self, root):
@@ -35,6 +37,7 @@ class App:
 
     def show_settings_inverted(self):
         self.clear()
+        root.geometry("1050x700")
         self.state["inverted"] = True
         load_settings_page_inverted(self.root, self)
 
@@ -43,7 +46,20 @@ class App:
         root.geometry("1050x750")
         load_manage_braillers_page(self.root, self)
 
+    def show_manage_braillers_inverted(self):
+        self.clear()
+        root.geometry("1050x750")
+        load_manage_braillers_page_inverted(self.root, self)
 
+    def show_text_page(self, brailler_name):
+        self.clear()
+        root.geometry("1050x700")
+        load_ind_brailler(self.root, self, brailler_name)
+
+    def show_text_page_inverted(self, brailler_name):
+        self.clear()
+        root.geometry("1050x700")
+        load_ind_brailler_inverted(self.root, self, brailler_name)
 
 root = tk.Tk()
 root.geometry("1050x700")

@@ -174,6 +174,9 @@ def load_settings_page_inverted(root, app):
     def inverted_filter_load():
         return
 
+    def on_brailler_click():
+        app.show_manage_braillers_inverted()
+
     ########################################################
     #Default and Inverted Section
     ###################################################
@@ -194,7 +197,7 @@ def load_settings_page_inverted(root, app):
     home_image = load_img("EPICS BCI Code/Images/Inverted Images/Home_icon_inverted.png", size=(105,110))
     home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 340))
     label_sub_title_2 = create_inverted_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='black', location=(165, 337))
-    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41)
+    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41, True, on_select=lambda: on_brailler_click())
 
     ########################################################
     #Settings Section

@@ -113,7 +113,7 @@ def load_ind_brailler_inverted(root, app, brailler_name):
         root.after_cancel(after_id1)
         root.after_cancel(after_id2)
         root.after_cancel(after_id3)
-        app.show_manage_braillers()
+        app.show_manage_braillers_inverted()
     
     
     home_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\Home_icon_inverted.png", size=(105,110))

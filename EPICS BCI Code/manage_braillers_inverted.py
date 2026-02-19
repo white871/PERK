@@ -77,7 +77,7 @@ def load_manage_braillers_page_inverted(root, app):
     root.configure(bg="#000000")
 
     # Header
-    title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#000000", highlightthickness=0, relief="solid", bd=2)
+    title_header_canvas = tk.Canvas(root, width=1035, height=110, background="#000000", highlightbackground="#FFFFFF", highlightthickness=1, relief="solid", bd=2)
     title_header_canvas.place(x=5, y=5, anchor="nw")
 
     title = create_inverted_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#000000', location=(50, 30))
@@ -191,7 +191,7 @@ def load_manage_braillers_page_inverted(root, app):
     settings_circle = create_interactive_icon(settings_icon, settings_label, (51, 48), 38, True, on_select=lambda: on_settings_click())
 
     def on_live_feed_click():
-        app.show_text_page(current_brailler_name)
+        app.show_text_page_inverted(current_brailler_name)
 
     def disconnect_brailler():
         set_brailler_status(current_brailler_name, False)

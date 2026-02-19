@@ -24,7 +24,7 @@ class App:
         }
 
         self.current_page = None
-        self.show_settings()
+        self.show_manage_braillers()
 
     def clear(self):
         for widget in self.root.winfo_children():

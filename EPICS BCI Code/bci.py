@@ -182,7 +182,7 @@ def load_ind_brailler(root, app, brailler_name):
             f.write(char)
 
         # Schedule next write
-        after_id1 = root.after(150, simulate_brailler_output)
+        after_id1 = root.after(300, simulate_brailler_output)
 
     simulate_brailler_output()
 
@@ -201,7 +201,7 @@ def load_ind_brailler(root, app, brailler_name):
             f.write(symbol)
 
         # Schedule next write
-        after_id2 = root.after(150, simulate_braille_binary_output)
+        after_id2 = root.after(300, simulate_braille_binary_output)
 
     # Start simulating
     simulate_braille_binary_output()

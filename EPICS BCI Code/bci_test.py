@@ -12,7 +12,7 @@ root.resizable(False, False)
 
 root.configure(bg="#FFFFFF")
 
-file_path = "Data\\brailler_output.txt"
+file_path = "Data/brailler_output.txt"
 
 current_mode = "live"
 
@@ -27,18 +27,18 @@ def toggle_braille_selection():
 
     if current_mode == "live":
         current_mode = "braille"
-        file_path = "Data\\braille_binary.txt"
+        file_path = "Data/braille_binary.txt"
         braille_selection_box_icon.config(image=braille_selection_box_img_2)
         text_display.config(font=("Cascadia Mono", 20))
     else:
         current_mode = "live"
-        file_path = "Data\\brailler_output.txt"
+        file_path = "Data/brailler_output.txt"
         braille_selection_box_icon.config(image=braille_selection_box_img)
         text_display.config(font=("Roboto Condensed", 14))
 
     update_live_feed(force_full_refresh=True)
 
-translations_path = "EPICS BCI Code\\Data\\translations.txt"
+translations_path = "EPICS BCI Code/Data/translations.txt"
 
 with open(translations_path, "r", encoding="utf-8") as f:
     translations = json.load(f)
@@ -49,7 +49,7 @@ title_header_canvas.place(x=5, y=5, anchor="nw")
 
 title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
 
-perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_Braille_Image_grey.png", size=(302,110))
+perk_braille_img = load_img("EPICS BCI Code/Images/PERK_Braille_Image_grey.png", size=(302,110))
 perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
 ########################################
@@ -68,8 +68,8 @@ contraction_library_label, line_canvas =  create_display_frame_header(contractio
 #######################################################
 #Creating images and canvas for triangle selection box
 ######################################################
-triangle_image_1 = load_img("EPICS BCI Code\\Images\\triangles_icon.png", size=(60,115))
-triangle_image_2 = load_img("EPICS BCI Code\\Images\\triangles_icon_flipped.png", size=(60,115))
+triangle_image_1 = load_img("EPICS BCI Code/Images/triangles_icon.png", size=(60,115))
+triangle_image_2 = load_img("EPICS BCI Code/Images/triangles_icon_flipped.png", size=(60,115))
 
 triangle_canvas, triangle_img_obj = create_image_canvas(root, 60, 115, 0, 0, 'nw', triangle_image_1, location=(155, 235))
 
@@ -100,11 +100,11 @@ triangle_contraction_library = create_triangle_button(
 ###############################################
 #Brailler COnnected Section
 ###################################################
-Brailler_connected_image = load_img("EPICS BCI Code\\Images\\Brailler_Connected_Icon.png", size=(100,100))
+Brailler_connected_image = load_img("EPICS BCI Code/Images/Brailler_Connected_Icon.png", size=(100,100))
 brailler_icon, brailler_img_obj = create_image_canvas(root, 100, 100, 0, 0, 'nw', Brailler_connected_image, location=(50, 135))
 label_sub_title_1 = create_label(root, 'w', txt="Brailler Connected",  font_txt="Roboto Condensed", font_size=25, bold='bold', italic='roman', backround='white', location=(165, 185))
 
-online_dot = load_img("EPICS BCI Code\\Images\\green_circle.png", size=(40,40))
+online_dot = load_img("EPICS BCI Code/Images/green_circle.png", size=(40,40))
 dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(460, 185))
 
 ######################################################################
@@ -113,7 +113,7 @@ dot_icon = create_label(root, 'w', img=online_dot, bd_width=0, location=(460, 18
 def home_select():
     return
 
-home_image = load_img("EPICS BCI Code\\Images\\Home_icon.png", size=(105,110))
+home_image = load_img("EPICS BCI Code/Images/Home_icon.png", size=(105,110))
 home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 445))
 label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 442))
 home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41, on_select=lambda: home_select())
@@ -124,7 +124,7 @@ home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41
 def settings_select():
     return
 
-settings_image = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(113,100))
+settings_image = load_img("EPICS BCI Code/Images/settings_icon.png", size=(113,100))
 settings_icon, settings_img_obj = create_image_canvas(root, 113, 100, 0, 0, 'center', settings_image, location=(100, 595))
 label_sub_title_3 = create_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 592))
 settings_circle = create_interactive_icon(settings_icon, label_sub_title_3, (54, 49), 41, on_select=lambda: settings_select())
@@ -161,10 +161,11 @@ text_display.config(yscrollcommand=scrollbar.set)
 live_text = ""
 last_len= 0
 
-text_file_path = "EPICS BCI Code\\Data\\brailler_output.txt"
-braille_file_path = "EPICS BCI Code\\Data\\braille_binary.txt"
+text_file_path = "EPICS BCI Code/Data/brailler_output.txt"
+braille_file_path = "EPICS BCI Code/Data/braille_binary.txt"
 
 after_id3 = None
+
 
 def update_live_feed(force_full_refresh=False):
     """Continuously update the text display."""
@@ -176,9 +177,9 @@ def update_live_feed(force_full_refresh=False):
 
     # Choose file depending on mode
     if current_mode == "live":
-        file_path = "EPICS BCI Code\\Data\\brailler_output.txt"
+        file_path = "EPICS BCI Code/Data/brailler_output.txt"
     elif current_mode == "braille":
-        file_path = "EPICS BCI Code\\Data\\braille_binary.txt"
+        file_path = "EPICS BCI Code/Data/braille_binary.txt"
 
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -254,14 +255,14 @@ def export_file_action():
 button_canvas = tk.Canvas(live_feed_frame, width=464, height=72, bg="#FFFFFF", highlightthickness=0)
 button_canvas.place(x=0, y=422)
 
-new_file_img = load_img("EPICS BCI Code\\Images\\New_file_button.png", size=(120, 35))
+new_file_img = load_img("EPICS BCI Code/Images/New_file_button.png", size=(120, 35))
 new_file_icon = make_interactive_image(button_canvas, new_file_img, 20, 18, on_click=new_file_action)
 
-export_text_file_img = load_img("EPICS BCI Code\\Images\\export_text_file_button.png", size=(161, 37))
+export_text_file_img = load_img("EPICS BCI Code/Images/export_text_file_button.png", size=(161, 37))
 export_text_file_icon = make_interactive_image(button_canvas, export_text_file_img, 155, 15, on_click=export_file_action)
 
-braille_selection_box_img = load_img("EPICS BCI Code\\Images\\braille_selection_box_unselected.png", size=(113, 39))
-braille_selection_box_img_2 = load_img("EPICS BCI Code\\Images\\braille_selection_box_selected.png", size=(105, 42))
+braille_selection_box_img = load_img("EPICS BCI Code/Images/braille_selection_box_unselected.png", size=(113, 39))
+braille_selection_box_img_2 = load_img("EPICS BCI Code/Images/braille_selection_box_selected.png", size=(105, 42))
 braille_selection_box_icon = make_interactive_image(button_canvas, braille_selection_box_img, 330, 15, on_click=toggle_braille_selection)
 
 ########################################################
@@ -274,7 +275,7 @@ def update_enabled(contraction, var):
         json.dump(enabled_contractions, f, indent=4, ensure_ascii=False)
 
 
-enabled_contractions_path = "EPICS BCI Code\\Data\\enabled_contractions.txt"
+enabled_contractions_path = "EPICS BCI Code/Data/enabled_contractions.txt"
 
 # Load the file if it exists
 try:

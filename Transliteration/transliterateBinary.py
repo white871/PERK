@@ -21,14 +21,14 @@ def transliterateBin(inputB):
     global lastOutput
     global enabled_contractions
     
-    with open('EPICS BCI Code\\Data\\enabled_contractions.txt', 'r') as f:
-        data = f.read()
-    enabled_data = ast.literal_eval(data)
+    #with open('EPICS BCI Code\\Data\\enabled_contractions.txt', 'r') as f:
+    #    data = f.read()
+    #enabled_data = ast.literal_eval(data)
 
-    enabled_contractions = {
-        word for word, info in enabled_data.items()
-        if info["enabled"] ==1
-    }
+    #enabled_contractions = {
+    #    word for word, info in enabled_data.items()
+    #    if info["enabled"] ==1
+    #}
 
     inputarr = []
     i = 0

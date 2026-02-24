@@ -81,8 +81,13 @@ with wave.open("output.wav", "wb") as f:
 spaceBarPressed = 0
 newLinePressed = 0
 binArray = []
-hallEffect = [gpiozero.DigitalInputDevice(f"BOARD{pin}", pull_up = True) for pin in [22, 24, 26, 28, 21, 23, 27, 29]]
+upButton = gpiozero.Button(17)
+downButton = gpiozero.Button(27)
+upButton.when_pressed = upVol
+downButton.when_pressed = downVol
+hallEffect = [gpiozero.DigitalInputDevice(f"BOARD{pin}", pull_up = True) for pin in [24, 26, 28, 23, 27, 29]]
 spacebar = gpiozero.DigitalInputDevice("BOARD21", pull_up = True)
-newline = gpiozero.DigitalInputDevice("BOARD25", pull_up = True)
+newline = gpiozero.DigitalInputDevice("BOARD22", pull_up = True)
+
 
 HallEffectRead()

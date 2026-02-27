@@ -90,8 +90,13 @@ def load_manage_braillers_page_inverted(root, app):
     home_icon, home_img_obj = create_image_canvas(root, 95, 100, 0, 0, 'center', home_image, location=(90, 185))
     Braillers_logo = create_inverted_label(root, anchr="nw", txt="Manage Braillers",font_txt="Roboto Condensed",font_size=25,bold="bold",backround="black",location=(140, 165))
 
+    def pair_all():
+        for brailler in braillers:
+            set_brailler_status(brailler, True)
+        return
+
     pair_all_image = load_img("EPICS BCI Code\\Images\\Inverted Images\\pair_all_button_inverted.png", size=(105, 44))
-    pair_all_button = make_interactive_image(root, pair_all_image, 890, 160, on_click=None)
+    pair_all_button = make_interactive_image(root, pair_all_image, 890, 160, on_click=lambda: pair_all())
 
         
     start_y = 250

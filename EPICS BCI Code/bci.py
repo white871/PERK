@@ -1,7 +1,5 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import tkinter.font as tkfont
-from PIL import Image, ImageTk
 import random
 import json
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame

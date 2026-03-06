@@ -44,3 +44,11 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - Keep in mind that pins 18, 19, 38, and 40 are now occupied for this protocol. Avoid using these pins for other external devices.
 - Next, to allow the sound architecture to recognize the i2s board to be controlled with software, go into root/etc and copy the asound.conf file. Restart, then do a speaker-test.
 - Type "alsamixer" and there should be a software volume control interface for Softmaster
+### Python Virtual Environment and Package Installation
+- We're almost there. Now, for context, Linux doesn't like it when you try to download a python library with the entire system, so you'll have to create a virtual enviroment in order to run the TTS processes.
+- First, type "python -m venv pyperk --system-site-packages", wait for it to setup, then type "source pyperk/bin/activate"
+- "(pyperk)" should be preceeding perk@perk in the terminal now. You can install python packages now!
+- This project uses Piper for clean TTS (https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md), use pip install or python -m pip to install piper-tts
+- Next, you'll need a voice. Run "python -m piper.download_voices en_US-amy-low".
+- You can look at the documentation if you want to install other voices, however I recommend using only low quality TTS models since we're not working with a lot of processing power here.
+That's it for the Raspberry Pi installation! Simple, right?

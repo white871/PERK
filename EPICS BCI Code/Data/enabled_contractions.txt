@@ -577,7 +577,7 @@
     "themselves": {
         "binary": "011101101100111001011100",
         "braille": "⠮⠍⠧⠎",
-        "enabled": 0
+        "enabled": 1
     },
     "there": {
         "binary": "000010011101",

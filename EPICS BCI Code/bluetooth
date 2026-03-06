@@ -31,14 +31,11 @@ def disconnecting_popup():
                            command=close_popup)
     cancel_btn.pack(side="right", padx=30)
     '''
-
     disconnecting.protocol("WM_DELETE_WINDOW", close_popup)
-
 
 def connect_to_brailler():
     messagebox.showinfo("Bluetooth", "Connecting brailler...")
     close_popup()
-
 
 def close_popup():
     global disconnecting
@@ -47,12 +44,10 @@ def close_popup():
         disconnecting = None
 
 
-# Main window
+# driving section
 root = PERK.Tk()
 root.geometry("350x275")
-
 open_btn = PERK.Button(root, text="Disconnect brailler?",
                      command=disconnecting_popup)
 open_btn.pack(pady=100)
-
 root.mainloop()

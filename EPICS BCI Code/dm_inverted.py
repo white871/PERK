@@ -9,7 +9,7 @@ def load_settings_page_inverted(root, app):
     # Set geometry
     root.configure(bg="#000000")
 
-    file_path = "Data\\brailler_output.txt"
+    file_path = "Data/brailler_output.txt"
     #"brailler_output.txt"
 
     circle_buttons = []
@@ -131,7 +131,7 @@ def load_settings_page_inverted(root, app):
 
     title = create_inverted_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#000000', location=(50, 30))
 
-    perk_braille_img = load_img("EPICS BCI Code\\Images\\Inverted Images\\PERK_Braille_Image_inverted.png", size=(302,110))
+    perk_braille_img = load_img("EPICS BCI Code/Images/Inverted Images/PERK_Braille_Image_grey.png", size=(302,110))
     perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
 
     ########################################
@@ -145,8 +145,8 @@ def load_settings_page_inverted(root, app):
 
     # load all the images, but don't show
     filter_images = {
-        "default": load_img("EPICS BCI Code/Images/Inverted Images/circles_icon1_inverted.png", size=(39,85)),
-        "inverted": load_img("EPICS BCI Code/Images/Inverted Images/circles_icon2_inverted.png", size=(39,85)),
+        "default": load_img("EPICS BCI Code/Images/Inverted Images/circles_icon1.png", size=(39,85)),
+        "inverted": load_img("EPICS BCI Code/Images/Inverted Images/circles_icon2.png", size=(39,85)),
     }
 
     default_image = {
@@ -194,7 +194,7 @@ def load_settings_page_inverted(root, app):
     #Device Management Section
     ######################################################################
 
-    home_image = load_img("EPICS BCI Code/Images/Inverted Images/Home_icon_inverted.png", size=(105,110))
+    home_image = load_img("EPICS BCI Code/Images/Inverted Images/Home_icon.png", size=(105,110))
     home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 340))
     label_sub_title_2 = create_inverted_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='black', location=(165, 337))
     home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41, True, on_select=lambda: on_brailler_click())
@@ -203,7 +203,7 @@ def load_settings_page_inverted(root, app):
     #Settings Section
     ###################################################
 
-    settings_image = load_img("EPICS BCI Code/Images/Inverted Images/settings_icon_inverted.png", size=(113,100))
+    settings_image = load_img("EPICS BCI Code/Images/Inverted Images/settings_icon.png", size=(113,100))
     settings_icon, settings_img_obj = create_image_canvas(root, 113, 100, 0, 0, 'nw', settings_image, location=(50, 160))
     label_sub_title_1 = create_inverted_label(root, 'w', txt="Settings",  font_txt="Roboto Condensed", font_size=25, bold='bold', italic='roman', backround='black', location=(162, 210))
 

@@ -9,6 +9,7 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - You also need a blank micro-SD card to install the Pi OS on.
 - Below is what each configuration you MUST follow in each tab
 - Device & OS: Select the correct model, then select Raspberry Pi OS (64-bit)
+- Alternatively, if you are familiar with Linux terminals, install Pi Lite instead for faster bootup time (no desktop environment)
 - Storage: It should be the SD card you inserted into your computer
 - Hostname: perk
 - Localization: Washington, D.C. for capital city; New_York for Time zone; and us for Keyboard layout (this is important, if you select the incorrect keyboard layout you most likely WILL have issues with your keyboard when typing in the Pi's terminal)

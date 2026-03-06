@@ -24,7 +24,7 @@ THEMES = {
         "hth": 1,
         "fg": "#FFFFFF",
         "label": create_inverted_label,
-        "image_path": "EPICS BCI Code/Images/Inverted/",
+        "image_path": "EPICS BCI Code/Images/Inverted Images/",
         "inverted": True
     }
 }

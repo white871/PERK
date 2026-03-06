@@ -6,15 +6,15 @@ with open('brailleLib.txt', 'r') as f:
     data = f.read()
 brailleLib = ast.literal_eval(data)
 
-with open('brailletobinary.txt', 'r', encoding = "utf-8") as f:
-    data = f.read()
-b2b = ast.literal_eval(data)
+#with open('brailletobinary.txt', 'r', encoding = "utf-8") as f:
+#    data = f.read()
+#b2b = ast.literal_eval(data)
 
 enabled_contractions = {}
 
 def transliterateBin(inputB):
     global brailleLib
-    global b2b
+   # global b2b
     global translated
     global translatedOutput
     global i

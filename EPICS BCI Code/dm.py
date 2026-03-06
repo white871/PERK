@@ -3,7 +3,7 @@ from tkinter import filedialog
 import tkinter.font as tkfont
 from PIL import Image, ImageTk, ImageOps
 import random
-from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, create_display_frame_header, create_display_frame
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame_header, create_display_frame
 
 def load_settings_page(root, app):
     # Set geometry
@@ -178,7 +178,6 @@ def load_settings_page(root, app):
 
     def inverted_filter_load():
         app.show_settings_inverted()
-        return
 
     def on_brailler_click():
         app.show_manage_braillers()
@@ -203,7 +202,7 @@ def load_settings_page(root, app):
     home_image = load_img("EPICS BCI Code/Images/Home_icon.png", size=(105,110))
     home_icon, home_img_obj = create_image_canvas(root, 105, 110, 0, 0, 'center', home_image, location=(100, 340))
     label_sub_title_2 = create_label(root, 'w', txt="Device Management",  font_txt="Roboto Condensed", font_size=25, bold='normal', italic='roman', backround='white', location=(165, 337))
-    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 52), 41, on_select=lambda: on_brailler_click())
+    home_circle = create_interactive_icon(home_icon, label_sub_title_2, (52, 54), 41, on_select=lambda: on_brailler_click())
 
     ########################################################
     #Settings Section

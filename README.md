@@ -43,3 +43,4 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - Reboot the Pi
 - Keep in mind that pins 18, 19, 38, and 40 are now occupied for this protocol. Avoid using these pins for other external devices.
 - Next, to allow the sound architecture to recognize the i2s board to be controlled with software, go into root/etc and copy the asound.conf file. Restart, then do a speaker-test.
+- Type "alsamixer" and there should be a software volume control interface for Softmaster

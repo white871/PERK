@@ -33,7 +33,7 @@ The proper config files should be in this repository for reference, but you can 
 - When the OS is rebooted, type in "ifconfig -a". If a "usb0" interface does not show up, type "sudo modprobe g_ether", run "ifconfig -a" again.
 - If the usb0 interface disappears after rebooting, edit the /etc/modules file, add "dwc2" and "g_ether".
 - Your computer should detect an "Ethernet Gadget" (Check device manager for windows under "Network Adapters", or "Network" on MacOS).
-- You can now ssh into the Pi without an internet connection. Open up terminal and type "ssh perk@perk.local".
+- You can now ssh into the Pi without an internet connection. Open up terminal and type "ssh perk@perk.local". If that doesn't work, try "ssh perk@perk"
 For more information on setting up RPI gadget mode, you can look at this guide: https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/
 ### Enabling I2S
 - To use the speaker, you must enable the I2S protocol in the config file.
@@ -42,3 +42,4 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - Finally, add "dtoverlay = max98357a"
 - Reboot the Pi
 - Keep in mind that pins 18, 19, 38, and 40 are now occupied for this protocol. Avoid using these pins for other external devices.
+- Next, to allow the sound architecture to recognize the i2s board to be controlled with software, go into root/etc and copy the asound.conf file. Restart, then do a speaker-test.

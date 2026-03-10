@@ -1,19 +1,51 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import tkinter.font as tkfont
-from PIL import Image, ImageTk
 import random
 import json
-from utility_functions import load_img, create_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
-class IndividualBraillerView:
+THEMES = {
+    "light": {
+        "bg": "#FFFFFF",
+        "header_bg": "#eeeeee",
+        "hbg": None,
+        "hth": 0,
+        "fg": "#000000",
+        "label": create_label,
+        "image_path": "EPICS BCI Code/Images/",
+        "inverted": False
+    },
+    "dark": {
+        "bg": "#000000",
+        "header_bg": "#000000",
+        "hbg": "#FFFFFF",
+        "hth": 1,
+        "fg": "#FFFFFF",
+        "label": create_inverted_label,
+        "image_path": "EPICS BCI Code/Images/Inverted Images/",
+        "inverted": True
+    }
+}
 
-    def __init__(self, root, app, brailler_name):
+class IndividualBraillerViewBase:
+
+    def __init__(self, root, app, brailler_name, theme_name="light"):
         self.root = root
         self.app = app
         self.brailler_name = brailler_name
 
-        self.root.configure(bg="#FFFFFF")
+        theme = THEMES[theme_name]
+        self.bg = theme["bg"]
+        self.header_bg = theme["header_bg"]
+        self.hbg = theme["hbg"]
+        self.hth = theme["hth"]
+        self.fg = theme["fg"]
+        self.label_fn = theme["label"]
+        self.image_path = theme["image_path"]
+        self.inverted = theme["inverted"]
+
+        self.root.configure(bg=self.bg)
+
 
         #STATE MODIFIERS
         self.current_mode = "live"
@@ -64,30 +96,31 @@ class IndividualBraillerView:
             self.root,
             width=1035,
             height=110,
-            background="#eeeeee",
-            highlightthickness=0,
+            background=self.header_bg,
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth,
             relief="solid",
             bd=2
         )
         title_header_canvas.place(x=5, y=5, anchor="nw")
 
-        title = create_label(
+        title = self.label_fn(
             self.root, 'nw',
             txt="PERK Brailler Digital Interface",
             font_txt="Roboto Condensed",
             font_size=37,
             bold='bold',
             italic='roman',
-            backround='#eeeeee',
+            backround=self.header_bg,
             location=(50, 30)
         )
 
         self.perk_braille_img = load_img(
-            "EPICS BCI Code/Images/PERK_Braille_Image_grey.png", 
+            self.image_path + "PERK_Braille_Image_grey.png", 
             size=(302,110)
         )
     
-        perk_logo = create_label(
+        perk_logo = self.label_fn(
             self.root, 'nw', 
             img=self.perk_braille_img, 
             bd_width=0, 
@@ -233,52 +266,63 @@ class IndividualBraillerView:
     def build_main_frames(self):
         display_container = tk.Frame(
             self.root, 
-            bg="#FFFFFF", bd=3, 
+            bg=self.bg, bd=3, 
             relief="solid"
         )
         display_container.place(x=530, y=145, width=470, height=500)
 
         self.live_feed_frame = create_display_frame(
-            display_container, 
-            start_display=True
+            display_container,
+            bg=self.bg,
+            start_display=True,
+            inverted=self.inverted
         )
         
         live_feed_label, line_canvas =  create_display_frame_header(
             self.live_feed_frame, 
             "Live Text Feed", 'n', 
-            coords=(470/2, 10)
+            coords=(470/2, 10),
+            bg=self.bg,
+            fg=self.fg,
+            line_color=self.fg
         )
 
         self.contraction_library_frame = create_display_frame(
-            display_container
+            display_container,
+            bg=self.bg,
+            inverted=self.inverted
         )
         
         contraction_library_label, line_canvas =  create_display_frame_header(
             self.contraction_library_frame, 
             "Contraction Library", 'n', 
-            coords=(470/2, 10)
+            coords=(470/2, 10),
+            bg=self.bg,
+            fg=self.fg,
+            line_color=self.fg
         )
 
+    def cancel_loops(self):
+        for after_id in [self.after_id1, self.after_id2, self.after_id3]:
+            if after_id:
+                self.root.after_cancel(after_id)
+
     def home_select(self):
-        self.root.after_cancel(self.after_id1)
-        self.root.after_cancel(self.after_id2)
-        self.root.after_cancel(self.after_id3)
+        self.cancel_loops()
         self.app.show_manage_braillers()
     
     def settings_select(self):
-        self.root.after_cancel(self.after_id1)
-        self.root.after_cancel(self.after_id2)
-        self.root.after_cancel(self.after_id3)
+        self.cancel_loops()
         self.app.show_settings()
 
     def build_navigation_buttons(self):
         self.triangle_image_1 = load_img(
-            "EPICS BCI Code/Images/triangles_icon.png", 
+            self.image_path + "triangles_icon.png", 
             size=(60,115)
         )
 
         self.triangle_image_2 = load_img(
-            "EPICS BCI Code/Images/triangles_icon_flipped.png", 
+            self.image_path + "triangles_icon_flipped.png", 
             size=(60,115)
         )
 
@@ -291,13 +335,13 @@ class IndividualBraillerView:
 
         self.triangle_buttons = []  # global list of all triangle buttons
 
-        label_live_text_feed = create_label(
+        label_live_text_feed = self.label_fn(
             self.root, 'w', 
             txt="Live Text Feed",  
             font_txt="Roboto Condensed", 
             font_size=20, 
             bold='bold', italic='roman', 
-            backround='white', 
+            backround=self.bg, 
             location=(224, 261)
         )
 
@@ -313,13 +357,13 @@ class IndividualBraillerView:
             on_select= self.show_live_feed
         )
 
-        label_contraction_library = create_label(
+        label_contraction_library = self.label_fn(
             self.root, 'w', 
             txt="Contraction Library",  
             font_txt="Roboto Condensed", 
             font_size=20, 
             bold='normal', italic='roman', 
-            backround='white', 
+            backround=self.bg, 
             location=(224, 322)
         )
 
@@ -336,7 +380,7 @@ class IndividualBraillerView:
         )
 
         self.Brailler_connected_image = load_img(
-            "EPICS BCI Code/Images/Brailler_Connected_Icon.png", 
+            self.image_path + "Brailler_Connected_Icon.png", 
             size=(100,100)
         )
 
@@ -347,22 +391,22 @@ class IndividualBraillerView:
             location=(50, 135)
         )
 
-        label_sub_title_1 = create_label(
+        label_sub_title_1 = self.label_fn(
             self.root, 'w', 
             txt=self.brailler_name,  
             font_txt="Roboto Condensed", 
             font_size=25, 
             bold='bold', italic='roman', 
-            backround='white', 
+            backround=self.bg, 
             location=(165, 185)
         )
 
         self.online_dot = load_img(
-            "EPICS BCI Code/Images/green_circle.png", 
+            self.image_path + "green_circle.png", 
             size=(40,40)
         )
 
-        dot_icon = create_label(
+        dot_icon = self.label_fn(
             self.root, 'w', 
             img=self.online_dot, 
             bd_width=0, 
@@ -371,7 +415,7 @@ class IndividualBraillerView:
 
         
         self.home_image = load_img(
-            "EPICS BCI Code/Images/Home_icon.png", 
+            self.image_path + "Home_icon.png", 
             size=(105,110)
         )
 
@@ -382,25 +426,25 @@ class IndividualBraillerView:
             location=(100, 445)
         )
 
-        label_sub_title_2 = create_label(
+        label_sub_title_2 = self.label_fn(
             self.root, 'w', 
             txt="Device Management",  
             font_txt="Roboto Condensed", 
             font_size=25, 
             bold='normal', italic='roman', 
-            backround='white', 
+            backround=self.bg, 
             location=(165, 442)
         )
 
-        home_circle = create_interactive_icon(
+        self.home_circle = create_interactive_icon(
             home_icon, 
             label_sub_title_2, 
             (52, 54), 41, 
-            on_select=lambda: self.home_select
+            on_select=self.home_select
         )
 
         self.settings_image = load_img(
-            "EPICS BCI Code/Images/settings_icon.png", 
+            self.image_path + "settings_icon.png", 
             size=(113,100)
         )
 
@@ -411,21 +455,21 @@ class IndividualBraillerView:
             location=(100, 595)
         )
 
-        label_sub_title_3 = create_label(
+        label_sub_title_3 = self.label_fn(
             self.root, 'w', 
             txt="Settings",  
             font_txt="Roboto Condensed", 
             font_size=25, 
             bold='normal', italic='roman', 
-            backround='white', 
+            backround=self.bg, 
             location=(165, 592)
         )
 
-        settings_circle = create_interactive_icon(
+        self.settings_circle = create_interactive_icon(
             settings_icon, 
             label_sub_title_3, 
             (54, 49), 41, 
-            on_select=lambda: self.settings_select
+            on_select=self.settings_select
         )
 
     def build_live_feed(self):
@@ -433,7 +477,7 @@ class IndividualBraillerView:
 
         text_frame = tk.Frame(
             self.live_feed_frame, 
-            bg="white"
+            bg=self.bg
         )
         text_frame.place(x=10, y=60, width=450, height=text_frame_height)
 
@@ -449,7 +493,9 @@ class IndividualBraillerView:
             text_frame,
             wrap="word",
             font=("Roboto Condensed", 14),
-            bg="white", bd=0,
+            fg=self.fg,
+            bg=self.bg, 
+            bd=0,
             highlightthickness=0,
             relief="flat",
             pady=5
@@ -463,13 +509,13 @@ class IndividualBraillerView:
         button_canvas = tk.Canvas(
             self.live_feed_frame, 
             width=464, height=72, 
-            bg="#FFFFFF", 
+            bg=self.bg, 
             highlightthickness=0
         )
         button_canvas.place(x=0, y=422)
 
         self.new_file_img = load_img(
-            "EPICS BCI Code/Images/New_file_button.png", 
+            self.image_path + "New_file_button.png", 
             size=(120, 35)
         )
 
@@ -481,7 +527,7 @@ class IndividualBraillerView:
         )
 
         self.export_text_file_img = load_img(
-            "EPICS BCI Code/Images/export_text_file_button.png", 
+            self.image_path + "export_text_file_button.png", 
             size=(161, 37)
         )
 
@@ -493,16 +539,16 @@ class IndividualBraillerView:
         )
 
         self.braille_selection_box_img = load_img(
-            "EPICS BCI Code/Images/braille_selection_box_unselected.png", 
+            self.image_path + "braille_selection_box_unselected.png", 
             size=(113, 39)
         )
 
         self.braille_selection_box_img_2 = load_img(
-            "EPICS BCI Code/Images/braille_selection_box_selected.png", 
+            self.image_path + "braille_selection_box_selected.png", 
             size=(105, 42)
         )
 
-        braille_selection_box_icon = make_interactive_image(
+        self.braille_selection_box_icon = make_interactive_image(
             button_canvas, 
             self.braille_selection_box_img, 
             330, 15, 
@@ -518,12 +564,12 @@ class IndividualBraillerView:
     def on_search_focus_in(self, event):
         if self.search_var.get() == self.placeholder_text:
             self.search_var.set("")
-            self.search_entry.config(fg="black")
+            self.search_entry.config(fg=self.fg)
 
     def on_search_focus_out(self, event):
         if self.search_var.get().strip() == "":
             self.search_var.set(self.placeholder_text)
-            self.search_entry.config(fg="gray")
+            self.search_entry.config(fg=self.fg)
 
             self.search_entry.selection_clear()
             self.root.focus()  # move focus somewhere else, here root
@@ -544,7 +590,10 @@ class IndividualBraillerView:
             self.contraction_library_frame,
             textvariable=self.search_var,
             font=("Roboto Condensed", 16),
-            fg="gray",
+            fg=self.fg,
+            bg=self.bg,
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth,
             bd=1,
             relief="solid"
         )
@@ -558,13 +607,13 @@ class IndividualBraillerView:
         # Scrollable frame for contraction list
         contraction_list_frame = tk.Frame(
             self.contraction_library_frame, 
-            bg="white"
+            bg=self.bg
         )
         contraction_list_frame.place(x=15, y=130, width=435, height=350)
 
         self.canvas = tk.Canvas(
             contraction_list_frame, 
-            bg="white", 
+            bg=self.bg, 
             highlightthickness=0
         )
 
@@ -576,7 +625,7 @@ class IndividualBraillerView:
 
         self.scrollable_frame = tk.Frame(
             self.canvas, 
-            bg="white"
+            bg=self.bg
         )
         
         self.scrollable_frame.bind(
@@ -596,7 +645,7 @@ class IndividualBraillerView:
         self.canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        self.canvas.bind("<MouseWheel>", self._on_mousewheel)
 
 
         contraction_labels = []
@@ -620,7 +669,11 @@ class IndividualBraillerView:
                 onvalue=1,
                 offvalue=0,
                 anchor="w",
-                bg="white",
+                fg=self.fg,
+                bg=self.bg,
+                selectcolor=self.bg,
+                highlightbackground=self.hbg,
+                highlightthickness=self.hth,
                 font=("Roboto Condensed", 14),
                 command=lambda c=contraction, v=var: self.update_enabled(c, v)
             )
@@ -634,6 +687,10 @@ class IndividualBraillerView:
             self.contraction_library_frame,
             text="Select All",
             font=("Roboto Condensed", 14),
+            fg=self.fg,
+            bg=self.bg,
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth,
             command=self.select_all_contractions
         )
         select_all_btn.place(x=331, y=63, width=120, height=28)
@@ -642,14 +699,16 @@ class IndividualBraillerView:
             self.contraction_library_frame,
             text="Deselect All",
             font=("Roboto Condensed", 14),
+            fg=self.fg,
+            bg=self.bg,
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth,
             command=self.deselect_all_contractions
         )
         deselect_all_btn.place(x=331, y=95, width=120, height=28)
 
         # Bind the search_var so it updates automatically
         self.search_var.trace_add("write", self.update_contraction_display)
-
-
 
     def update_contraction_display(self, *args):
         search_term = self.search_var.get().lower().strip()
@@ -708,3 +767,12 @@ class IndividualBraillerView:
         # Save once
         with open(self.enabled_contractions_path, "w", encoding="utf-8") as f:
             json.dump(self.enabled_contractions, f, indent=4, ensure_ascii=False)
+
+
+class IndividualBraillerView(IndividualBraillerViewBase):
+    def __init__(self, root, app, brailler_name):
+        super().__init__(root, app, brailler_name, theme_name="light")
+
+class IndividualBraillerViewInverted(IndividualBraillerViewBase):
+    def __init__(self, root, app, brailler_name):
+        super().__init__(root, app, brailler_name, theme_name="dark")

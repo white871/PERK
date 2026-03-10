@@ -9,7 +9,7 @@ def load_settings_page(root, app):
     # Set geometry
     root.configure(bg="#FFFFFF")
 
-    file_path = "Data\\brailler_output.txt"
+    file_path = "Data/brailler_output.txt"
     #"brailler_output.txt"
 
     circle_buttons = []
@@ -131,7 +131,7 @@ def load_settings_page(root, app):
 
     title = create_label(root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
 
-    perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_Braille_Image_grey.png", size=(302,110))
+    perk_braille_img = load_img("EPICS BCI Code/Images/PERK_Braille_Image_grey.png", size=(302,110))
     perk_logo = create_label(root, 'nw', img=perk_braille_img, bd_width=0, location=(695, 6))
     ########################################
     #Creating Frames

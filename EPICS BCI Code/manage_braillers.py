@@ -1,20 +1,55 @@
 import tkinter as tk
 import math
-from utility_functions import load_img, create_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
-class ManageBraillersView:
-    def __init__(self, root, app):
+THEMES = {
+    "light": {
+        "bg": "#FFFFFF",
+        "header_bg": "#eeeeee",
+        "hbg": "#000000",
+        "hth": 1,
+        "fg": "#000000",
+        "label": create_label,
+        "image_path": "EPICS BCI Code/Images/",
+        "inverted": False
+    },
+    "dark": {
+        "bg": "#000000",
+        "header_bg": "#000000",
+        "hbg": "#FFFFFF",
+        "hth": 1,
+        "fg": "#FFFFFF",
+        "label": create_inverted_label,
+        "image_path": "EPICS BCI Code/Images/Inverted Images/",
+        "inverted": True
+    }
+}
+
+class ManageBraillersViewBase:
+    def __init__(self, root, app, theme_name="light"):
         self.root = root
         self.app = app
-        self.root.configure(bg="#FFFFFF")
+
+        theme = THEMES[theme_name]
+        self.bg = theme["bg"]
+        self.header_bg = theme["header_bg"]
+        self.hbg = theme["hbg"]
+        self.hth = theme["hth"]
+        self.fg = theme["fg"]
+        self.label_fn = theme["label"]
+        self.image_path = theme["image_path"]
+        self.inverted = theme["inverted"]
+
+        self.root.configure(bg=self.bg)
 
         self.current_brailler_label = None
         self.current_brailler_name = None
         self.brailler_status_dots = {}
+
         self.STATUS_RADIUS = 6
         self.STATUS_GREEN = "#93c47d"
         self.STATUS_RED = "#e06666"
-        self.brailler_status_dots={}
+
         self.braillers = [
             "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
             "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
@@ -22,21 +57,47 @@ class ManageBraillersView:
             "Mary's Brailler", "Jane's Brailler", "Josh's Brailler", 
             "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
         ]
+
         self.build_header()
-        self.build.brailler_list()
+        self.build_brailler_list()
         self.build_popup_menu()
         self.build_bottom_actions()
         self.initialize_status()
 
 #Header
     def build_header(self):
-        title_header_canvas = tk.Canvas(self.root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
+        title_header_canvas = tk.Canvas(
+            self.root, 
+            width=1035, height=110, 
+            background=self.header_bg, 
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth, 
+            relief="solid", 
+            bd=2
+        )
         title_header_canvas.place(x=5, y=5, anchor="nw")
 
-        create_label(self.root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
+        title = self.label_fn(
+            self.root, 'nw', 
+            txt="PERK Brailler Digital Interface",  
+            font_txt="Roboto Condensed", 
+            font_size=37, 
+            bold='bold', italic='roman', 
+            backround=self.header_bg, 
+            location=(50, 30)
+        )
 
-        self.perk_braille_img = load_img("EPICS BCI Code\\Images\\PERK_braille_Image_grey.png", size=(302,110))
-        create_label(self.root, 'nw', img=self.perk_braille_img, bd_width=0, location=(695, 6))
+        self.perk_braille_img = load_img(
+            self.image_path + "PERK_braille_Image_grey.png", 
+            size=(302,110)
+        )
+
+        perk_logo = create_label(
+            self.root, 'nw', 
+            img=self.perk_braille_img, 
+            bd_width=0, 
+            location=(695, 6)
+        )
 
 # Brailler list
     def build_brailler_list(self):
@@ -45,7 +106,7 @@ class ManageBraillersView:
         available_height = bottom_limit - start_y
 
         max_columns = 3
-        total_rows = math.ceil(len(self.total_braillers) / max_columns)
+        total_rows = math.ceil(len(self.braillers) / max_columns)
 
         row_height = available_height / total_rows  
 
@@ -62,17 +123,18 @@ class ManageBraillersView:
             x = left_margin + col * column_width
             y = start_y + row * row_height
 
-            lbl = create_label(
+            lbl = self.label_fn(
                 self.root,
                 anchr="nw",
                 txt=name,
                 font_txt="Roboto Condensed",
                 font_size=18,
                 bold="normal",
-                backround="white",
+                backround=self.bg,
                 location=(x, y)
             )
 
+            lbl.is_bold = False
             lbl.config(cursor="hand2")
             lbl.bind("<Button-1>", lambda e, l=lbl, n=name: self.on_brailler_click(l, n))
 
@@ -80,7 +142,7 @@ class ManageBraillersView:
                 self.root,
                 width=self.STATUS_RADIUS * 2,
                 height=self.STATUS_RADIUS * 2,
-                bg="white",
+                bg=self.bg,
                 highlightthickness=0
             )
             dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
@@ -122,27 +184,27 @@ class ManageBraillersView:
         self.popup=create_display_frame(
             self.root, 
             rel_fill=(0,0),
-            bg="#eeeeee",
+            bg=self.bg,
             start_display=False
         )
 
         self.popup.config(
-            highlightbackground="black",
-            highlightthickness=1
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth
         )
 
         button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
         x_positions=[60, 250, 530, 730]
 
         for name, x in zip(button_names, x_positions):
-            lbl=create_label(
+            lbl= self.label_fn(
                 self.popup, 
                 anchr="nw",
                 txt=name, 
                 font_txt="Roboto Condensed", 
                 font_size=18, 
                 bold="normal", 
-                backround="#eeeeee",
+                backround=self.bg,
                 location=(x, 5)
                 )
             lbl.config(cursor="hand2")
@@ -184,7 +246,10 @@ class ManageBraillersView:
 
 #Button actions
     def open_live_feed(self):
-        self.app.show_text_page(self.current_brailler_name)
+        if self.inverted:
+            self.app.show_text_page_inverted(self.current_brailler_name)
+        else:
+            self.app.show_text_page(self.current_brailler_name)
 
     def disconnect_brailler(self):
         self.set_brailler_status(self.current_brailler_name, False)
@@ -194,44 +259,165 @@ class ManageBraillersView:
 
 #Rename device 
     def rename_device(self):
-        popup = tk.Toplevel(self.root)
-        popup.title("Rename Device")
-        popup.geometry("300x120")
-        popup.resizable(False, False)
-        popup.grab_set()  # Make it modal
+        self.rename_popup = tk.Toplevel(self.root)
+        self.rename_popup.title("Rename Device")
+        self.rename_popup.geometry("300x120")
+        self.rename_popup.resizable(False, False)
+        self.rename_popup.grab_set()  # Make it modal
+        self.rename_popup.configure(bg=self.bg)
     
         # Create the entry variable and widget
-        entry_var = tk.StringVar()
+        self.entry_var = tk.StringVar()
 
-        entry = tk.Entry(popup, textvariable=entry_var, font=("Roboto Condensed", 14))
+        entry = tk.Entry(
+            self.rename_popup, 
+            textvariable=self.entry_var, 
+            font=("Roboto Condensed", 14),
+            bg=self.bg,
+            fg=self.fg,
+            insertbackground=self.fg
+        )
         
         entry.pack(pady=10)
         entry.focus_set()
     
-        def submit():
-                new_name = entry_var.get().strip()
-                if new_name:
-                    # Update label text
-                    self.current_brailler_label.config(text=new_name)
-                    
-                    # Update brailler status dictionary
-                    if self.current_brailler_name in self.brailler_status_dots:
-                        self.brailler_status_dots[new_name]=\
-                            self.brailler_status_dots.pop(self.current_brailler_name)
-                    # Update current name reference
-                    self.current_brailler_name = new_name
-    
-                popup.destroy()
-    
-        tk.Button(popup, text="Rename", font=("Roboto Condensed", 12), command=submit).pack(pady=5)
-#Bottom actions
-    def build_bottom_actions(self):
-        bluetooth_image = load_img("EPICS BCI Code\\Images\\Bluetooth_icon.png", size=(110, 98))
-        bluetooth_icon,_=create_image_canvas(self.root, 110, 98, 0, 0, 'center', bluetooth_image, location=(90, 645))
-        pairing_label=create_label(self.root, anchr="sw",txt="Start Pairing Process",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(140, 665))
-        create_interactive_icon(bluetooth_icon, pairing_label, (52, 50), 38)
+        rename_button = tk.Button(
+            self.rename_popup, 
+            text="Rename", 
+            font=("Roboto Condensed", 12),
+            bg=self.bg,
+            fg=self.fg, 
+            command=self.submit
+            )
+        rename_button.pack(pady=5)
 
-        settings_image = load_img("EPICS BCI Code\\Images\\settings_icon.png", size=(105, 97))
-        settings_icon,_=create_image_canvas(self.root, 105, 97, 0, 0, 'center', settings_image, location=(805, 645))
-        settings_label=create_label(self.root, anchr="se",txt="Settings",font_txt="Roboto Condensed",font_size=25,bold="normal",backround="white",location=(970, 665))
-        create_interactive_icon(settings_icon, settings_label, (51, 48), 38, on_select=lambda: self.app.show_settings())    
+    def submit(self):
+        new_name = self.entry_var.get().strip()
+        if new_name:
+            # Update label text
+            self.current_brailler_label.config(text=new_name)
+                    
+            # Update brailler status dictionary
+            if self.current_brailler_name in self.brailler_status_dots:
+                self.brailler_status_dots[new_name]=\
+                    self.brailler_status_dots.pop(self.current_brailler_name)
+            # Update current name reference
+            self.current_brailler_name = new_name
+    
+        self.rename_popup.destroy()
+    
+    #Bottom actions
+    def build_bottom_actions(self):
+        # Manage Braillers row
+        self.home_image = load_img(
+            self.image_path + "Home_icon.png", 
+            size=(95, 100)
+        )
+
+        home_icon, home_img_obj = create_image_canvas(
+            self.root, 
+            95, 100, 0, 0, 
+            'center', 
+            self.home_image, 
+            location=(90, 185)
+        )
+
+        Braillers_logo = self.label_fn(
+            self.root, 
+            anchr="nw",
+            txt="Manage Braillers",
+            font_txt="Roboto Condensed",
+            font_size=25,
+            bold="bold",
+            backround=self.bg,
+            location=(140, 165)
+        )
+
+        self.pair_all_image = load_img(
+            self.image_path + "pair_all_button.png", 
+            size=(105, 44)
+        )
+        pair_all_button = make_interactive_image(
+            self.root, 
+            self.pair_all_image, 
+            890, 160, 
+            on_click=lambda: self.pair_all()
+        )   
+            
+        self.bluetooth_image = load_img(
+            self.image_path + "Bluetooth_icon.png", 
+            size=(110, 98)
+        )
+
+        bluetooth_icon,_=create_image_canvas(
+            self.root, 
+            110, 98, 0, 0, 
+            'center', 
+            self.bluetooth_image, 
+            location=(90, 645)
+        )
+
+        pairing_label=self.label_fn(
+            self.root, 
+            anchr="sw",
+            txt="Start Pairing Process",
+            font_txt="Roboto Condensed",
+            font_size=25,
+            bold="normal",
+            backround=self.bg,
+            location=(140, 665)
+        )
+
+        create_interactive_icon(
+            bluetooth_icon, 
+            pairing_label, 
+            (52, 50), 38
+        )
+
+        self.settings_image = load_img(
+            self.image_path + "settings_icon.png", 
+            size=(105, 97)
+        )
+        
+        settings_icon,_=create_image_canvas(
+            self.root, 
+            105, 97, 0, 0, 
+            'center', 
+            self.settings_image, 
+            location=(805, 645)
+        )
+
+        settings_label=self.label_fn(
+            self.root, 
+            anchr="se",
+            txt="Settings",
+            font_txt="Roboto Condensed",
+            font_size=25,
+            bold="normal",
+            backround=self.bg,
+            location=(970, 665)
+        )
+
+        create_interactive_icon(
+            settings_icon, 
+            settings_label, 
+            (51, 48), 38, 
+            on_select=lambda: (
+                self.app.show_settings_inverted()
+                if self.inverted
+                else self.app.show_settings()
+            )
+        )    
+
+    def pair_all(self):
+                for brailler in self.braillers:
+                    self.set_brailler_status(brailler, True)
+                return
+
+class ManageBraillersView(ManageBraillersViewBase):
+    def __init__(self, root, app):
+        super().__init__(root, app, theme_name="light")
+
+class ManageBraillersViewInverted(ManageBraillersViewBase):
+    def __init__(self, root, app):
+        super().__init__(root, app, theme_name="dark")

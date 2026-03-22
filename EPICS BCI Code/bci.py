@@ -8,8 +8,8 @@ THEMES = {
     "light": {
         "bg": "#FFFFFF",
         "header_bg": "#eeeeee",
-        "hbg": None,
-        "hth": 0,
+        "hbg": "#000000",
+        "hth": 1,
         "fg": "#000000",
         "label": create_label,
         "image_path": "EPICS BCI Code/Images/",
@@ -45,7 +45,6 @@ class IndividualBraillerViewBase:
         self.inverted = theme["inverted"]
 
         self.root.configure(bg=self.bg)
-
 
         #STATE MODIFIERS
         self.current_mode = "live"
@@ -508,7 +507,7 @@ class IndividualBraillerViewBase:
    
         button_canvas = tk.Canvas(
             self.live_feed_frame, 
-            width=464, height=72, 
+            width=460, height=66, 
             bg=self.bg, 
             highlightthickness=0
         )

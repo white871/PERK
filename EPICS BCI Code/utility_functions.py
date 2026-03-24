@@ -246,12 +246,19 @@ def create_display_frame_header(parent, text, anchor, coords=(0,0),font=("Roboto
 
     return label, line_canvas
 
-def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=False, inverted=False):
-    if inverted ==False:
-        frame = tk.Frame(parent, bg=bg)
-    elif inverted== True:
-        frame = tk.Frame(parent, bg=bg, highlightbackground="#FFFFFF", highlightthickness=2, relief="solid", bd=0)
+def create_display_frame(parent, rel_fill = (1, 1), bg="#FFFFFF", start_display=False, border_color="#000000"):
+    
+    frame = tk.Frame(
+        parent,
+        bg=bg,
+        highlightbackground=border_color,
+        highlightthickness=3,
+        bd=0,
+        relief="solid"
+    )
+
     frame.place(relwidth=rel_fill[0], relheight=rel_fill[1])
+    
     if start_display:
         frame.tkraise()
     return frame

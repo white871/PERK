@@ -2,31 +2,8 @@ import tkinter as tk
 import math
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
-THEMES = {
-    "light": {
-        "bg": "#FFFFFF",
-        "header_bg": "#eeeeee",
-        "hbg": "#000000",
-        "hth": 1,
-        "fg": "#000000",
-        "label": create_label,
-        "image_path": "EPICS BCI Code/Images/",
-        "inverted": False
-    },
-    "dark": {
-        "bg": "#000000",
-        "header_bg": "#000000",
-        "hbg": "#FFFFFF",
-        "hth": 1,
-        "fg": "#FFFFFF",
-        "label": create_inverted_label,
-        "image_path": "EPICS BCI Code/Images/Inverted Images/",
-        "inverted": True
-    }
-}
-
 class ManageBraillersViewBase:
-    def __init__(self, root, app, theme_name="light"):
+    def __init__(self, root, app, THEMES, theme_name="light"):
         self.root = root
         self.app = app
 
@@ -185,7 +162,8 @@ class ManageBraillersViewBase:
             self.root, 
             rel_fill=(0,0),
             bg=self.bg,
-            start_display=False
+            start_display=False,
+            border_color=self.fg
         )
 
         self.popup.config(
@@ -415,9 +393,9 @@ class ManageBraillersViewBase:
                 return
 
 class ManageBraillersView(ManageBraillersViewBase):
-    def __init__(self, root, app):
-        super().__init__(root, app, theme_name="light")
+    def __init__(self, root, app, THEMES):
+        super().__init__(root, app, THEMES, theme_name="light")
 
 class ManageBraillersViewInverted(ManageBraillersViewBase):
-    def __init__(self, root, app):
-        super().__init__(root, app, theme_name="dark")
+    def __init__(self, root, app, THEMES):
+        super().__init__(root, app, THEMES, theme_name="dark")

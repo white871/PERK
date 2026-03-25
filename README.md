@@ -38,6 +38,6 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - First, type "python -m venv pyperk --system-site-packages", wait for it to setup, then type "source pyperk/bin/activate"
 - "(pyperk)" should be preceeding perk@perk in the terminal now. You can install python packages now!
 - This project uses Piper for clean TTS (https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md), use pip install or python -m pip to install piper-tts
-- Next, you'll need a voice. Run "python -m piper.download_voices en_US-amy-low".
+- Next, you'll need a voice. Run "python -m piper.download_voices en_US-amy-medium".
 - You can look at the documentation if you want to install other voices, however I recommend using only low quality TTS models since we're not working with a lot of processing power here.
 #### That's it for the Raspberry Pi installation! Simple, right?

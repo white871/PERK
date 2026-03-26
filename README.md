@@ -22,6 +22,9 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 For more information on setting up RPI gadget mode, you can look at this guide: https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/
 ### TLV320DAC3100 setup (speaker & headphones)
 - Setup is simple, go into boot/firmware/config.txt and add "dtoverlay=i2s-dac"
+- Comment 'dtparam=audio=on', uncomment 'dtparam=i2s=on'
+- Enable i2c: When done with the config file, type "sudo raspi-config", and go into interfacing options and enable i2c
+- Run 'sudo apt-get install -y i2c-tools'
 - Install the bash script on the repository onto the Pi, run it using (bash bash_tlv) before doing anything else
 - Hopefully it works!
 ### Max98357a setup (speaker only)
@@ -39,5 +42,6 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - "(pyperk)" should be preceeding perk@perk in the terminal now. You can install python packages now!
 - This project uses Piper for clean TTS (https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/API_PYTHON.md), use pip install or python -m pip to install piper-tts
 - Next, you'll need a voice. Run "python -m piper.download_voices en_US-amy-medium".
-- You can look at the documentation if you want to install other voices, however I recommend using only low quality TTS models since we're not working with a lot of processing power here.
+- You can look at the documentation if you want to install other voices, however I wouldn't recommend running high quality TTS models since they will take a while to load when running the audio python script. 
+
 #### That's it for the Raspberry Pi installation! Simple, right?

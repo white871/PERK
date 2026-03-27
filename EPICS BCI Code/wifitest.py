@@ -25,16 +25,10 @@ def setup_wifi(ssh):
     NAME = "PERK_WIFI"
     PASSWORD = "perk12345"
 
-    commands = [
-        "sudo apt update",
-        "sudo apt install -y network-manager",
-        "sudo systemctl start NetworkManager",
-        f"sudo nmcli device wifi hotspot ssid {NAME} password {PASSWORD}"
-    ]
-
-    for cmd in commands:
-        out, err = run_command(ssh, cmd)
-        print(out if out else err)
+    cmd = f"sudo nmcli device wifi hotspot ssid {NAME} password {PASSWORD}"
+    
+    out, err = run_command(ssh, cmd)
+    print(out if out else err)
 
     print("Basic setup complete.")
 

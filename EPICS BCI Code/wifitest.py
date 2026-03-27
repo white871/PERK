@@ -57,6 +57,13 @@ def check_devices(ssh):
         print("No devices found.")
         return
 
+    known_devices = {
+        "" : "Diana's Phone",
+        "" : "Nash's Phone",
+        "" : "Ayona's Phone",
+        "" : "Raspberry Pi 1"
+    }
+
     print("Connected devices:")
     for i, (ip, mac, state) in enumerate(devices, 1):
         if state == "REACHABLE":
@@ -72,7 +79,7 @@ def menu():
     print("Connected to Raspberry Pi.\n")
 
     while True:
-        print("\nSelect an option:")
+        print("Select an option:")
         print("1 - Setup WiFi / Hotspot")
         print("2 - Check connected devices")
         print("3 - Exit")

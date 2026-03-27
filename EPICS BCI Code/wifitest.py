@@ -39,8 +39,6 @@ def check_devices(ssh):
     cmd = "ip neigh show dev wlan0"
     out, err = run_command(ssh, cmd)
 
-    print(out)
-
     if err:
         print("Error:", err)
         return
@@ -61,7 +59,8 @@ def check_devices(ssh):
 
     print("Connected devices:")
     for i, (ip, mac, state) in enumerate(devices, 1):
-        print(f"{i}. IP: {ip} | MAC: {mac} | State: {state}")
+        if state == "REACHABLE":
+            print(f"{i}. IP: {ip} | MAC: {mac} | State: {state}")
 
 
 # -----------------------------

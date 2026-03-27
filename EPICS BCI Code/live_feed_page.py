@@ -4,32 +4,9 @@ import random
 import json
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
-THEMES = {
-    "light": {
-        "bg": "#FFFFFF",
-        "header_bg": "#eeeeee",
-        "hbg": None,
-        "hth": 0,
-        "fg": "#000000",
-        "label": create_label,
-        "image_path": "EPICS BCI Code/Images/",
-        "inverted": False
-    },
-    "dark": {
-        "bg": "#000000",
-        "header_bg": "#000000",
-        "hbg": "#FFFFFF",
-        "hth": 1,
-        "fg": "#FFFFFF",
-        "label": create_inverted_label,
-        "image_path": "EPICS BCI Code/Images/Inverted Images/",
-        "inverted": True
-    }
-}
-
 class IndividualBraillerViewBase:
 
-    def __init__(self, root, app, brailler_name, theme_name="light"):
+    def __init__(self, root, app, brailler_name, THEMES, theme_name="light"):
         self.root = root
         self.app = app
         self.brailler_name = brailler_name
@@ -45,7 +22,6 @@ class IndividualBraillerViewBase:
         self.inverted = theme["inverted"]
 
         self.root.configure(bg=self.bg)
-
 
         #STATE MODIFIERS
         self.current_mode = "live"
@@ -266,8 +242,9 @@ class IndividualBraillerViewBase:
     def build_main_frames(self):
         display_container = tk.Frame(
             self.root, 
-            bg=self.bg, bd=3, 
-            relief="solid"
+            bg=self.bg, 
+            bd=0, 
+            highlightthickness=0
         )
         display_container.place(x=530, y=145, width=470, height=500)
 
@@ -275,7 +252,7 @@ class IndividualBraillerViewBase:
             display_container,
             bg=self.bg,
             start_display=True,
-            inverted=self.inverted
+            border_color=self.fg
         )
         
         live_feed_label, line_canvas =  create_display_frame_header(
@@ -290,7 +267,7 @@ class IndividualBraillerViewBase:
         self.contraction_library_frame = create_display_frame(
             display_container,
             bg=self.bg,
-            inverted=self.inverted
+            border_color=self.fg
         )
         
         contraction_library_label, line_canvas =  create_display_frame_header(
@@ -309,11 +286,17 @@ class IndividualBraillerViewBase:
 
     def home_select(self):
         self.cancel_loops()
-        self.app.show_manage_braillers()
+        if self.inverted:
+            self.app.show_manage_braillers_inverted()
+        else:
+            self.app.show_manage_braillers()
     
     def settings_select(self):
         self.cancel_loops()
-        self.app.show_settings()
+        if self.inverted:
+            self.app.show_settings_inverted()
+        else:
+            self.app.show_settings()
 
     def build_navigation_buttons(self):
         self.triangle_image_1 = load_img(
@@ -508,7 +491,7 @@ class IndividualBraillerViewBase:
    
         button_canvas = tk.Canvas(
             self.live_feed_frame, 
-            width=464, height=72, 
+            width=460, height=66, 
             bg=self.bg, 
             highlightthickness=0
         )
@@ -770,9 +753,9 @@ class IndividualBraillerViewBase:
 
 
 class IndividualBraillerView(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name):
-        super().__init__(root, app, brailler_name, theme_name="light")
+    def __init__(self, root, app, brailler_name, THEMES):
+        super().__init__(root, app, brailler_name, THEMES, theme_name="light")
 
 class IndividualBraillerViewInverted(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name):
-        super().__init__(root, app, brailler_name, theme_name="dark")
+    def __init__(self, root, app, brailler_name, THEMES):
+        super().__init__(root, app, brailler_name, THEMES, theme_name="dark")

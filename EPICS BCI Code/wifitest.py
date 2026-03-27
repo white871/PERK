@@ -1,9 +1,9 @@
 import paramiko
 import time
 
-HOST = "perkhost@perkhost.local"   # or IP
-USER = "pi"
-PASS = "raspberry"
+HOST = "perkhost.local"   # or IP
+USER = "perkhost"
+PASS = "perk"
 
 def connect_ssh():
     ssh = paramiko.SSHClient()

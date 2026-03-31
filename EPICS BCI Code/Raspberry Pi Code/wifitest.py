@@ -1,10 +1,14 @@
 import paramiko
+from scp import SCPClient
 import socket
 import time
 
 HOST = "perkhost.local"   # or IP
 USER = "perkhost"
 PASS = "perk"
+
+CLIENT_USER = "perk"
+CLIENT_PASS = "perk"
 
 def connect_ssh():
     ssh = paramiko.SSHClient()
@@ -61,19 +65,25 @@ def check_devices(ssh):
 
     for ip in ips:
         try:
-            s = socket.socket()
-            s.settimeout(2)
-            s.connect((ip, 5001))
+            client = paramiko.SSHClient()
+            client.load_system_host_keys()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(ip, username=CLIENT_USER, password=CLIENT_PASS, timeout=2)
 
-            s.sendall(b"IDENTIFY")
+            scp = SCPClient(client.get_transport())
+                
+            # Download a file
+            scp.get('device_id.txt', f"{ip}_name.txt")
+            scp.close()
 
-            response = s.recv(1024).decode().strip()
+            # read it
+            with open(f"{ip}_name.txt", "r") as f:
+                name = f.read().strip()
 
-            devices.append((response, ip))
+            devices.append((name, ip))
 
-            s.close()
-
-        except:
+            client.close()
+        except Exception:
             # ignore devices that don't respond
             continue
 

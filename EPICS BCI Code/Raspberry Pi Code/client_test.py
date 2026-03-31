@@ -33,32 +33,6 @@ def connect_wifi(ssh):
 
     print("Wifi connected.")
 
-def socket_server(ssh):
-
-    HOST = "0.0.0.0"
-    PORT = 5001
-
-    DEVICE_FILE = "device_id.txt"
-
-    server = socket.socket()
-    server.bind((HOST, PORT))
-    server.listen(1)
-
-    print("Client ready, waiting for request...")
-
-    while True:
-        conn, addr = server.accept()
-
-        request = conn.recv(1024).decode().strip()
-
-        if request == "IDENTIFY":
-            with open(DEVICE_FILE, "r") as f:
-                device_id = f.read().strip()
-
-            conn.sendall(device_id.encode())
-
-        conn.close()
-
 def setup_device_name():
     print("=== Device Setup ===")
 
@@ -83,8 +57,7 @@ def menu():
         print("Select an option:")
         print("1 - Connect to WiFi / Hotspot")
         print("2 - Create Host Name File")
-        print("3 - Create Socket Server")
-        print("4 - Exit")
+        print("3 - Exit")
 
         choice = input("Enter choice: ").strip()
 
@@ -95,9 +68,6 @@ def menu():
             setup_device_name()
 
         elif choice == "3":
-            socket_server(ssh)
-
-        elif choice == "4":
             print("Exiting...")
             ssh.close()
             break

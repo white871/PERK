@@ -1,4 +1,5 @@
 import paramiko
+import socket
 import time
 
 HOST = "perkhost.local"   # or IP
@@ -43,32 +44,46 @@ def check_devices(ssh):
         print("Error:", err)
         return
 
-    devices = []
+    ips = []
 
     for line in out.splitlines():
         parts = line.split()
-        if len(parts) >= 4:
-            ip = parts[0]
-            mac = parts[2]
-            state = parts[3]
-            devices.append((ip, mac, state))
+        if len(parts) >= 4 and parts[-1] == "REACHABLE":
+            ips.append(parts[0])
 
-    if not devices:
+    if not ips:
         print("No devices found.")
         return
 
-    known_devices = {
-        "" : "Diana's Phone",
-        "" : "Nash's Phone",
-        "" : "Ayona's Phone",
-        "" : "Raspberry Pi 1"
-    }
+    print("Requesting device identities...\n")
 
-    print("Connected devices:")
-    for i, (ip, mac, state) in enumerate(devices, 1):
-        if state == "REACHABLE":
-            print(f"{i}. IP: {ip} | MAC: {mac} | State: {state}")
+    devices = []
 
+    for ip in ips:
+        try:
+            s = socket.socket()
+            s.settimeout(2)
+            s.connect((ip, 5001))
+
+            s.sendall(b"IDENTIFY")
+
+            response = s.recv(1024).decode().strip()
+
+            devices.append((response, ip))
+
+            s.close()
+
+        except:
+            # ignore devices that don't respond
+            continue
+
+    if not devices:
+        print("No Raspberry Pis responded.")
+        return
+
+    print("Connected Raspberry Pis:")
+    for i, (name, ip) in enumerate(devices, 1):
+        print(f"{i}. {name} → {ip}")
 
 # -----------------------------
 # MENU LOOP

@@ -51,7 +51,6 @@ class App:
 
     def load_fonts(self, font_path):
         import ctypes
-        import os
 
         FR_PRIVATE = 0x10
         

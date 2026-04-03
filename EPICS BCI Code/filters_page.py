@@ -63,7 +63,7 @@ class SettingsViewBase:
         )
 
         self.perk_braille_img = load_img(
-            self.image_path + "PERK_Braille_Image_grey.png",
+            self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"),
             size=(302,110)
         )
 
@@ -109,7 +109,7 @@ class SettingsViewBase:
     def build_navigation_buttons(self):
 
         self.home_image = load_img(
-            self.image_path + "Home_icon.png",
+            self.app.resource_path(self.image_path + "Home_icon.png"),
             size=(105,110)
         )
 
@@ -138,7 +138,7 @@ class SettingsViewBase:
         )
 
         self.settings_image = load_img(
-            self.image_path + "settings_icon.png", 
+            self.app.resource_path(self.image_path + "settings_icon.png"), 
             size=(113,100)
         )
 
@@ -257,7 +257,10 @@ class SettingsViewBase:
 
     def build_filters_section(self):
 
-        self.button_img = load_img(self.image_path + "circles_icon1.png", size=(39,85))
+        self.button_img = load_img(
+            self.app.resource_path(self.image_path + "circles_icon1.png"), 
+            size=(39,85)
+        )
 
         self.preview_canvas, self.preview_img_obj = create_image_canvas(
             self.filters_frame,

@@ -19,6 +19,8 @@ class ManageBraillersViewBase:
 
         self.root.configure(bg=self.bg)
 
+        self.wifi_name_file = self.app.writeable_path("Data/wifi_name.txt")
+
         self.current_brailler_label = None
         self.current_brailler_name = None
         self.brailler_status_dots = {}
@@ -65,7 +67,7 @@ class ManageBraillersViewBase:
         )
 
         self.perk_braille_img = load_img(
-            self.image_path + "PERK_braille_Image_grey.png", 
+            self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"), 
             size=(302,110)
         )
 
@@ -265,11 +267,11 @@ class ManageBraillersViewBase:
             font=("Roboto Condensed", 12),
             bg=self.bg,
             fg=self.fg, 
-            command=self.submit
+            command=self.submit_rename
             )
         rename_button.pack(pady=5)
 
-    def submit(self):
+    def submit_rename(self):
         new_name = self.entry_var.get().strip()
         if new_name:
             # Update label text
@@ -282,13 +284,16 @@ class ManageBraillersViewBase:
             # Update current name reference
             self.current_brailler_name = new_name
     
+            if self.current_brailler_name in self.braillers:
+                index = self.braillers.index(self.current_brailler_name)
+                self.braillers[index] = new_name
         self.rename_popup.destroy()
     
     #Bottom actions
     def build_bottom_actions(self):
         # Manage Braillers row
         self.home_image = load_img(
-            self.image_path + "Home_icon.png", 
+            self.app.resource_path(self.image_path + "Home_icon.png"), 
             size=(95, 100)
         )
 
@@ -312,7 +317,7 @@ class ManageBraillersViewBase:
         )
 
         self.pair_all_image = load_img(
-            self.image_path + "pair_all_button.png", 
+            self.app.resource_path(self.image_path + "pair_all_button.png"), 
             size=(105, 44)
         )
         pair_all_button = make_interactive_image(
@@ -323,7 +328,7 @@ class ManageBraillersViewBase:
         )   
             
         self.bluetooth_image = load_img(
-            self.image_path + "Bluetooth_icon.png", 
+            self.app.resource_path(self.image_path + "Bluetooth_icon.png"), 
             size=(110, 98)
         )
 
@@ -349,11 +354,14 @@ class ManageBraillersViewBase:
         create_interactive_icon(
             bluetooth_icon, 
             pairing_label, 
-            (52, 50), 38
+            (52, 50), 38,
+            on_select=lambda: (
+                self.wifi_enable()
+            )
         )
 
         self.settings_image = load_img(
-            self.image_path + "settings_icon.png", 
+            self.app.resource_path(self.image_path + "settings_icon.png"), 
             size=(105, 97)
         )
         
@@ -386,6 +394,59 @@ class ManageBraillersViewBase:
                 else self.app.show_settings()
             )
         )    
+
+    def wifi_enable(self):
+        self.wifi_popup = tk.Toplevel(self.root)
+        self.wifi_popup.title("Wireless Connection")
+        self.wifi_popup.geometry("300x120")
+        self.wifi_popup.resizable(False, False)
+        self.wifi_popup.grab_set()  # Make it modal
+        self.wifi_popup.configure(bg=self.bg)
+    
+        title_label = tk.Label(
+            self.wifi_popup,
+            text="Enter Your Classroom's Room Number",
+            font=("Roboto Condensed", 14, "bold"),
+            bg=self.bg,
+            fg=self.fg
+        )
+        title_label.pack(pady=(10, 5))  # top padding, small gap below
+
+
+        # Create the entry variable and widget
+        self.entry_var = tk.StringVar()
+
+        entry = tk.Entry(
+            self.wifi_popup, 
+            textvariable=self.entry_var, 
+            font=("Roboto Condensed", 14),
+            bg=self.bg,
+            fg=self.fg,
+            insertbackground=self.fg
+        )
+        entry.pack(pady=5)
+        entry.focus_set()
+    
+        submit_button = tk.Button(
+            self.wifi_popup, 
+            text="Submit", 
+            font=("Roboto Condensed", 12),
+            bg=self.bg,
+            fg=self.fg, 
+            command=self.submit_wifi
+            )
+        submit_button.pack(pady=5)
+
+    
+    def submit_wifi(self):
+        wifi_name = self.entry_var.get().strip()
+
+        with open(self.wifi_name_file, "a", encoding="utf-8") as f:
+            f.write(wifi_name)
+
+        self.wifi_popup.destroy()
+
+        #LOTS OF STUFF HAPPENS HERE
 
     def pair_all(self):
                 for brailler in self.braillers:

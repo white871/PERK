@@ -39,8 +39,24 @@ class App:
             }
         }
 
+        font_path_1 = "EPICS BCI Code/Fonts/RobotoCondensed-Italic-VariableFont_wght.ttf"
+        font_path_2 = "EPICS BCI Code/Fonts/RobotoCondensed-VariableFont_wght.ttf"
+
+
+        self.load_fonts(font_path_1)
+        self.load_fonts(font_path_2)
+
         self.current_page = None
         self.show_manage_braillers()
+
+    def load_fonts(self, font_path):
+        import ctypes
+        import os
+
+        FR_PRIVATE = 0x10
+        
+        return ctypes.windll.gdi32.AddFontResourceExW(font_path, FR_PRIVATE, 0)
+        
 
     def clear(self):
         for widget in self.root.winfo_children():

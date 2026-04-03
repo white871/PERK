@@ -1,9 +1,9 @@
 import tkinter as tk
 import math
-from utility_functions import load_img, create_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
+from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
-class ManageBraillersView:
-    def __init__(self, root, app):
+class ManageBraillersViewBase:
+    def __init__(self, root, app, THEMES, theme_name="light"):
         self.root = root
         self.app = app
 
@@ -21,13 +21,14 @@ class ManageBraillersView:
 
         self.wifi_name_file = self.app.writeable_path("Data/wifi_name.txt")
 
-        self.currdent_brailler_label = None
+        self.current_brailler_label = None
         self.current_brailler_name = None
         self.brailler_status_dots = {}
+
         self.STATUS_RADIUS = 6
         self.STATUS_GREEN = "#93c47d"
         self.STATUS_RED = "#e06666"
-        self.brailler_status_dots={}
+
         self.braillers = [
             "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
             "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
@@ -35,18 +36,35 @@ class ManageBraillersView:
             "Mary's Brailler", "Jane's Brailler", "Josh's Brailler", 
             "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
         ]
+
         self.build_header()
-        self.build.brailler_list()
+        self.build_brailler_list()
         self.build_popup_menu()
         self.build_bottom_actions()
         self.initialize_status()
 
 #Header
     def build_header(self):
-        title_header_canvas = tk.Canvas(self.root, width=1035, height=110, background="#eeeeee", highlightthickness=0, relief="solid", bd=2)
+        title_header_canvas = tk.Canvas(
+            self.root, 
+            width=1035, height=110, 
+            background=self.header_bg, 
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth, 
+            relief="solid", 
+            bd=2
+        )
         title_header_canvas.place(x=5, y=5, anchor="nw")
 
-        create_label(self.root, 'nw', txt="PERK Brailler Digital Interface",  font_txt="Roboto Condensed", font_size=37, bold='bold', italic='roman', backround='#eeeeee', location=(50, 30))
+        title = self.label_fn(
+            self.root, 'nw', 
+            txt="PERK Brailler Digital Interface",  
+            font_txt="Roboto Condensed", 
+            font_size=37, 
+            bold='bold', italic='roman', 
+            backround=self.header_bg, 
+            location=(50, 30)
+        )
 
         self.perk_braille_img = load_img(
             self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"), 
@@ -67,7 +85,7 @@ class ManageBraillersView:
         available_height = bottom_limit - start_y
 
         max_columns = 3
-        total_rows = math.ceil(len(self.total_braillers) / max_columns)
+        total_rows = math.ceil(len(self.braillers) / max_columns)
 
         row_height = available_height / total_rows  
 
@@ -84,17 +102,18 @@ class ManageBraillersView:
             x = left_margin + col * column_width
             y = start_y + row * row_height
 
-            lbl = create_label(
+            lbl = self.label_fn(
                 self.root,
                 anchr="nw",
                 txt=name,
                 font_txt="Roboto Condensed",
                 font_size=18,
                 bold="normal",
-                backround="white",
+                backround=self.bg,
                 location=(x, y)
             )
 
+            lbl.is_bold = False
             lbl.config(cursor="hand2")
             lbl.bind("<Button-1>", lambda e, l=lbl, n=name: self.on_brailler_click(l, n))
 
@@ -102,7 +121,7 @@ class ManageBraillersView:
                 self.root,
                 width=self.STATUS_RADIUS * 2,
                 height=self.STATUS_RADIUS * 2,
-                bg="white",
+                bg=self.bg,
                 highlightthickness=0
             )
             dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
@@ -144,27 +163,28 @@ class ManageBraillersView:
         self.popup=create_display_frame(
             self.root, 
             rel_fill=(0,0),
-            bg="#eeeeee",
-            start_display=False
+            bg=self.bg,
+            start_display=False,
+            border_color=self.fg
         )
 
         self.popup.config(
-            highlightbackground="black",
-            highlightthickness=1
+            highlightbackground=self.hbg,
+            highlightthickness=self.hth
         )
 
         button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
         x_positions=[60, 250, 530, 730]
 
         for name, x in zip(button_names, x_positions):
-            lbl=create_label(
+            lbl= self.label_fn(
                 self.popup, 
                 anchr="nw",
                 txt=name, 
                 font_txt="Roboto Condensed", 
                 font_size=18, 
                 bold="normal", 
-                backround="#eeeeee",
+                backround=self.bg,
                 location=(x, 5)
                 )
             lbl.config(cursor="hand2")
@@ -206,7 +226,10 @@ class ManageBraillersView:
 
 #Button actions
     def open_live_feed(self):
-        self.app.show_text_page(self.current_brailler_name)
+        if self.inverted:
+            self.app.show_text_page_inverted(self.current_brailler_name)
+        else:
+            self.app.show_text_page(self.current_brailler_name)
 
     def disconnect_brailler(self):
         self.set_brailler_status(self.current_brailler_name, False)
@@ -216,16 +239,24 @@ class ManageBraillersView:
 
 #Rename device 
     def rename_device(self):
-        popup = tk.Toplevel(self.root)
-        popup.title("Rename Device")
-        popup.geometry("300x120")
-        popup.resizable(False, False)
-        popup.grab_set()  # Make it modal
+        self.rename_popup = tk.Toplevel(self.root)
+        self.rename_popup.title("Rename Device")
+        self.rename_popup.geometry("300x120")
+        self.rename_popup.resizable(False, False)
+        self.rename_popup.grab_set()  # Make it modal
+        self.rename_popup.configure(bg=self.bg)
     
         # Create the entry variable and widget
-        entry_var = tk.StringVar()
+        self.entry_var = tk.StringVar()
 
-        entry = tk.Entry(popup, textvariable=entry_var, font=("Roboto Condensed", 14))
+        entry = tk.Entry(
+            self.rename_popup, 
+            textvariable=self.entry_var, 
+            font=("Roboto Condensed", 14),
+            bg=self.bg,
+            fg=self.fg,
+            insertbackground=self.fg
+        )
         
         entry.pack(pady=10)
         entry.focus_set()
@@ -246,20 +277,19 @@ class ManageBraillersView:
             # Update label text
             self.current_brailler_label.config(text=new_name)
                     
-                    # Update brailler status dictionary
-                    if self.current_brailler_name in self.brailler_status_dots:
-                        self.brailler_status_dots[new_name]=\
-                            self.brailler_status_dots.pop(self.current_brailler_name)
-                    # Update current name reference
-                    self.current_brailler_name = new_name
+            # Update brailler status dictionary
+            if self.current_brailler_name in self.brailler_status_dots:
+                self.brailler_status_dots[new_name]=\
+                    self.brailler_status_dots.pop(self.current_brailler_name)
+            # Update current name reference
+            self.current_brailler_name = new_name
     
             if self.current_brailler_name in self.braillers:
                 index = self.braillers.index(self.current_brailler_name)
                 self.braillers[index] = new_name
         self.rename_popup.destroy()
     
-        tk.Button(popup, text="Rename", font=("Roboto Condensed", 12), command=submit).pack(pady=5)
-#Bottom actions
+    #Bottom actions
     def build_bottom_actions(self):
         # Manage Braillers row
         self.home_image = load_img(

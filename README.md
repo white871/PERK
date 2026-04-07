@@ -45,3 +45,7 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - You can look at the documentation if you want to install other voices, however I wouldn't recommend running high quality TTS models since they will take a while to load when running the audio python script. 
 
 #### That's it for the Raspberry Pi installation! Simple, right?
+
+#### Setting up an .exe file
+- Make sure you have PyInstaller downloaded using pip install PyInstaller
+- After, run this command in a terminal with the directory open: python -m PyInstaller --onefile --add-data "Data;Data" --add-data "Fonts;Fonts" --add-data "Images;Images" main.py

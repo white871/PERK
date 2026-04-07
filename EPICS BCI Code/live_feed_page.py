@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import random
 import json
+import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
 class IndividualBraillerViewBase:
@@ -27,10 +28,10 @@ class IndividualBraillerViewBase:
         self.current_mode = "live"
         self.last_len = 0
 
-        self.text_file_path = self.app.writeable_path("Data/brailler_output.txt")
-        self.braille_file_path = self.app.writeable_path("Data/braille_binary.txt")
-        self.translations_path = self.app.writeable_path("Data/translations.txt")
-        self.enabled_contractions_path = self.app.writeable_path("Data/enabled_contractions.txt")
+        self.text_file_path = self.app.ensure_data_file("Data/brailler_output.txt")
+        self.braille_file_path = self.app.ensure_data_file("Data/braille_binary.txt")
+        self.translations_path = self.app.ensure_data_file("Data/translations.txt")
+        self.enabled_contractions_path = self.app.ensure_data_file("Data/enabled_contractions.txt")
 
         self.after_id1 = None
         self.after_id2 = None
@@ -92,7 +93,7 @@ class IndividualBraillerViewBase:
         )
 
         self.perk_braille_img = load_img(
-            self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"), 
+            os.path.join(self.image_path, "PERK_Braille_Image_grey.png"), 
             size=(302,110)
         )
     
@@ -132,9 +133,9 @@ class IndividualBraillerViewBase:
 
         # Choose file depending on mode
         if self.current_mode == "live":
-            file_path =self.app.resource_path( "Data/brailler_output.txt")
+            file_path =self.app.writeable_path("Data/brailler_output.txt")
         elif self.current_mode == "braille":
-            file_path = self.app.resource_path("Data/braille_binary.txt")
+            file_path = self.app.writeable_path("Data/braille_binary.txt")
 
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -300,12 +301,12 @@ class IndividualBraillerViewBase:
 
     def build_navigation_buttons(self):
         self.triangle_image_1 = load_img(
-            self.app.resource_path(self.image_path + "triangles_icon.png"), 
+            os.path.join(self.image_path, "triangles_icon.png"), 
             size=(60,115)
         )
 
         self.triangle_image_2 = load_img(
-            self.app.resource_path(self.image_path + "triangles_icon_flipped.png"), 
+            os.path.join(self.image_path, "triangles_icon_flipped.png"), 
             size=(60,115)
         )
 
@@ -363,7 +364,7 @@ class IndividualBraillerViewBase:
         )
 
         self.Brailler_connected_image = load_img(
-            self.app.resource_path(self.image_path + "Brailler_Connected_Icon.png"), 
+            os.path.join(self.image_path, "Brailler_Connected_Icon.png"), 
             size=(100,100)
         )
 
@@ -385,7 +386,7 @@ class IndividualBraillerViewBase:
         )
 
         self.online_dot = load_img(
-            self.app.resource_path(self.image_path + "green_circle.png"), 
+            os.path.join(self.image_path, "green_circle.png"), 
             size=(40,40)
         )
 
@@ -398,7 +399,7 @@ class IndividualBraillerViewBase:
 
         
         self.home_image = load_img(
-            self.app.resource_path(self.image_path + "Home_icon.png"), 
+            os.path.join(self.image_path, "Home_icon.png"), 
             size=(105,110)
         )
 
@@ -427,7 +428,7 @@ class IndividualBraillerViewBase:
         )
 
         self.settings_image = load_img(
-            self.app.resource_path(self.image_path + "settings_icon.png"), 
+            os.path.join(self.image_path, "settings_icon.png"), 
             size=(113,100)
         )
 
@@ -498,7 +499,7 @@ class IndividualBraillerViewBase:
         button_canvas.place(x=0, y=422)
 
         self.new_file_img = load_img(
-            self.app.resource_path(self.image_path + "New_file_button.png"), 
+            os.path.join(self.image_path, "New_file_button.png"), 
             size=(120, 35)
         )
 
@@ -510,7 +511,7 @@ class IndividualBraillerViewBase:
         )
 
         self.export_text_file_img = load_img(
-            self.app.resource_path(self.image_path + "export_text_file_button.png"), 
+            os.path.join(self.image_path, "export_text_file_button.png"), 
             size=(161, 37)
         )
 
@@ -522,12 +523,12 @@ class IndividualBraillerViewBase:
         )
 
         self.braille_selection_box_img = load_img(
-            self.app.resource_path(self.image_path + "braille_selection_box_unselected.png"), 
+            os.path.join(self.image_path, "braille_selection_box_unselected.png"), 
             size=(113, 39)
         )
 
         self.braille_selection_box_img_2 = load_img(
-            self.app.resource_path(self.image_path + "braille_selection_box_selected.png"), 
+            os.path.join(self.image_path, "braille_selection_box_selected.png"), 
             size=(105, 42)
         )
 

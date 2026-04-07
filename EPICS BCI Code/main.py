@@ -26,7 +26,7 @@ class App:
                 "hth": 1,
                 "fg": "#000000",
                 "label": create_label,
-                "image_path": "Images/",
+                "image_path": self.resource_path("Images"),
                 "inverted": False
             },
             "dark": {
@@ -36,7 +36,7 @@ class App:
                 "hth": 1,
                 "fg": "#FFFFFF",
                 "label": create_inverted_label,
-                "image_path": "Images/Inverted Images/",
+                "image_path": self.resource_path("Images/Inverted Images"),
                 "inverted": True
             }
         }
@@ -51,16 +51,33 @@ class App:
         self.current_page = None
         self.show_manage_braillers()
 
-    def writable_path(self, relative_path):
+    def writeable_path(self, relative_path):
         base_path = os.path.dirname(sys.executable)  # folder where exe is
         return os.path.join(base_path, relative_path)
 
     def resource_path(self, relative_path):
-        try:
-            base_path = sys._MEIPASS  # PyInstaller temp dir
-        except Exception:
-            base_path = os.path.abspath(".")
+        base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
         return os.path.join(base_path, relative_path)
+
+    def ensure_data_file(self, relative_path):
+        writable = self.writeable_path(relative_path)
+        resource = self.resource_path(relative_path)
+
+        # Make sure folder exists
+        os.makedirs(os.path.dirname(writable), exist_ok=True)
+
+         # If file doesn't exist outside → copy it from EXE
+        if not os.path.exists(writable):
+            try:
+                with open(resource, "r", encoding="utf-8") as src:
+                    content = src.read()
+            except Exception:
+                content = ""  # fallback if something goes wrong
+
+            with open(writable, "w", encoding="utf-8") as dst:
+                dst.write(content)
+
+        return writable
 
     def load_fonts(self, font_path):
         import ctypes

@@ -1,9 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
-import tkinter.font as tkfont
-from PIL import Image, ImageTk, ImageOps
-import random
-import json
+import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame_header, create_display_frame
 
 #class BraillerSettings:
@@ -63,7 +59,7 @@ class SettingsViewBase:
         )
 
         self.perk_braille_img = load_img(
-            self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"),
+            os.path.join(self.image_path, "PERK_Braille_Image_grey.png"),
             size=(302,110)
         )
 
@@ -109,7 +105,7 @@ class SettingsViewBase:
     def build_navigation_buttons(self):
 
         self.home_image = load_img(
-            self.app.resource_path(self.image_path + "Home_icon.png"),
+            os.path.join(self.image_path, "Home_icon.png"),
             size=(105,110)
         )
 
@@ -138,7 +134,7 @@ class SettingsViewBase:
         )
 
         self.settings_image = load_img(
-            self.app.resource_path(self.image_path + "settings_icon.png"), 
+            os.path.join(self.image_path, "settings_icon.png"), 
             size=(113,100)
         )
 
@@ -258,7 +254,7 @@ class SettingsViewBase:
     def build_filters_section(self):
 
         self.button_img = load_img(
-            self.app.resource_path(self.image_path + "circles_icon1.png"), 
+            os.path.join(self.image_path, "circles_icon1.png"), 
             size=(39,85)
         )
 

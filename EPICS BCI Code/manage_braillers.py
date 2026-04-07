@@ -1,5 +1,6 @@
 import tkinter as tk
 import math
+import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
 class ManageBraillersViewBase:
@@ -19,7 +20,7 @@ class ManageBraillersViewBase:
 
         self.root.configure(bg=self.bg)
 
-        self.wifi_name_file = self.app.writeable_path("Data/wifi_name.txt")
+        self.wifi_name_file = self.app.ensure_data_file("Data/wifi_name.txt")
 
         self.current_brailler_label = None
         self.current_brailler_name = None
@@ -67,7 +68,7 @@ class ManageBraillersViewBase:
         )
 
         self.perk_braille_img = load_img(
-            self.app.resource_path(self.image_path + "PERK_Braille_Image_grey.png"), 
+            os.path.join(self.image_path, "PERK_Braille_Image_grey.png"), 
             size=(302,110)
         )
 
@@ -293,7 +294,7 @@ class ManageBraillersViewBase:
     def build_bottom_actions(self):
         # Manage Braillers row
         self.home_image = load_img(
-            self.app.resource_path(self.image_path + "Home_icon.png"), 
+            os.path.join(self.image_path, "Home_icon.png"), 
             size=(95, 100)
         )
 
@@ -317,7 +318,7 @@ class ManageBraillersViewBase:
         )
 
         self.pair_all_image = load_img(
-            self.app.resource_path(self.image_path + "pair_all_button.png"), 
+            os.path.join(self.image_path, "pair_all_button.png"), 
             size=(105, 44)
         )
         pair_all_button = make_interactive_image(
@@ -328,7 +329,7 @@ class ManageBraillersViewBase:
         )   
             
         self.bluetooth_image = load_img(
-            self.app.resource_path(self.image_path + "Bluetooth_icon.png"), 
+            os.path.join(self.image_path, "Bluetooth_icon.png"), 
             size=(110, 98)
         )
 
@@ -361,7 +362,7 @@ class ManageBraillersViewBase:
         )
 
         self.settings_image = load_img(
-            self.app.resource_path(self.image_path + "settings_icon.png"), 
+            os.path.join(self.image_path, "settings_icon.png"), 
             size=(105, 97)
         )
         

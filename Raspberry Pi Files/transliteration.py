@@ -15,6 +15,15 @@ def powerDown():
     subprocess.run('sudo shutdown now')
     
 def networkSearch():
+    subprocess.run('( speaker-test -t sine -f 1500 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
+    subprocess.run('( speaker-test -t sine -f 1500 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
+    out = subprocess.check_output('sudo nmcli -t -f SSID,SIGNAL dev wifi list')
+    for net in out.split("\n"):
+        net = net.split(":")
+        if net[0][0:5] == "perk-":
+            subprocess.run(f'sudo nmcli dev wifi connect SSID {net[0]} password perk12345')
+            return
+    
     
 def HallEffectRead(hallEffect, out):
     outputnum = ""
@@ -54,7 +63,7 @@ while True:
     output = HallEffectRead(hallEffect, mux_out)
     newline = int(output[0])
     space = int(output[4])
-    keys = output[1:3] + output[5:7]
+    keys = output[3] + output[2] + output[1] + output[5:8]
     if space:
         space_press = 1
     elif space_press:

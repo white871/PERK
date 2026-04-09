@@ -34,11 +34,11 @@ write 0x40 0x00 # Unmute DAC channels, ind. volume control
 write 0x41 0xD4 # -22db Left # EDIT FOR VOLUME CONTROL
 write 0x42 0xD4 # -22db Right # EDIT FOR VOLUME CONTROL
 
-write 0x43 0x80 # Headset det. enabled
+#write 0x43 0x80 # Headset det. enabled
 
 # Configure INT1 -> GPIO1 for Headset Detection Interrupt
-write 0x30 0x80 # INT1 set to headset detection
-write 0x33 0x14 # INT1 -> GPIO 1
+#write 0x30 0x80 # INT1 set to headset detection
+#write 0x33 0x14 # INT1 -> GPIO 1
 
 write 0x00 0x01 # Switch to Page 1
 

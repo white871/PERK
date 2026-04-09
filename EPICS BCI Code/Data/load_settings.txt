@@ -1,4 +1,4 @@
 {
     "inverted": true,
-    "current_brailler": "Nash's Brailler"
+    "current_brailler": "Lucy's Brailler"
 }

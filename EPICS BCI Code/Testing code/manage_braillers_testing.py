@@ -71,14 +71,14 @@ class ManageBraillersViewBase:
 
         self.perk_braille_img = load_img(
             os.path.join(self.image_path, "PERK_Braille_Image_grey.png"), 
-            size=(302,110)
+            size=(302,108)
         )
 
         perk_logo = create_label(
             self.root, 'nw', 
             img=self.perk_braille_img, 
             bd_width=0, 
-            location=(695, 6)
+            location=(695, 8)
         )
 
 # Brailler list

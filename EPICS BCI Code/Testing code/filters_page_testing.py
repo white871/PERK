@@ -60,14 +60,14 @@ class SettingsViewBase:
 
         self.perk_braille_img = load_img(
             os.path.join(self.image_path, "PERK_Braille_Image_grey.png"),
-            size=(302,110)
+            size=(302,108)
         )
 
         perk_logo = self.label_fn(
             self.root, 'nw',
             img=self.perk_braille_img,
             bd_width=0,
-            location=(695, 6)
+            location=(695, 8)
         )
 
     def build_main_frames(self):

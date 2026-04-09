@@ -11,7 +11,7 @@ class App:
     def __init__(self, root):
         self.root = root
 
-        self.settings_path = self.app.ensure_data_file("Data/load_settings.txt")
+        self.settings_path = self.ensure_data_file("Data/load_settings.txt")
 
         try:
             with open(self.settings_path, "r", encoding="utf-8") as f:
@@ -96,57 +96,45 @@ class App:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    def show_settings(self):
-        self.clear()
-        self.state["inverted"] = False
-        self.state["current_brailler"] = None
+    def save_settings(self, inverted, brailler):
+        self.state["inverted"] = inverted
+        self.state["current_brailler"] = brailler
         with open(self.settings_path, "w", encoding="utf-8") as f:
             json.dump(self.state, f, indent=4, ensure_ascii=False)
+
+    def show_settings(self):
+        self.clear()
+        self.save_settings(False, None)
         self.root.geometry("1050x700")
         SettingsView(self.root, self, self.THEMES)
 
     def show_settings_inverted(self):
         self.clear()
-        self.state["inverted"] = True
-        self.state["current_brailler"] = None
-        with open(self.settings_path, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=4, ensure_ascii=False)
+        self.save_settings(True, None)
         self.root.geometry("1050x700")
         SettingsViewInverted(self.root, self, self.THEMES)
 
     def show_manage_braillers(self):
         self.clear()
-        self.state["inverted"] = False
-        self.state["current_brailler"] = None
-        with open(self.settings_path, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=4, ensure_ascii=False)
+        self.save_settings(False, None)
         self.root.geometry("1050x750")
         ManageBraillersView(self.root, self, self.THEMES)
 
     def show_manage_braillers_inverted(self):
         self.clear()
-        self.state["inverted"] = True
-        self.state["current_brailler"] = None
-        with open(self.settings_path, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=4, ensure_ascii=False)
+        self.save_settings(True, None)
         self.root.geometry("1050x750")
         ManageBraillersViewInverted(self.root, self, self.THEMES)
 
     def show_text_page(self, brailler_name):
         self.clear()
-        self.state["inverted"] = False
-        self.state["current_brailler"] = brailler_name
-        with open(self.settings_path, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=4, ensure_ascii=False)
+        self.save_settings(False, brailler_name)
         self.root.geometry("1050x700")
         IndividualBraillerView(self.root, self, brailler_name, self.THEMES)
 
     def show_text_page_inverted(self, brailler_name):
         self.clear()
-        self.state["inverted"] = True
-        self.state["current_brailler"] = brailler_name
-        with open(self.settings_path, "w", encoding="utf-8") as f:
-            json.dump(self.state, f, indent=4, ensure_ascii=False)
+        self.save_settings(True, brailler_name)
         self.root.geometry("1050x700")
         IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES)
 

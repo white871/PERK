@@ -133,10 +133,13 @@ class IndividualBraillerViewBase:
 
         # Choose file depending on mode
         if self.current_mode == "live":
-            file_path =self.app.writeable_path("Data/brailler_output.txt")
+            file_path = self.app.writeable_path("Data/brailler_output.txt")
         elif self.current_mode == "braille":
             file_path = self.app.writeable_path("Data/braille_binary.txt")
 
+        ###################################################
+        #####################################################
+        #EDIT HERE#### add function to get file from pi###############
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read().strip()
@@ -163,7 +166,7 @@ class IndividualBraillerViewBase:
         # Schedule next update after 150 ms
         self.after_id3 = self.root.after(500, self.update_live_feed)
 
-  ###  
+    ####################EDIT HERE ##############remove these two functions that simulate output  
     def simulate_brailler_output(self):
         """Simulate text arriving from Brailler device."""
         char = random.choice(
@@ -193,8 +196,8 @@ class IndividualBraillerViewBase:
 
         # Schedule next write
         self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)
-####
-    
+
+    ###############EDIT HERE ############ somehow make it so new file action also clears file on client raspberry pi
     def new_file_action(self):
         #Making sure the user intended to click the new file button
         confirm = messagebox.askyesno(

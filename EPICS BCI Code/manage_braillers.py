@@ -30,6 +30,8 @@ class ManageBraillersViewBase:
         self.STATUS_GREEN = "#93c47d"
         self.STATUS_RED = "#e06666"
 
+
+        #########EDIT HERE################ delete this once more function is added
         self.braillers = [
             "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
             "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
@@ -96,6 +98,7 @@ class ManageBraillersViewBase:
         usable_width = window_width - left_margin - right_margin
         column_width = usable_width / max_columns
 
+        #########EDIT HERE######## make it so it only populates this list once the start process is created
         for i, name in enumerate(self.braillers):
             row = i // max_columns
             col = i % max_columns
@@ -208,6 +211,7 @@ class ManageBraillersViewBase:
         color = self.STATUS_GREEN if connected else self.STATUS_RED
         canvas.itemconfig(dot, fill=color)
     
+    ############EDIT HERE############ make it so it constantly checks status of each device based on if reachable on host pis wifi
     def initialize_status(self):
         self.set_brailler_status("Mark's Brailler", False)
         self.set_brailler_status("Nash's Brailler", False)
@@ -238,7 +242,7 @@ class ManageBraillersViewBase:
     def pair_brailler(self):
         self.set_brailler_status(self.current_brailler_name, True)
 
-#Rename device 
+    ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
     def rename_device(self):
         self.rename_popup = tk.Toplevel(self.root)
         self.rename_popup.title("Rename Device")
@@ -396,6 +400,7 @@ class ManageBraillersViewBase:
             )
         )    
 
+    ###########EDIT HERE######## make it so when you do this it actually ssh s to the pi to start the wifi using wifi name 
     def wifi_enable(self):
         self.wifi_popup = tk.Toplevel(self.root)
         self.wifi_popup.title("Wireless Connection")
@@ -449,6 +454,7 @@ class ManageBraillersViewBase:
 
         #LOTS OF STUFF HAPPENS HERE
 
+    ############EDIT HERE#########  get rid of pair all button
     def pair_all(self):
                 for brailler in self.braillers:
                     self.set_brailler_status(brailler, True)

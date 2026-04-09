@@ -77,7 +77,10 @@ while True:
         if lastWord and keys == "000000": 
             TTS(lastWord, voice)
         space_press = 0
-        binArray[current_line] += keys
+        if current_line >= len(binArray):
+            binArray.append(keys)
+        else:
+            binArray[current_line] += keys
         with open("tempbin.txt", 'w') as f:
             for line in binArray:
                 f.write(line + '\n')

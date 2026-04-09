@@ -8,22 +8,25 @@ import wave
 from piper import PiperVoice
 
 from transliterateBinary import transliterateBin
+def beep_beep(freq1, freq2):
+    subprocess.run(f'( speaker-test -t sine -f {freq1} )& pid=$! ; sleep 0.2s ; kill -9 $pid')
+    subprocess.run(f'( speaker-test -t sine -f {freq2} )& pid=$! ; sleep 0.2s ; kill -9 $pid')
 
 def powerDown():
-    subprocess.run('( speaker-test -t sine -f 1500 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
-    subprocess.run('( speaker-test -t sine -f 1000 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
+    beep_beep(1500, 1000)
     subprocess.run('sudo shutdown now')
     
 def networkSearch():
-    subprocess.run('( speaker-test -t sine -f 1500 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
-    subprocess.run('( speaker-test -t sine -f 1500 )& pid=$! ; sleep 0.2s ; kill -9 $pid')
+    beep_beep(1500, 1500)
     out = subprocess.check_output('sudo nmcli -t -f SSID,SIGNAL dev wifi list')
     for net in out.split("\n"):
         net = net.split(":")
         if net[0][0:5] == "perk-":
             subprocess.run(f'sudo nmcli dev wifi connect SSID {net[0]} password perk12345')
+            beep_beep(1000, 1500)
             return
-    
+    beep_beep(1000,1000)
+
     
 def HallEffectRead(hallEffect, out):
     outputnum = ""
@@ -54,6 +57,10 @@ hallEffect = [DigitalOutputDevice(f"BOARD{pin}", pull_up = True) for pin in [31,
 mux_out = DigitalInputDevice(f"BOARD36", pull_up = True)
 on_off = Button(23)
 pair = Button(24)
+
+on_off.when_pressed = powerDown
+pair.when_pressed = networkSearch
+
 binArray = []
 space_press = 0
 line_press = 0

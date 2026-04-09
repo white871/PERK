@@ -1,0 +1,4 @@
+{
+    "inverted": False,
+    "current_brailler": None
+}

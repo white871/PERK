@@ -1,0 +1,49 @@
+{
+    "py1": {
+        "ip": "192.168.1.10",
+        "status": "UNREACHABLE"
+    },
+    "py2": {
+        "ip": "192.168.1.08",
+        "status": "UNREACHABLE"
+    },
+    "py3": {
+        "status": "UNREACHABLE"
+    },
+    "py4": {
+        "status": "UNREACHABLE"
+    },
+    "py5": {
+        "status": "UNREACHABLE"
+    },
+    "py6": {
+        "status": "UNREACHABLE"
+    },
+    "py7": {
+        "status": "UNREACHABLE"
+    },
+    "py8": {
+        "status": "UNREACHABLE"
+    },
+    "py9": {
+        "status": "UNREACHABLE"
+    },
+    "py10": {
+        "status": "UNREACHABLE"
+    },
+    "py11": {
+        "status": "UNREACHABLE"
+    },
+    "py12": {
+        "status": "UNREACHABLE"
+    },
+    "py13": {
+        "status": "UNREACHABLE"
+    },
+    "py14": {
+        "status": "UNREACHABLE"
+    },
+    "py15": {
+        "status": "UNREACHABLE"
+    }
+}

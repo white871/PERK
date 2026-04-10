@@ -1,6 +1,9 @@
 import tkinter as tk
 import math
 import os
+import paramiko
+import json
+from scp import SCPClient
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
 class ManageBraillersViewBase:
@@ -21,6 +24,8 @@ class ManageBraillersViewBase:
         self.root.configure(bg=self.bg)
 
         self.wifi_name_file = "EPICS BCI Code/Data/wifi_name.txt"
+        self.device_registry_path = "EPICS BCI Code/Data/device_registry.json"
+        self.device_state_path = "EPICS BCI Code/Data/device_state.json"
 
         self.current_brailler_label = None
         self.current_brailler_name = None
@@ -30,21 +35,47 @@ class ManageBraillersViewBase:
         self.STATUS_GREEN = "#93c47d"
         self.STATUS_RED = "#e06666"
 
+        self.CLIENT_USER = "perk"
+        self.CLIENT_PASS = "perk"
 
-        #########EDIT HERE################ delete this once more function is added
-        self.braillers = [
-            "Mark's Brailler", "Nash's Brailler", "Lucy's Brailler",
-            "Diana's Brailler", "Mohammad's Brailler", "Sarvesh's Brailler",
-            "Ayona's Brailler", "Felix's Brailler", "Joe's Brailler", 
-            "Mary's Brailler", "Jane's Brailler", "Josh's Brailler", 
-            "Chloe's Brailler", "Ashley's Brailler", "Gina's Brailler"
-        ]
+        self.ssh = None
 
+        self.HOST = "perkhost.local"   # or IP
+        self.USER = "perkhost"
+        self.PASS = "perk"
+
+        self.load_registry()
+        self.load_state()
         self.build_header()
         self.build_brailler_list()
         self.build_popup_menu()
         self.build_bottom_actions()
-        self.initialize_status()
+
+        self.refresh_ui() 
+        self.sync_devices()
+
+
+    def load_registry(self):
+        try:
+            with open(self.device_registry_path, "r") as f:
+                self.registry = json.load(f)
+        except:
+            self.registry = {}
+
+    def load_state(self):
+        try:
+            with open(self.device_state_path, "r") as f:
+                 self.state = json.load(f)
+        except:
+            self.state = {}
+
+    def save_registry(self):
+        with open(self.device_registry_path, "w") as f:
+            json.dump(self.registry, f, indent=4)
+                
+    def save_state(self):
+        with open(self.device_state_path, "w") as f:
+            json.dump(self.state, f, indent=4)
 
 #Header
     def build_header(self):
@@ -81,66 +112,113 @@ class ManageBraillersViewBase:
             location=(695, 8)
         )
 
+    def create_brailler_row(self, device_id, name, x, y):
+        lbl = self.label_fn(
+            self.brailler_frame,
+            anchr="n",
+            txt=name,
+            font_txt="Roboto Condensed",
+            font_size=18,
+            bold="normal",
+            backround=self.bg,
+            location=(x, y)
+        )
+
+        lbl.config(cursor="hand2")
+        lbl.bind("<Button-1>", lambda e: self.on_brailler_click(lbl, name, device_id))
+
+        dot_canvas = tk.Canvas(
+            self.brailler_frame,
+            width=self.STATUS_RADIUS * 2,
+            height=self.STATUS_RADIUS * 2,
+            bg=self.bg,
+            highlightthickness=0
+        )
+        dot_canvas.place(x=x + 120, y=y +10, anchor="nw")
+
+        dot = dot_canvas.create_oval(
+            0, 0,
+            self.STATUS_RADIUS * 2,
+            self.STATUS_RADIUS * 2,
+            fill=self.STATUS_RED,
+            outline=""
+        )
+
+        self.brailler_status_dots[device_id] = (dot_canvas, dot)
+
+        self.set_brailler_status(device_id, "UNREACHABLE")
+
+        return lbl
+
 # Brailler list
     def build_brailler_list(self):
-        start_y = 250
-        bottom_limit = 550   # where bottom buttons start
+        self.brailler_frame = tk.Frame(
+            self.root,
+            bg=self.bg,
+            highlightbackground=self.fg,   # border color
+            highlightthickness=2           # border thickness
+        )
+        self.brailler_frame.place(x=80, y=240, width=890, height=280)
+                
+        start_y = 240
+        bottom_limit = 500   # where bottom buttons start
         available_height = bottom_limit - start_y
 
         max_columns = 3
-        total_rows = math.ceil(len(self.braillers) / max_columns)
+        total_rows = math.ceil(len(self.registry) / max_columns)
 
         row_height = available_height / total_rows  
 
-        window_width = 1250
-        left_margin = 110
-        right_margin = 110
+        window_width = 890
+        left_margin = 20
+        right_margin = 20
         usable_width = window_width - left_margin - right_margin
         column_width = usable_width / max_columns
 
         #########EDIT HERE######## make it so it only populates this list once the start process is created
-        for i, name in enumerate(self.braillers):
+        for i, (device_id, info) in enumerate(self.registry.items()):
+            name = info.get("name", device_id)
+
             row = i // max_columns
             col = i % max_columns
 
-            x = left_margin + col * column_width
-            y = start_y + row * row_height
+            x = col * column_width + 0.5 * column_width -10
+            y = row * row_height + 20 
 
-            lbl = self.label_fn(
-                self.root,
-                anchr="nw",
-                txt=name,
-                font_txt="Roboto Condensed",
-                font_size=18,
-                bold="normal",
-                backround=self.bg,
-                location=(x, y)
-            )
+            self.create_brailler_row(device_id, name, x, y)
 
-            lbl.is_bold = False
-            lbl.config(cursor="hand2")
-            lbl.bind("<Button-1>", lambda e, l=lbl, n=name: self.on_brailler_click(l, n))
+        # self.root.after(100, self.refresh_ui)
 
-            dot_canvas = tk.Canvas(
-                self.root,
-                width=self.STATUS_RADIUS * 2,
-                height=self.STATUS_RADIUS * 2,
-                bg=self.bg,
-                highlightthickness=0
-            )
-            dot_canvas.place(x=x - 20, y=y + 5, anchor="nw")
+    def add_brailler_to_ui(self, device_id):
+        if device_id not in self.registry:
+            return
 
-            dot = dot_canvas.create_oval(
-                0,0,
-                self.STATUS_RADIUS * 2,
-                self.STATUS_RADIUS * 2,
-                outline=""
-            )
 
-            self.brailler_status_dots[name] = (dot_canvas, dot)
+        # already exists in UI
+        if device_id in self.brailler_status_dots:
+            return
+
+        index = len(self.brailler_status_dots)
+
+        max_columns = 3
+        start_y = 250
+        left_margin = 110
+        window_width = 1250
+        column_width = (window_width - 220) / max_columns
+        row_height = 100  # simple fixed spacing (important fix)
+
+        row = index // max_columns
+        col = index % max_columns
+
+        x = left_margin + col * column_width
+        y = start_y + row * row_height
+
+        name = self.registry[device_id]["name"]
+
+        self.create_brailler_row(device_id, name, x, y)    
 
 #Brailler click
-    def on_brailler_click(self, label, name):
+    def on_brailler_click(self, label, name, device_id):
         # If clicking the same label → unbold + hide popup
         if self.current_brailler_label == label:
             label.config(font=("Roboto Condensed", 18, "normal", "roman"))
@@ -156,9 +234,10 @@ class ManageBraillersViewBase:
 
         # Bold new one
         label.config(font=("Roboto Condensed", 18, "bold"))
-        self.popup.place(x=50, y=540, width=950, height=50)
+        self.popup.place(x=80, y=540, width=890, height=50)
         self.popup.tkraise()
         self.current_brailler_label = label
+        self.current_brailler_id = device_id
         self.current_brailler_name = name
 
 #Popup menu
@@ -174,11 +253,11 @@ class ManageBraillersViewBase:
 
         self.popup.config(
             highlightbackground=self.hbg,
-            highlightthickness=self.hth
+            highlightthickness=2
         )
 
-        button_names= "Live Feed", "Disconnect Brailler", "Pair Device", "Rename Device"
-        x_positions=[60, 250, 530, 730]
+        button_names= "Live Feed", "Contractions", "Remove Device", "Rename Device"
+        x_positions=[30, 220, 450, 700]
 
         for name, x in zip(button_names, x_positions):
             lbl= self.label_fn(
@@ -195,39 +274,113 @@ class ManageBraillersViewBase:
 
             if name == "Live Feed":
                 lbl.bind("<Button-1>", lambda e: self.open_live_feed())    
-            if name == "Disconnect Brailler":
-                lbl.bind("<Button-1>", lambda e: self.disconnect_brailler())   
-            if name == "Pair Device":
-                lbl.bind("<Button-1>", lambda e: self.pair_brailler()) 
+            if name == "Contractions":
+                lbl.bind("<Button-1>", lambda e: self.open_contractions())   
+            if name == "Remove Device":
+                lbl.bind("<Button-1>", lambda e: self.remove_device()) 
             if name == "Rename Device":
                 lbl.bind("<Button-1>", lambda e: self.rename_device())     
 
 #Status management
-    def set_brailler_status(self, name, connected):
-        if name not in self.brailler_status_dots:
+    def set_brailler_status(self, device_id, status):
+        if device_id not in self.brailler_status_dots:
             return
 
-        canvas, dot = self.brailler_status_dots[name]
+        canvas, dot = self.brailler_status_dots[device_id]
+       
+        connected = (status == "REACHABLE")
+
         color = self.STATUS_GREEN if connected else self.STATUS_RED
+        
         canvas.itemconfig(dot, fill=color)
     
-    ############EDIT HERE############ make it so it constantly checks status of each device based on if reachable on host pis wifi
-    def initialize_status(self):
-        self.set_brailler_status("Mark's Brailler", False)
-        self.set_brailler_status("Nash's Brailler", False)
-        self.set_brailler_status("Ayona's Brailler", True)
-        self.set_brailler_status("Joe's Brailler", False)
-        self.set_brailler_status("Lucy's Brailler", True)
-        self.set_brailler_status("Diana's Brailler", False)
-        self.set_brailler_status("Mohammad's Brailler", True)
-        self.set_brailler_status("Sarvesh's Brailler", True)
-        self.set_brailler_status("Felix's Brailler", False)
-        self.set_brailler_status("Mary's Brailler", False)
-        self.set_brailler_status("Jane's Brailler", True)
-        self.set_brailler_status("Josh's Brailler", False)
-        self.set_brailler_status("Chloe's Brailler", True)
-        self.set_brailler_status("Ashley's Brailler", False)
-        self.set_brailler_status("Gina's Brailler", True)
+    def sync_devices(self):
+        self.scan_and_update_devices()
+
+        self.refresh_ui()
+
+        # self.root.after(5000, self.sync_devices)
+
+    def refresh_ui(self):
+        for device_id in self.registry:
+            status = self.state.get(device_id, {}).get("status", "UNREACHABLE")
+            self.set_brailler_status(device_id, status)
+
+    def scan_and_update_devices(self):
+        for device_id in self.registry:
+            if device_id not in self.state:
+                self.state[device_id] = {}
+
+            self.state[device_id]["status"] = "UNREACHABLE"
+
+        scan_cmd = "ip neigh show dev wlan0"
+        out = self.run_command(scan_cmd)
+
+        self.ips = []
+        self.statuses = []
+
+        for line in out.splitlines():
+            parts = line.split()
+
+            if len(parts) < 3:
+                continue
+
+            self.ips.append(parts[0])
+            self.statuses.append(parts[-1])
+
+
+        for i in range(len(self.ips)):
+            client = None
+            scp = None
+            
+            try:
+                client = paramiko.SSHClient()
+                client.load_system_host_keys()
+                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                
+                client.connect(
+                    self.ips[i], 
+                    username=self.CLIENT_USER, 
+                    password=self.CLIENT_PASS, 
+                    timeout=2
+                )
+
+                scp = SCPClient(client.get_transport())
+                    
+                # Download a file
+                scp.get('device_id.txt', f"{self.ips[i]}_name.txt")
+
+                # read it
+                with open(f"{self.ips[i]}_name.txt", "r") as f:
+                    device_id = f.read().strip()
+
+                if not device_id:
+                    continue
+
+                self.state[device_id] = {
+                    "ip": self.ips[i],
+                    "status": self.statuses[i]
+                }
+
+                if device_id not in self.registry:
+                    self.registry[device_id] = {
+                        "name": device_id
+                    }
+                
+                    self.add_brailler_to_ui(device_id)
+
+            except (paramiko.SSHException, FileNotFoundError, Exception):
+                # ignore devices that don't respond
+                continue
+
+            finally:
+                if scp:
+                    scp.close()
+                if client:
+                    client.close()
+
+        self.save_state()
+        self.save_registry()
 
 #Button actions
     def open_live_feed(self):
@@ -235,12 +388,6 @@ class ManageBraillersViewBase:
             self.app.show_text_page_inverted(self.current_brailler_name)
         else:
             self.app.show_text_page(self.current_brailler_name)
-
-    def disconnect_brailler(self):
-        self.set_brailler_status(self.current_brailler_name, False)
-    
-    def pair_brailler(self):
-        self.set_brailler_status(self.current_brailler_name, True)
 
     ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
     def rename_device(self):
@@ -277,21 +424,31 @@ class ManageBraillersViewBase:
         rename_button.pack(pady=5)
 
     def submit_rename(self):
-        new_name = self.entry_var.get().strip()
-        if new_name:
-            # Update label text
-            self.current_brailler_label.config(text=new_name)
-                    
-            # Update brailler status dictionary
-            if self.current_brailler_name in self.brailler_status_dots:
-                self.brailler_status_dots[new_name]=\
-                    self.brailler_status_dots.pop(self.current_brailler_name)
-            # Update current name reference
-            self.current_brailler_name = new_name
     
-            if self.current_brailler_name in self.braillers:
-                index = self.braillers.index(self.current_brailler_name)
-                self.braillers[index] = new_name
+        new_name = self.entry_var.get().strip()
+        
+        if not new_name:
+            self.rename_popup.destroy()
+            return
+    
+        device_id = self.current_brailler_id
+        old_name = self.current_brailler_name
+
+        # Update label text
+        self.current_brailler_label.config(text=new_name)
+
+        # Update registry 
+        if device_id in self.registry:
+            self.registry[device_id]["name"] = new_name
+        else:
+            # fallback safety
+            self.registry[device_id] = {"name": new_name}
+
+        self.save_registry()
+
+        # Update current name reference
+        self.current_brailler_name = new_name
+
         self.rename_popup.destroy()
     
     #Bottom actions
@@ -320,17 +477,6 @@ class ManageBraillersViewBase:
             backround=self.bg,
             location=(140, 165)
         )
-
-        self.pair_all_image = load_img(
-            os.path.join(self.image_path, "pair_all_button.png"), 
-            size=(105, 44)
-        )
-        pair_all_button = make_interactive_image(
-            self.root, 
-            self.pair_all_image, 
-            890, 160, 
-            on_click=lambda: self.pair_all()
-        )   
             
         self.bluetooth_image = load_img(
             os.path.join(self.image_path, "Bluetooth_icon.png"), 
@@ -445,20 +591,80 @@ class ManageBraillersViewBase:
 
     
     def submit_wifi(self):
-        wifi_name = self.entry_var.get().strip()
+        self.wifi_name = self.entry_var.get().strip()
 
-        with open(self.wifi_name_file, "a", encoding="utf-8") as f:
-            f.write(wifi_name)
+        self.close_popup(self.wifi_popup)
 
-        self.wifi_popup.destroy()
+        self.ssh = self.connect_ssh()
+
+        # if not self.ssh:
+        #     return
+        
+        self.setup_wifi()
+
 
         #LOTS OF STUFF HAPPENS HERE
 
-    ############EDIT HERE#########  get rid of pair all button
-    def pair_all(self):
-                for brailler in self.braillers:
-                    self.set_brailler_status(brailler, True)
-                return
+    def create_error_popup(self, text):
+        error_popup = tk.Toplevel(self.root)
+        error_popup.title("Wireless Connection")
+        error_popup.geometry("300x120")
+        error_popup.resizable(False, False)
+        error_popup.grab_set()  # Make it modal
+        error_popup.configure(bg=self.bg)
+    
+        error_label = tk.Label(
+            error_popup,
+            text=text,
+            font=("Roboto Condensed", 14, "bold"),
+            bg=self.bg,
+            fg=self.fg
+        )
+        error_label.pack(pady=(10, 5))  # top padding, small gap below
+
+        okay_button = tk.Button(
+            error_popup, 
+            text="Okay", 
+            font=("Roboto Condensed", 12),
+            bg=self.bg,
+            fg=self.fg, 
+            command=lambda: self.close_popup(error_popup)
+        )
+        okay_button.pack(pady=5)
+
+    def run_command(self, command):
+
+        if self.ssh is None:
+            self.create_error_popup("SSH is not connected.")
+            return ""
+        stdin, stdout, stderr = self.ssh.exec_command(command)
+        output = stdout.read().decode()
+        error = stderr.read().decode()
+
+        if error:
+            self.create_error_popup(error)
+        return output
+
+    def close_popup(self, popup):
+        popup.destroy()
+
+    def setup_wifi(self):
+        self.FULLNAME = "perk-" + self.wifi_name
+        self.PASSWORD = "perk12345"
+
+        set_up_wifi = f"sudo nmcli device wifi hotspot ssid {self.FULLNAME} password {self.PASSWORD}"
+        
+        out = self.run_command(set_up_wifi)
+
+    def connect_ssh(self):
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(self.HOST, username=self.USER, password=self.PASS)
+            return ssh
+        except Exception as e:
+            self.create_error_popup(f"BCI Connection Failed:\n{e}")
+            return None
 
 class ManageBraillersView(ManageBraillersViewBase):
     def __init__(self, root, app, THEMES):

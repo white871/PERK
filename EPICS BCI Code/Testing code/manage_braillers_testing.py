@@ -330,21 +330,8 @@ class ManageBraillersViewBase:
             scp = None
             
             try:
-                client = paramiko.SSHClient()
-                client.load_system_host_keys()
-                client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                
-                client.connect(
-                    self.ips[i], 
-                    username=self.CLIENT_USER, 
-                    password=self.CLIENT_PASS, 
-                    timeout=2
-                )
 
-                scp = SCPClient(client.get_transport())
-                    
-                # Download a file
-                scp.get('name.txt', f"{self.ips[i]}_name.txt")
+                out = self.run_command(f"scp {self.ips[i]}_name.txt perk@{self.ips[i]}:~name.txt")
 
                 # read it
                 with open(f"{self.ips[i]}_name.txt", "r") as f:

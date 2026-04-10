@@ -40,7 +40,8 @@ class ManageBraillersViewBase:
 
         self.ssh = None
 
-        self.HOST = "perkhost.local"   # or IP
+        self.HOST = "perkhost.local"
+        self.HOST2 = "perkhost"   # or IP
         self.USER = "perkhost"
         self.PASS = "perk"
 
@@ -354,7 +355,8 @@ class ManageBraillersViewBase:
                     device_id = f.read().strip()
 
                 if not device_id:
-                    continue
+                    self.create_error_popup("No device ID available")
+                    return
 
                 self.state[device_id] = {
                     "ip": self.ips[i],
@@ -370,6 +372,7 @@ class ManageBraillersViewBase:
 
             except (paramiko.SSHException, FileNotFoundError, Exception):
                 # ignore devices that don't respond
+                self.create_error_popup("SSH to client pi failed")
                 continue
 
             finally:
@@ -597,7 +600,7 @@ class ManageBraillersViewBase:
         self.ssh = self.connect_ssh()
 
         # if not self.ssh:
-        #     return
+        #    return
         
         self.setup_wifi()
 
@@ -665,7 +668,17 @@ class ManageBraillersViewBase:
             return ssh
         except Exception as e:
             self.create_error_popup(f"BCI Connection Failed:\n{e}")
-            return None
+            try:
+                ssh = paramiko.SSHClient()
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh.connect(self.HOST2, username=self.USER, password=self.PASS)
+                return ssh
+            except Exception as e:
+                self.create_error_popup(f"BCI Connection Failed:\n{e}")
+                return
+                
+        
+
 
 class ManageBraillersView(ManageBraillersViewBase):
     def __init__(self, root, app, THEMES):

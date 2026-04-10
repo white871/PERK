@@ -10,9 +10,14 @@ if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:disconnected" ]; then
     exit 1
 fi
 echo -n "Fetching Perk Files..."
-curl https://github.com/white871/PERK -o Perk_RPI
-unzip Perk_RPI.zip
-rm Perk.zip
+if [-e Perk_RPI.zip]
+then 
+    echo "Zip folder found"
+    unzip Perk_RPI.zip
+    rm Perk_RPI.zip
+else 
+    echo "Please use transfer the zip file from the repository into the Pi."
+fi
 echo "Done."
 
 echo -n "Setting up I2C..."

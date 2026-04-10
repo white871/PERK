@@ -52,6 +52,27 @@ class ManageBraillersViewBase:
         self.build_popup_menu()
         self.build_bottom_actions() 
 
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def on_close(self):
+        try:
+            # try shutting down wifi hotspot before exit
+            if self.ssh:
+                try:
+                    self.run_command("nmcli connection down perk-hotspot")
+                except:
+                    pass
+
+            # close ssh connection
+            if self.ssh:
+                self.ssh.close()
+                self.ssh = None
+
+        except Exception:
+            pass
+
+        self.root.destroy()
+
 
     def load_registry(self):
         try:
@@ -279,6 +300,58 @@ class ManageBraillersViewBase:
             if name == "Rename Device":
                 lbl.bind("<Button-1>", lambda e: self.rename_device())     
 
+    def open_contractions(self):
+        if self.inverted:
+            self.app.show_text_page_inverted(
+                self.current_brailler_name,
+                open_tab="contractions"
+            )
+        else:
+            self.app.show_text_page(
+                self.current_brailler_name,
+                open_tab="contractions"
+            )
+
+    def remove_device(self):
+        device_id = self.current_brailler_id
+
+        if not device_id:
+            return
+        
+        # Remove from registry
+        if device_id in self.registry:
+            del self.registry[device_id]
+
+        # Remove from state
+        if device_id in self.state:
+            del self.state[device_id]
+
+        # Remove status dot from UI
+        if device_id in self.brailler_status_dots:
+            canvas, _ = self.brailler_status_dots[device_id]
+            canvas.destroy()
+            del self.brailler_status_dots[device_id]
+
+        # Remove label from UI
+        if self.current_brailler_label:
+            self.current_brailler_label.destroy()
+
+        # Clear current selection
+        self.current_brailler_label = None
+        self.current_brailler_id = None
+        self.current_brailler_name = None
+
+        # Hide popup
+        self.popup.place_forget()
+
+        # Save changes
+        self.save_registry()
+        self.save_state()
+
+        self.brailler_frame.destroy()
+        self.build_brailler_list()
+
+
 #Status management
     def set_brailler_status(self, device_id, status):
         if device_id not in self.brailler_status_dots:
@@ -326,14 +399,16 @@ class ManageBraillersViewBase:
 
 
         for i in range(len(self.ips)):
-            client = None
-            scp = None
             
             try:
 
                 out = self.run_command(f"scp perk@{self.ips[i]}:~/name.txt {self.ips[i]}_name.txt")
 
                 self.create_error_popup(out)
+
+                # Step 2 (your PC pulls from host Pi)
+                scp = SCPClient(self.ssh.get_transport())
+                scp.get(f"{self.ips[i]}_name.txt", f"{self.ips[i]}_name.txt")
 
                 # read it
                 with open(f"{self.ips[i]}_name.txt", "r") as f:
@@ -359,12 +434,6 @@ class ManageBraillersViewBase:
                 # ignore devices that don't respond
                 self.create_error_popup("SSH to client pi failed")
                 continue
-
-            finally:
-                if scp:
-                    scp.close()
-                if client:
-                    client.close()
 
         self.save_state()
         self.save_registry()
@@ -607,20 +676,25 @@ class ManageBraillersViewBase:
 
     def create_error_popup(self, text):
         error_popup = tk.Toplevel(self.root)
-        error_popup.title("Wireless Connection")
-        error_popup.geometry("500x120")
-        error_popup.resizable(False, False)
+        error_popup.title("Error or Output")
+        error_popup.geometry("400x200")
         error_popup.grab_set()  # Make it modal
         error_popup.configure(bg=self.bg)
-    
+
+        max_width = 400
+
         error_label = tk.Label(
             error_popup,
             text=text,
-            font=("Roboto Condensed", 14, "bold"),
+            font=("Roboto Condensed", 14),
             bg=self.bg,
-            fg=self.fg
+            fg=self.fg,
+            wraplength=max_width-40,
+            justify="left",
+            padx=20,
+            pady=20
         )
-        error_label.pack(pady=(10, 5))  # top padding, small gap below
+        error_label.pack(expand=True, fill="both")  # top padding, small gap below
 
         okay_button = tk.Button(
             error_popup, 
@@ -628,9 +702,10 @@ class ManageBraillersViewBase:
             font=("Roboto Condensed", 12),
             bg=self.bg,
             fg=self.fg, 
-            command=lambda: self.close_popup(error_popup)
+            command=error_popup.destroy
         )
-        okay_button.pack(pady=5)
+        okay_button.pack(pady=(0,10))
+
 
     def run_command(self, command):
 
@@ -644,9 +719,6 @@ class ManageBraillersViewBase:
         if error:
             self.create_error_popup(error)
         return output
-
-    def close_popup(self, popup):
-        popup.destroy()
 
     def setup_wifi(self):
         self.FULLNAME = "perk-" + self.wifi_name

@@ -50,91 +50,101 @@ def create_image_canvas(root, wdth, hght, highlightthick, border, anchr, img, lo
     return canvas, img_obj
 
 
-def create_triangle_button(
-    canvas, coords, label, img_obj=None, 
-    img_on_click=None, selected=False, on_select=None):
-    """
-    Creates a triangle-shaped button on a canvas with hover and click interactions.
-    Args:
-        canvas: the Tkinter Canvas to draw on
-        coords: tuple of triangle coordinates
-        img_obj: canvas image object to change when clicked
-        img_on_click: dict {True_image, False_image} to swap on click
-        selected: initial selected state
-   """
+class TriangleButton:
+    def __init__(self, canvas, data):
+        self.data = data
+        self.canvas = canvas
+        
 
-    # Draw the triangle
+    def select(self, state: bool):
+        self.data["selected"] = state
+        # call the SAME renderer used by clicks
+        self.data["update"]()
+
+def create_triangle_button(
+    canvas, coords, label, target_frame, # Added target_frame
+    img_obj=None, img_on_click=None, selected=False, on_select=None):
+
     triangle_id = canvas.create_polygon(coords, fill="", outline="")
 
     button_data = {
         "tri": triangle_id,
         "label": label,
+        "target_frame": target_frame, # Store the frame it controls
         "selected": selected,
         "img_obj": img_obj,
-        "img_on_click": img_on_click
+        "img_on_click": img_on_click,
+        "on_select": on_select
     }
     
     triangle_buttons.append(button_data)
 
     def update_fonts_and_images():
-        'Deselect all others, select this one, and update images.'
-
-        # Remove destroyed widgets first
         global triangle_buttons
-        triangle_buttons = [
-            btn for btn in triangle_buttons
-            if btn["label"].winfo_exists()
-        ]
+        # Filter out destroyed widgets
+        triangle_buttons = [btn for btn in triangle_buttons if btn["label"].winfo_exists()]
 
         for btn in triangle_buttons:
-            if btn["tri"] == triangle_id:
-                btn["selected"] = True
+            is_selected = btn["selected"]
 
-                if btn["label"].winfo_exists():
-                    btn["label"].config(font=("Roboto Condensed", 20, 'bold', 'roman'))
+            # 1. Update Bold/Normal Font
+            btn["label"].config(
+                font=("Roboto Condensed", 20, 'bold' if is_selected else 'normal', 'roman')
+            )
 
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["True"])
+            # 2. Swap Image (Version 1 vs Version 2)
+            if btn["img_obj"] and btn["img_on_click"]:
+                state_key = "True" if is_selected else "False"
+                canvas.itemconfig(
+                    btn["img_obj"],
+                    image=btn["img_on_click"][state_key]
+                )
+            
+            # 3. Raise the frame if selected
+            if is_selected and btn["target_frame"]:
+                btn["target_frame"].tkraise()
 
-                if on_select:
-                    on_select()
-
-            else:
-                btn["selected"] = False
-
-                if btn["label"].winfo_exists():
-                    btn["label"].config(font=("Roboto Condensed", 20, 'normal', 'roman'))
-
-                if btn["img_obj"] and btn["img_on_click"]:
-                    canvas.itemconfig(btn["img_obj"], image=btn["img_on_click"]["False"])
-
-
-    # Hover effects
     def on_enter(event):
         canvas.itemconfig(triangle_id, outline="gray", width=3)
+        # Only show italic hover if the button ISN'T the one currently active
         if not button_data["selected"]:
             label.config(font=("Roboto Condensed", 20, 'bold', 'italic'))
 
     def on_leave(event):
         canvas.itemconfig(triangle_id, outline="", width=1)
-        if not button_data["selected"]:
+        # Return to the correct state based on selection
+        if button_data["selected"]:
+            # Keep it Bold if it's the active tab
+            label.config(font=("Roboto Condensed", 20, 'bold', 'roman'))
+        else:
+            # Return to Normal if it's the inactive tab
             label.config(font=("Roboto Condensed", 20, 'normal', 'roman'))
 
     def on_click(event):
+        # RADIO BUTTON LOGIC:
+        # Set all buttons in the list to False, then set THIS one to True
+        for btn in triangle_buttons:
+            btn["selected"] = False
+        
+        button_data["selected"] = True
+        
+        # Execute the specific logic (like loading data)
+        if button_data["on_select"]:
+            button_data["on_select"]()
+            
+        # Refresh the whole UI
         update_fonts_and_images()
 
-    # Bind events
-    canvas.tag_bind(triangle_id, "<Enter>", on_enter)
-    canvas.tag_bind(triangle_id, "<Leave>", on_leave)
+    # Bindings remain the same
     canvas.tag_bind(triangle_id, "<Button-1>", on_click)
-
+    label.bind("<Button-1>", on_click)
     label.bind("<Enter>", on_enter)
     label.bind("<Leave>", on_leave)
-    label.bind("<Button-1>", on_click)
+    
+    # Hover effects (Simplified for brevity, keep your existing enter/leave logic)
+    button_data["update"] = update_fonts_and_images
+    return TriangleButton(canvas, button_data)
 
-    if selected:
-        update_fonts_and_images()
-    return triangle_id
 
 def create_interactive_icon(canvas, label,
     circle_center, circle_radius, inverted=False, on_select=None):

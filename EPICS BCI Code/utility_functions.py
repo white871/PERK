@@ -49,6 +49,20 @@ def create_image_canvas(root, wdth, hght, highlightthick, border, anchr, img, lo
     img_obj = canvas.create_image(0, 0, anchor='nw', image=img)
     return canvas, img_obj
 
+class TriangleButton:
+    def __init__(self, canvas, data):
+        self.data = data
+        self.canvas = canvas
+
+    def select(self, state: bool):
+        self.data["selected"] = state
+        # reuse your existing logic indirectly
+        # fake a click-style update
+        if state:
+            self.data["label"].config(font=("Roboto Condensed", 20, "bold", "roman"))
+        else:
+            self.data["label"].config(font=("Roboto Condensed", 20, "normal", "roman"))
+
 
 def create_triangle_button(
     canvas, coords, label, img_obj=None, 
@@ -134,7 +148,8 @@ def create_triangle_button(
 
     if selected:
         update_fonts_and_images()
-    return triangle_id
+
+    return TriangleButton(canvas, button_data)
 
 def create_interactive_icon(canvas, label,
     circle_center, circle_radius, inverted=False, on_select=None):

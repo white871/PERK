@@ -331,7 +331,9 @@ class ManageBraillersViewBase:
             
             try:
 
-                out = self.run_command(f"scp {self.ips[i]}_name.txt perk@{self.ips[i]}:~name.txt")
+                out = self.run_command(f"scp perk@{self.ips[i]}:~/name.txt {self.ips[i]}_name.txt")
+
+                self.create_error_popup(out)
 
                 # read it
                 with open(f"{self.ips[i]}_name.txt", "r") as f:

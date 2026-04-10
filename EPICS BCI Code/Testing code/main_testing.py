@@ -56,6 +56,17 @@ class App:
         else:
             self.show_manage_braillers()
 
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        # This finds every child window (popups) and destroys them
+        for child in self.root.winfo_children():
+            if isinstance(child, tk.Toplevel):
+                child.destroy()
+        
+        # Finally, destroy the main window
+        self.root.destroy()
+
     def load_fonts(self, font_path):
         import ctypes
 
@@ -66,7 +77,8 @@ class App:
 
     def clear(self):
         for widget in self.root.winfo_children():
-            widget.destroy()
+            if not isinstance(widget, tk.Toplevel):
+                widget.destroy()
 
     def save_settings(self, inverted, brailler):
         self.state["inverted"] = inverted
@@ -98,17 +110,17 @@ class App:
         self.root.geometry("1050x750")
         ManageBraillersViewInverted(self.root, self, self.THEMES)
 
-    def show_text_page(self, brailler_name):
+    def show_text_page(self, brailler_name, open_tab="live_feed"):
         self.clear()
         self.save_settings(False, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerView(self.root, self, brailler_name, self.THEMES)
+        IndividualBraillerView(self.root, self, brailler_name, self.THEMES, open_tab)
 
-    def show_text_page_inverted(self, brailler_name):
+    def show_text_page_inverted(self, brailler_name, open_tab="live_feed"):
         self.clear()
         self.save_settings(True, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES)
+        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES, open_tab)
 
 root = tk.Tk()
 root.geometry("1050x700")

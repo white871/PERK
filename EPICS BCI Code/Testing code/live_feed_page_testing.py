@@ -7,10 +7,11 @@ from utility_functions import load_img, create_label, create_inverted_label, cre
 
 class IndividualBraillerViewBase:
 
-    def __init__(self, root, app, brailler_name, THEMES, theme_name="light"):
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, theme_name="light", ):
         self.root = root
         self.app = app
         self.brailler_name = brailler_name
+        self.current_tab = open_tab
 
         theme = THEMES[theme_name]
         self.bg = theme["bg"]
@@ -52,6 +53,8 @@ class IndividualBraillerViewBase:
         self.simulate_brailler_output()
         self.simulate_braille_binary_output()
         self.update_live_feed()
+
+        self.sync_triangle_state()
 
     
     def load_translations(self):
@@ -105,10 +108,12 @@ class IndividualBraillerViewBase:
         )
     
     def show_live_feed(self):
-        self.live_feed_frame.tkraise()
+        self.current_tab = "live_feed"
+        self.sync_triangle_state()
 
     def show_contraction_library(self):
-        self.contraction_library_frame.tkraise()
+        self.current_tab = "contractions"
+        self.sync_triangle_state()
 
     def toggle_braille_selection(self):
 
@@ -313,7 +318,7 @@ class IndividualBraillerViewBase:
             size=(60,115)
         )
 
-        triangle_canvas, triangle_img_obj = create_image_canvas(
+        self.triangle_canvas, triangle_img_obj = create_image_canvas(
             self.root, 
             60, 115, 0, 0, 
             'nw', self.triangle_image_1, 
@@ -334,13 +339,14 @@ class IndividualBraillerViewBase:
 
         triangle_live_feed_coords = (12, 9, 12, 46, 48, 28)
 
-        triangle_live_feed = create_triangle_button(
-            triangle_canvas, 
+        self.triangle_live_feed = create_triangle_button(
+            self.triangle_canvas, 
             triangle_live_feed_coords, 
             label_live_text_feed, 
+            target_frame = self.live_feed_frame,
             img_obj=triangle_img_obj, 
             img_on_click={"True": self.triangle_image_1, "False": self.triangle_image_2}, 
-            selected=True,
+            selected=(self.current_tab == "live_feed"),
             on_select= self.show_live_feed
         )
 
@@ -356,13 +362,14 @@ class IndividualBraillerViewBase:
 
         triangle_contraction_library_coords = (12, 68, 12, 105, 48, 87)
 
-        triangle_contraction_library = create_triangle_button(
-            triangle_canvas, 
+        self.triangle_contraction_library = create_triangle_button(
+            self.triangle_canvas, 
             triangle_contraction_library_coords, 
             label_contraction_library, 
+            target_frame = self.contraction_library_frame,
             img_obj=triangle_img_obj, 
             img_on_click={"True": self.triangle_image_2, "False": self.triangle_image_1}, 
-            selected=False, 
+            selected=(self.current_tab == "contractions"), 
             on_select= self.show_contraction_library
         )
 
@@ -459,6 +466,15 @@ class IndividualBraillerViewBase:
             on_select=self.settings_select
         )
 
+    def sync_triangle_state(self):
+        if self.current_tab == "live_feed":
+            self.triangle_live_feed.select(True)
+            self.triangle_contraction_library.select(False)
+    
+        elif self.current_tab == "contractions":
+            self.triangle_live_feed.select(False)
+            self.triangle_contraction_library.select(True)
+          
     def build_live_feed(self):
         text_frame_height = 500-72-60
 
@@ -757,9 +773,9 @@ class IndividualBraillerViewBase:
 
 
 class IndividualBraillerView(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name, THEMES):
-        super().__init__(root, app, brailler_name, THEMES, theme_name="light")
+    def __init__(self, root, app, brailler_name, THEMES, open_tab):
+        super().__init__(root, app, brailler_name, THEMES, open_tab, theme_name="light")
 
 class IndividualBraillerViewInverted(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name, THEMES):
-        super().__init__(root, app, brailler_name, THEMES, theme_name="dark")
+    def __init__(self, root, app, brailler_name, THEMES, open_tab):
+        super().__init__(root, app, brailler_name, THEMES, open_tab, theme_name="dark")

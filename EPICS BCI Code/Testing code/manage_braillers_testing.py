@@ -50,10 +50,7 @@ class ManageBraillersViewBase:
         self.build_header()
         self.build_brailler_list()
         self.build_popup_menu()
-        self.build_bottom_actions()
-
-        self.refresh_ui() 
-        # self.sync_devices()
+        self.build_bottom_actions() 
 
 
     def load_registry(self):
@@ -295,13 +292,11 @@ class ManageBraillersViewBase:
         
         canvas.itemconfig(dot, fill=color)
     
-    def sync_devices(self):
-        self.scan_and_update_devices()
-        self.refresh_ui()
-
-        # self.root.after(5000, self.sync_devices)
 
     def refresh_ui(self):
+
+        self.scan_and_update_devices()
+
         for device_id in self.registry:
             status = self.state.get(device_id, {}).get("status", "UNREACHABLE")
             self.set_brailler_status(device_id, status)
@@ -548,6 +543,19 @@ class ManageBraillersViewBase:
             )
         )    
 
+        
+        self.refresh_img = load_img(
+            os.path.join(self.image_path, "refresh_button.png"), 
+            size=(166, 50)
+        )
+
+        new_file_icon = make_interactive_image(
+            self.root, 
+            self.refresh_img, 
+            780, 175, 
+            on_click=lambda: self.refresh_ui()
+        )
+
     ###########EDIT HERE######## make it so when you do this it actually ssh s to the pi to start the wifi using wifi name 
     def wifi_enable(self):
         self.wifi_popup = tk.Toplevel(self.root)
@@ -658,7 +666,9 @@ class ManageBraillersViewBase:
         
         out = self.run_command(set_up_wifi)
 
-        self.sync_devices()
+        self.create_error_popup(out)
+
+        self.refresh_ui()
 
     def connect_ssh(self):
         try:

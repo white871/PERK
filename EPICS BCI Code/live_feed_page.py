@@ -5,7 +5,7 @@ import random
 import json
 import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
-from Data.binarytobraille import binarytobraille
+
 
 class IndividualBraillerViewBase:
 
@@ -53,7 +53,7 @@ class IndividualBraillerViewBase:
         # Start background loops
         #self.simulate_brailler_output()
         # self.simulate_braille_binary_output()
-        self.fetch_from_pi()
+        # self.fetch_from_pi()
         self.update_live_feed()
 
         self.USE_SIMULATION = True 
@@ -61,8 +61,27 @@ class IndividualBraillerViewBase:
             self.simulate_brailler_output()
             self.simulate_braille_binary_output()
         else:
-            self.fetch_from_pi()
-    
+            # self.fetch_from_pi()
+            print("yay")
+        
+        
+    def binToBraille(self, bin_data):
+        out = ""
+
+        # Split by whitespace/newlines
+        chunks = bin_data.split()
+
+        for chunk in chunks:
+            if chunk in self.translations:
+                out += self.translations[chunk]
+            elif chunk == "":
+                out += " "
+            else:
+                # Unknown pattern (optional debug)
+                pass
+
+        return out
+
     def load_translations(self):
         try:
             with open(self.translations_path, "r", encoding="utf-8") as f:
@@ -156,7 +175,7 @@ class IndividualBraillerViewBase:
             raw_content = ""
         # Convert ONLY in braille mode
         if self.current_mode == "braille":
-            content = binarytobraille(raw_content)
+            content = self.binToBraille(raw_content)
         else:
             content = raw_content
 
@@ -207,18 +226,18 @@ class IndividualBraillerViewBase:
         
         self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)
 
-    def fetch_from_pi(self):
-        """Pull latest binary file from Raspberry Pi using SCP."""
-        try:
-            subprocess.run([
-                "scp",
-                "pi@<PI_IP>:/path/to/binary.txt",
-                self.braille_file_path
-            ], check=True)
-        except Exception as e:
-            print("SCP failed:", e)
+    # def fetch_from_pi(self):
+    #     """Pull latest binary file from Raspberry Pi using SCP."""
+    #     try:
+    #         subprocess.run([
+    #             "scp",
+    #             "pi@<PI_IP>:/path/to/binary.txt",
+    #             self.braille_file_path
+    #         ], check=True)
+    #     except Exception as e:
+    #         print("SCP failed:", e)
 
-        self.after_id2 = self.root.after(500, self.fetch_from_pi)
+    #     self.after_id2 = self.root.after(500, self.fetch_from_pi)
     
     ###############EDIT HERE ############ somehow make it so new file action also clears file on client raspberry pi
     def new_file_action(self):

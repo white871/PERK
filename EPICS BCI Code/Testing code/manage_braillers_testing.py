@@ -52,7 +52,7 @@ class ManageBraillersViewBase:
         self.build_bottom_actions()
 
         self.refresh_ui() 
-        self.sync_devices()
+        # self.sync_devices()
 
 
     def load_registry(self):
@@ -296,7 +296,6 @@ class ManageBraillersViewBase:
     
     def sync_devices(self):
         self.scan_and_update_devices()
-
         self.refresh_ui()
 
         # self.root.after(5000, self.sync_devices)
@@ -655,6 +654,8 @@ class ManageBraillersViewBase:
         set_up_wifi = f"sudo nmcli device wifi hotspot ssid {self.FULLNAME} password {self.PASSWORD}"
         
         out = self.run_command(set_up_wifi)
+
+        self.sync_devices()
 
     def connect_ssh(self):
         try:

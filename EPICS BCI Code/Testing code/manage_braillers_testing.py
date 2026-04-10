@@ -310,6 +310,7 @@ class ManageBraillersViewBase:
 
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
+        self.create_error_popup(out)
 
         self.ips = []
         self.statuses = []

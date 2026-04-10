@@ -610,7 +610,7 @@ class ManageBraillersViewBase:
     def create_error_popup(self, text):
         error_popup = tk.Toplevel(self.root)
         error_popup.title("Wireless Connection")
-        error_popup.geometry("300x120")
+        error_popup.geometry("500x120")
         error_popup.resizable(False, False)
         error_popup.grab_set()  # Make it modal
         error_popup.configure(bg=self.bg)

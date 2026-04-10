@@ -20,13 +20,16 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - RPI connect doesn't matter
 - Enable USB-Gadget (you'll get a warning, ignore it) <br> <br>
 For more information on setting up RPI gadget mode, you can look at this guide: https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/
+
+### Setup.sh and Perk_RPI.zip
+- transfer setup.sh into the Pi (navigate to your directory containing setup.sh, then run "scp setup.sh perk@perk.local:~/setup.sh")
+- When editing ANY file in Raspberry Pi Files, you MUST compress all files into Perk_RPI before committing and pushing. Please keep the zip file updated!!
 ### TLV320DAC3100 setup (speaker & headphones)
 - Setup is simple, go into boot/firmware/config.txt and add "dtoverlay=i2s-dac"
-- Comment 'dtparam=audio=on', uncomment 'dtparam=i2s=on'
+- Uncomment 'dtparam=i2s=on'
 - Enable i2c: When done with the config file, type "sudo raspi-config", and go into interfacing options and enable i2c
 - Run 'sudo apt-get install -y i2c-tools'
-- Install the bash script on the repository onto the Pi, run it using (bash bash_tlv) before doing anything else
-- Hopefully it works!
+- Install the bash script on the repository onto the Pi, run it using (bash setup_tlv) before doing anything else
 ### Max98357a setup (speaker only)
 - To use this audio chip, you must enable the I2S protocol in the config file.
 - Uncomment "dtparam=12s=on" and comment "dtparam=audio=on"

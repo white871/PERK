@@ -4,14 +4,10 @@ BUS=1
 write() {
     sudo i2cset -y $BUS $ADDR $1 $2
 }
-
-
-# Setup for TLV320DAC3100 
-# RUN THIS BEFORE RUNNING ANY AUDIO SCRIPTS!!!
+write 0x00 0x00 # Ensure reg is on page 0
 
 write 0x01 0x01 # Reset Software
-sleep 0.1 # Honk shoo
-
+sleep 0.1
 # Clock Gen
 write 0x04 0x07 # PLL_CLK = BCLK, CODEC = PLL_CLK
 
@@ -31,14 +27,11 @@ write 0x1B 0x00 # Codec config, I2s slave, 16-bit
 # DAC Datapath
 write 0x3F 0xFA # Power both channels, set to L+R / 2
 write 0x40 0x00 # Unmute DAC channels, ind. volume control
-write 0x41 0xD4 # -22db Left # EDIT FOR VOLUME CONTROL
-write 0x42 0xD4 # -22db Right # EDIT FOR VOLUME CONTROL
+write 0x41 0xD4 # -22db Left - EDIT FOR VOLUME CONTROL
+write 0x42 0xD4 # -22db Right - EDIT FOR VOLUME CONTROL
 
-#write 0x43 0x80 # Headset det. enabled
-
-# Configure INT1 -> GPIO1 for Headset Detection Interrupt
-#write 0x30 0x80 # INT1 set to headset detection
-#write 0x33 0x14 # INT1 -> GPIO 1
+write 0x43 0x80 # Heatset det. enabled
+#write 0x74 0x80 # Set ADC for pot. vol control 
 
 write 0x00 0x01 # Switch to Page 1
 
@@ -48,10 +41,4 @@ write 0x23 0x44 # DAC Channels to mixer amps
 write 0x26 0x80 # Left analog volume to speaker
 write 0x2A 0x04 # Unmute driver
 
-# Headphone Config
-#write 0x1F 0xC4 # Headphone Driver on
-#write 0x24 0xFF # left analog -> headphone
-#write 0x25 0xFF # right analog -> headphone
 
-# IF HEADSET DET:
-# write 0x23 0x88 # DAC channels to headphone drivers

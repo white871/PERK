@@ -44,6 +44,7 @@ def transliterateBin(inputB):
     i = 0
     translatedOutput = ""
     lastOutput = ""
+    #print(inputarr)
     inputarr.insert(0, "000000")
     inputarr.append("000000")
     while (i < len(inputarr)):
@@ -70,6 +71,7 @@ def transliterateBin(inputB):
             global lastOutput
             if whatLong in brailleLib.keys():
                 for possibleOut in brailleLib[whatLong]:
+                    #print(possibleOut)
                     if "./" in possibleOut:
                         translatedOutput += possibleOut.replace("^", "")
                         lastOutput = possibleOut.replace("^", "")
@@ -78,8 +80,8 @@ def transliterateBin(inputB):
                     if "_" in possibleOut:
                         contraction_word = possibleOut.replace("_","")
 
-                        if contraction_word not in enabled_contractions:
-                            continue
+                        #if contraction_word not in enabled_contractions:
+                         #   continue
 
                         if i > 0 and i < len(inputarr) - 1:
                             expand = False
@@ -160,7 +162,7 @@ def transliterateBin(inputB):
         findOutput(oneLong, 1)
         if not translated:
             i += 1
-
+    #print(translatedOutput)
     translatedOutput = translatedOutput.replace("_", "")
     try:
         while("./" in translatedOutput):
@@ -193,4 +195,8 @@ def transliterateBin(inputB):
     f_out = open('transliterateOutput.txt', 'w')
     f_out.write(translatedOutput)
     f_out.close()
-    return translatedOutput.split()[-1] # Return last "word"
+    #print(translatedOutput.split())
+    if translatedOutput.split(): 
+        print(translatedOutput.split()[-1])
+    if translatedOutput:
+        return translatedOutput.split()[-1] # Return last "word"

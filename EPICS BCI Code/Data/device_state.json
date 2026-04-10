@@ -42,8 +42,5 @@
     },
     "py14": {
         "status": "UNREACHABLE"
-    },
-    "py15": {
-        "status": "UNREACHABLE"
     }
 }

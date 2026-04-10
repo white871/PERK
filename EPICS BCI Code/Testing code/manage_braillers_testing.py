@@ -344,7 +344,7 @@ class ManageBraillersViewBase:
                 scp = SCPClient(client.get_transport())
                     
                 # Download a file
-                scp.get('device_id.txt', f"{self.ips[i]}_name.txt")
+                scp.get('name.txt', f"{self.ips[i]}_name.txt")
 
                 # read it
                 with open(f"{self.ips[i]}_name.txt", "r") as f:

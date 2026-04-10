@@ -381,12 +381,11 @@ class ManageBraillersViewBase:
 
             self.state[device_id]["status"] = "UNREACHABLE"
 
+        self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
+
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
         self.create_error_popup(out)
-
-        self.ips = []
-        self.statuses = []
 
         for line in out.splitlines():
             parts = line.split()
@@ -394,46 +393,50 @@ class ManageBraillersViewBase:
             if len(parts) < 3:
                 continue
 
-            self.ips.append(parts[0])
-            self.statuses.append(parts[-1])
+            ip = parts[0]
+            status = parts[-1]
 
+            if status == "REACHABLE":
+                try:
 
-        for i in range(len(self.ips)):
-            
-            try:
+                    out = self.run_command(f"scp perk@{ip}:~/name.txt {ip}_name.txt")
 
-                out = self.run_command(f"scp perk@{self.ips[i]}:~/name.txt {self.ips[i]}_name.txt")
+                    self.create_error_popup(out)
 
-                self.create_error_popup(out)
+                    # Step 2 (your PC pulls from host Pi)
+                    scp = SCPClient(self.ssh.get_transport())
+                    scp.get(f"{ip}_name.txt", f"{ip}_name.txt")
 
-                # Step 2 (your PC pulls from host Pi)
-                scp = SCPClient(self.ssh.get_transport())
-                scp.get(f"{self.ips[i]}_name.txt", f"{self.ips[i]}_name.txt")
+                    # read it
+                    with open(f"{ip}_name.txt", "r") as f:
+                        device_id = f.read().strip()
 
-                # read it
-                with open(f"{self.ips[i]}_name.txt", "r") as f:
-                    device_id = f.read().strip()
+                    if not device_id:
+                        self.create_error_popup("No device ID available")
+                        return
 
-                if not device_id:
-                    self.create_error_popup("No device ID available")
-                    return
-
-                self.state[device_id] = {
-                    "ip": self.ips[i],
-                    "status": self.statuses[i]
-                }
-
-                if device_id not in self.registry:
-                    self.registry[device_id] = {
-                        "name": device_id
+                    self.state[device_id] = {
+                        "ip": ip,
+                        "status": "REACHABLE"
                     }
-                
-                    self.add_brailler_to_ui(device_id)
 
-            except (paramiko.SSHException, FileNotFoundError, Exception):
-                # ignore devices that don't respond
-                self.create_error_popup("SSH to client pi failed")
-                continue
+                    if device_id not in self.registry:
+                        self.registry[device_id] = {
+                            "name": device_id
+                        }
+                    
+                        self.add_brailler_to_ui(device_id)
+
+                except (paramiko.SSHException, FileNotFoundError, Exception):
+                    # ignore devices that don't respond
+                    self.create_error_popup("SSH to client pi failed")
+                    continue
+
+        else:
+            # Mark as unreachable in the UI dots
+            for dev_id, info in self.state.items():
+                if info.get("ip") == ip:
+                    self.state[dev_id]["status"] = "UNREACHABLE"
 
         self.save_state()
         self.save_registry()

@@ -1,11 +1,9 @@
-from asyncio import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import random
 import json
 import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
-from Data.binarytobraille import binarytobraille
 
 class IndividualBraillerViewBase:
 
@@ -51,17 +49,10 @@ class IndividualBraillerViewBase:
         self.build_contraction_library()
 
         # Start background loops
-        #self.simulate_brailler_output()
-        # self.simulate_braille_binary_output()
-        self.fetch_from_pi()
+        self.simulate_brailler_output()
+        self.simulate_braille_binary_output()
         self.update_live_feed()
 
-        self.USE_SIMULATION = True 
-        if self.USE_SIMULATION:
-            self.simulate_brailler_output()
-            self.simulate_braille_binary_output()
-        else:
-            self.fetch_from_pi()
     
     def load_translations(self):
         try:
@@ -151,14 +142,9 @@ class IndividualBraillerViewBase:
         #EDIT HERE#### add function to get file from pi###############
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                raw_content = f.read()
+                content = f.read().strip()
         except FileNotFoundError:
-            raw_content = ""
-        # Convert ONLY in braille mode
-        if self.current_mode == "braille":
-            content = binarytobraille(raw_content)
-        else:
-            content = raw_content
+            content = ""
 
         new_len = len(content)
 
@@ -196,30 +182,21 @@ class IndividualBraillerViewBase:
         self.after_id1 = self.root.after(300, self.simulate_brailler_output)
 
     def simulate_braille_binary_output(self):
-        """Simulate raw binary input like the Pi would send."""
+        """Simulate Braille binary sequences using only valid codes in the translations dictionary."""
         if not self.translations:
-            return
-        
-        # Generate random binary (6-bit chunks)
+            return  # safety check
+
+        # Pick a random valid braille code from the dictionary keys
         binary_seq = random.choice(list(self.translations.keys()))
+        symbol = self.translations[binary_seq]
+
+        # Append it to the file with a space (to separate sequences)
         with open(self.braille_file_path, "a", encoding="utf-8") as f:
-            f.write(binary_seq + " ")
-        
+            f.write(symbol)
+
+        # Schedule next write
         self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)
 
-    def fetch_from_pi(self):
-        """Pull latest binary file from Raspberry Pi using SCP."""
-        try:
-            subprocess.run([
-                "scp",
-                "pi@<PI_IP>:/path/to/binary.txt",
-                self.braille_file_path
-            ], check=True)
-        except Exception as e:
-            print("SCP failed:", e)
-
-        self.after_id2 = self.root.after(500, self.fetch_from_pi)
-    
     ###############EDIT HERE ############ somehow make it so new file action also clears file on client raspberry pi
     def new_file_action(self):
         #Making sure the user intended to click the new file button

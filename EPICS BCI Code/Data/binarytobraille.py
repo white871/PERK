@@ -65,16 +65,19 @@ lib = {
 "000111" : "⠸"
 }
 
-def binToBraille(bin):
-	i = 0
-	out = ""
-	while(i <= len(bin) - 6):
-		try:
-			while ("\n" in bin[i:i+6]):
-				out += "\n"
-				i += 1
-			out += lib[bin[i:i+6]]
-		except:
-			pass
-		i += 6
-	return out
+def binToBraille(bin_data):
+    out = ""
+
+    # Split by whitespace/newlines
+    chunks = bin_data.split()
+
+    for chunk in chunks:
+        if chunk in lib:
+            out += lib[chunk]
+        elif chunk == "":
+            out += " "
+        else:
+            # Unknown pattern (optional debug)
+            pass
+
+    return out

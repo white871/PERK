@@ -77,15 +77,16 @@ while True:
 	#keys = output[3] + output[2] + output[1] + output[5:8]
     if space:
         space_press = 1
+        currentBinary = keys
     elif space_press:
-        print(keys)
-        if lastWord and keys == "000000": 
+        print(currentBinary)
+        if lastWord and currentBinary == "000000": 
             TTS(lastWord, voice)
         space_press = 0
         if current_line >= len(binArray):
-            binArray.append(keys)
+            binArray.append(currentBinary)
         else:
-            binArray[current_line] += keys
+            binArray[current_line] += currentBinary
             print(binArray[current_line])
         with open("tempbin.txt", 'w') as f:
             for line in binArray:

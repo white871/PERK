@@ -386,6 +386,7 @@ class ManageBraillersViewBase:
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
         self.create_error_popup(out)
+        print(out)
 
         for line in out.splitlines():
             parts = line.split()
@@ -398,8 +399,8 @@ class ManageBraillersViewBase:
 
             if status == "REACHABLE":
                 try:
-
-                    device_id = self.run_command(f"ssh perk@{ip} 'cat ~/name.txt")
+                    
+                    device_id = self.run_command(f"ssh perk@{ip} 'cat ~/name.txt'")
 
                     if not device_id:
                         self.create_error_popup("No device ID available")
@@ -422,11 +423,11 @@ class ManageBraillersViewBase:
                     self.create_error_popup("SSH to client pi failed")
                     continue
 
-        else:
-            # Mark as unreachable in the UI dots
-            for dev_id, info in self.state.items():
-                if info.get("ip") == ip:
-                    self.state[dev_id]["status"] = "UNREACHABLE"
+            else:
+                # Mark as unreachable in the UI dots
+                for dev_id, info in self.state.items():
+                    if info.get("ip") == ip:
+                        self.state[dev_id]["status"] = "UNREACHABLE"
 
         self.save_state()
         self.save_registry()
@@ -655,12 +656,12 @@ class ManageBraillersViewBase:
     def submit_wifi(self):
         self.wifi_name = self.entry_var.get().strip()
 
-        self.close_popup(self.wifi_popup)
+        self.wifi_popup.destroy()
 
         self.ssh = self.connect_ssh()
 
-        # if not self.ssh:
-        #    return
+        if not self.ssh:
+            return
         
         self.setup_wifi()
 
@@ -732,7 +733,6 @@ class ManageBraillersViewBase:
             ssh.connect(self.HOST, username=self.USER, password=self.PASS)
             return ssh
         except Exception as e:
-            self.create_error_popup(f"BCI Connection Failed:\n{e}")
             try:
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

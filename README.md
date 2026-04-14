@@ -24,6 +24,7 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 ### Setup.sh and Perk_RPI.zip
 - transfer setup.sh into the Pi (navigate to your directory containing setup.sh, then run "scp setup.sh perk@perk.local:~/setup.sh")
 - When editing ANY file in Raspberry Pi Files, you MUST compress all files into Perk_RPI before committing and pushing. Please keep the zip file updated!!
+- With these two files, you can skip the below steps (besides building the exe) for setting up the client Pi.
 ### TLV320DAC3100 setup (speaker & headphones)
 - Setup is simple, go into boot/firmware/config.txt and add "dtoverlay=i2s-dac"
 - Uncomment 'dtparam=i2s=on'

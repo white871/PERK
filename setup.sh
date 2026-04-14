@@ -2,7 +2,23 @@ if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:unavailable" ]; then
     echo "Network unavailable. Setting WLAN Country to US"
     sudo raspi-config nonint do_wifi_country US
 fi
-
+if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:connected" ]; then
+    echo "Internet!"
+fi
+if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:disconnected" ]; then
+    echo "You need an internet connection for this script."
+    exit 1
+fi
+echo -n "Fetching Perk Files..."
+if [-e Perk_RPI.zip]
+then 
+    echo "Zip folder found"
+    unzip Perk_RPI.zip
+    rm Perk_RPI.zip
+else 
+    echo "Please use transfer the zip file from the repository into the Pi."
+fi
+echo "Done."
 
 echo -n "Setting up I2C..."
 sudo raspi-config nonint do_i2c 0
@@ -21,7 +37,12 @@ pyperk/bin/python -m piper.download_voices en_US-amy-medium
 echo "Installing i2c-tools"
 sudo apt-get install -y i2c-tools
 
-echo "Packages installed. please go to root and add dtoverlay=i2s-dac in the firmware/config.txt file."
+echo -n 'Enabling i2s...'
+echo 'dtoverlay=i2s-dac' | sudo tee -a /boot/firmware/config.txt
+sudo sed -i 's/^#dtparam=i2s=on/dtparam=i2s=on/' /boot/firmware/config.txt
+echo 'Done.' 
+
+echo "Pi Ready!."
 echo "The Pi will reboot now."
 
 sudo reboot now

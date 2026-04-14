@@ -16,13 +16,16 @@ This repository also serves as backup to the Raspberry Pi's files, please ensure
 - Localization: Washington, D.C. for capital city; New_York for Time zone; and us for Keyboard layout (this is important, if you select the incorrect keyboard layout you most likely WILL have issues with your keyboard when typing in the Pi's terminal)
 - User: perk, password: perk (For the host Pi, the user is perkhost)
 - Wi-fi: Doesn't really matter, but do connect it to wifi for installing packages
+- *NOTE* If you leave Wifi blank, youll have to manually enable it when working with the Pi (See https://www.raspberrypi.com/documentation/computers/configuration.html#wireless-connection)
 - Remote Access: enable SSH, and select "Use password authentication"
 - RPI connect doesn't matter
 - Enable USB-Gadget (you'll get a warning, ignore it) <br> <br>
 For more information on setting up RPI gadget mode, you can look at this guide: https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/
-
-### Setup.sh and Perk_RPI.zip
-- transfer setup.sh into the Pi (navigate to your directory containing setup.sh, then run "scp setup.sh perk@perk.local:~/setup.sh")
+### Host Pi (Perkhost)
+- After setting up, run sudo apt-get install sshpass
+- That's it!
+### Setup.sh and Perk_RPI.zip (Client Pi)
+- transfer setup.sh into the Pi AND Perk_RPI.zip (navigate to your directory containing setup.sh, then run "scp setup.sh perk@perk.local:~/setup.sh", then to the directory with Perk_RPI do the corresponding scp command)
 - When editing ANY file in Raspberry Pi Files, you MUST compress all files into Perk_RPI before committing and pushing. Please keep the zip file updated!!
 - With these two files, you can skip the below steps (besides building the exe) for setting up the client Pi.
 ### TLV320DAC3100 setup (speaker & headphones)

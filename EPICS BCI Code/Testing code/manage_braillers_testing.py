@@ -399,17 +399,7 @@ class ManageBraillersViewBase:
             if status == "REACHABLE":
                 try:
 
-                    out = self.run_command(f"scp perk@{ip}:~/name.txt {ip}_name.txt")
-
-                    self.create_error_popup(out)
-
-                    # Step 2 (your PC pulls from host Pi)
-                    scp = SCPClient(self.ssh.get_transport())
-                    scp.get(f"{ip}_name.txt", f"{ip}_name.txt")
-
-                    # read it
-                    with open(f"{ip}_name.txt", "r") as f:
-                        device_id = f.read().strip()
+                    device_id = self.run_command(f"ssh perk@{ip} 'cat ~/name.txt")
 
                     if not device_id:
                         self.create_error_popup("No device ID available")

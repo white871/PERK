@@ -435,9 +435,15 @@ class ManageBraillersViewBase:
 #Button actions
     def open_live_feed(self):
         if self.inverted:
-            self.app.show_text_page_inverted(self.current_brailler_name)
+            self.app.show_text_page_inverted(
+                self.current_brailler_name, 
+                open_tab="live_feed"
+            )
         else:
-            self.app.show_text_page(self.current_brailler_name)
+            self.app.show_text_page(
+                self.current_brailler_name,
+                open_tab="live_feed"
+            )
 
     ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
     def rename_device(self):

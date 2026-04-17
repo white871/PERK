@@ -400,7 +400,8 @@ class ManageBraillersViewBase:
             if status == "REACHABLE":
                 try:
                     
-                    device_id = self.run_command(f"ssh perk@{ip} 'cat ~/name.txt'")
+                    device_id = self.run_command(f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'").strip()
+
                     if not device_id:
                         self.create_error_popup("No device ID available")
                         return

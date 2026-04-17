@@ -7,7 +7,7 @@ from utility_functions import load_img, create_label, create_inverted_label, cre
 
 class IndividualBraillerViewBase:
 
-    def __init__(self, root, app, brailler_name, THEMES, open_tab, theme_name="light", ):
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, theme_name="light"):
         self.root = root
         self.app = app
         self.brailler_name = brailler_name
@@ -29,10 +29,23 @@ class IndividualBraillerViewBase:
         self.current_mode = "live"
         self.last_len = 0
 
+        self.device_registry_path = "EPICS BCI Code/Data/device_registry.json"
+        self.device_state_path = "EPICS BCI Code/Data/device_state.json"
         self.text_file_path = "EPICS BCI Code/Data/brailler_output.txt"
         self.braille_file_path = "EPICS BCI Code/Data/braille_binary.txt"
         self.translations_path = "EPICS BCI Code/Data/translations.txt"
         self.enabled_contractions_path = "EPICS BCI Code/Data/enabled_contractions.txt"
+
+        self.load_registry()
+        self.load_state()
+
+        self.brailler_id = None
+        for dev_id, info in self.registry.items():
+            if info.get("name") == brailler_name:
+                self.brailler_id = dev_id
+                break
+
+        self.ip = self.state[self.brailler_id].get("ip")
 
         self.after_id1 = None
         self.after_id2 = None
@@ -56,7 +69,21 @@ class IndividualBraillerViewBase:
 
         self.sync_triangle_state()
 
-    
+    def load_registry(self):
+        try:
+            with open(self.device_registry_path, "r") as f:
+                self.registry = json.load(f)
+        except:
+            self.registry = {}
+
+    def load_state(self):
+        try:
+            with open(self.device_state_path, "r") as f:
+                 self.state = json.load(f)
+        except:
+            self.state = {}
+
+
     def load_translations(self):
         try:
             with open(self.translations_path, "r", encoding="utf-8") as f:
@@ -173,31 +200,33 @@ class IndividualBraillerViewBase:
 
     ####################EDIT HERE ##############remove these two functions that simulate output  
     def simulate_brailler_output(self):
-        """Simulate text arriving from Brailler device."""
-        char = random.choice(
-            ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p",
-             "q","r","s","t","u","v","w","x","y","z"," ", " ", " "," ", " "]
-        )
+        # """Simulate text arriving from Brailler device."""
+        # char = random.choice(
+        #     ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p",
+        #      "q","r","s","t","u","v","w","x","y","z"," ", " ", " "," ", " "]
+        # )
 
-        # Append to the file
-        with open(self.text_file_path, "a", encoding="utf-8") as f:
-            f.write(char)
+        # # Append to the file
+        # with open(self.text_file_path, "a", encoding="utf-8") as f:
+        #     f.write(char)
+
+
 
         # Schedule next write
         self.after_id1 = self.root.after(300, self.simulate_brailler_output)
 
     def simulate_braille_binary_output(self):
-        """Simulate Braille binary sequences using only valid codes in the translations dictionary."""
-        if not self.translations:
-            return  # safety check
+        # """Simulate Braille binary sequences using only valid codes in the translations dictionary."""
+        # if not self.translations:
+        #     return  # safety check
 
-        # Pick a random valid braille code from the dictionary keys
-        binary_seq = random.choice(list(self.translations.keys()))
-        symbol = self.translations[binary_seq]
+        # # Pick a random valid braille code from the dictionary keys
+        # binary_seq = random.choice(list(self.translations.keys()))
+        # symbol = self.translations[binary_seq]
 
-        # Append it to the file with a space (to separate sequences)
-        with open(self.braille_file_path, "a", encoding="utf-8") as f:
-            f.write(symbol)
+        # # Append it to the file with a space (to separate sequences)
+        # with open(self.braille_file_path, "a", encoding="utf-8") as f:
+        #     f.write(symbol)
 
         # Schedule next write
         self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)

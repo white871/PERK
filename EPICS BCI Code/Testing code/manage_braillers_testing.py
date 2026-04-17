@@ -304,12 +304,15 @@ class ManageBraillersViewBase:
         if self.inverted:
             self.app.show_text_page_inverted(
                 self.current_brailler_name,
-                open_tab="contractions"
+                open_tab="contractions", 
+                ssh=self.ssh
+
             )
         else:
             self.app.show_text_page(
                 self.current_brailler_name,
-                open_tab="contractions"
+                open_tab="contractions", 
+                ssh=self.ssh
             )
 
     def remove_device(self):
@@ -399,8 +402,8 @@ class ManageBraillersViewBase:
 
             if status == "REACHABLE":
                 try:
-                    
-                    device_id = self.run_command(f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'").strip()
+                    cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'"
+                    device_id = self.run_command(cmd).strip()
 
                     if not device_id:
                         self.create_error_popup("No device ID available")
@@ -435,9 +438,9 @@ class ManageBraillersViewBase:
 #Button actions
     def open_live_feed(self):
         if self.inverted:
-            self.app.show_text_page_inverted(self.current_brailler_name)
+            self.app.show_text_page_inverted(self.current_brailler_name, self.ssh)
         else:
-            self.app.show_text_page(self.current_brailler_name)
+            self.app.show_text_page(self.current_brailler_name, self.ssh)
 
     ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
     def rename_device(self):
@@ -660,8 +663,8 @@ class ManageBraillersViewBase:
 
         self.ssh = self.connect_ssh()
 
-        if not self.ssh:
-            return
+        # if not self.ssh:
+        #     return
         
         self.setup_wifi()
 

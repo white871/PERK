@@ -114,13 +114,13 @@ class App:
         self.clear()
         self.save_settings(False, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerView(self.root, self, brailler_name, self.THEMES, open_tab)
+        IndividualBraillerView(self.root, self, brailler_name, self.THEMES, open_tab, ssh=None)
 
     def show_text_page_inverted(self, brailler_name, open_tab="live_feed"):
         self.clear()
         self.save_settings(True, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES, open_tab)
+        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES, open_tab, ssh=None)
 
 root = tk.Tk()
 root.geometry("1050x700")

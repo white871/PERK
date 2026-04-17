@@ -381,7 +381,7 @@ class ManageBraillersViewBase:
 
             self.state[device_id]["status"] = "UNREACHABLE"
 
-        self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
+        #self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
 
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
@@ -401,7 +401,6 @@ class ManageBraillersViewBase:
                 try:
                     
                     device_id = self.run_command(f"ssh perk@{ip} 'cat ~/name.txt'")
-
                     if not device_id:
                         self.create_error_popup("No device ID available")
                         return

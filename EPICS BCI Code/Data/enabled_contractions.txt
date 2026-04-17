@@ -477,7 +477,7 @@
     "question": {
         "binary": "000010111110",
         "braille": "⠐⠟",
-        "enabled": 0
+        "enabled": 1
     },
     "quick": {
         "binary": "111110101000",
@@ -577,7 +577,7 @@
     "themselves": {
         "binary": "011101101100111001011100",
         "braille": "⠮⠍⠧⠎",
-        "enabled": 1
+        "enabled": 0
     },
     "there": {
         "binary": "000010011101",

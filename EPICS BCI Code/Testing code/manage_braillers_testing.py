@@ -384,7 +384,7 @@ class ManageBraillersViewBase:
 
             self.state[device_id]["status"] = "UNREACHABLE"
 
-        self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
+        #self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
 
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
@@ -402,8 +402,8 @@ class ManageBraillersViewBase:
 
             if status == "REACHABLE":
                 try:
-                    
-                    device_id = self.run_command(f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'").strip()
+                    cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'"
+                    device_id = self.run_command(cmd).strip()
 
                     if not device_id:
                         self.create_error_popup("No device ID available")
@@ -438,7 +438,6 @@ class ManageBraillersViewBase:
 #Button actions
     def open_live_feed(self):
         if self.inverted:
-<<<<<<< HEAD
             self.app.show_text_page_inverted(
                 self.current_brailler_name, 
                 open_tab="live_feed"
@@ -670,8 +669,8 @@ class ManageBraillersViewBase:
 
         self.ssh = self.connect_ssh()
 
-        if not self.ssh:
-            return
+        # if not self.ssh:
+        #     return
         
         self.setup_wifi()
 

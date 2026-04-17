@@ -1,4 +1,8 @@
 {
     "inverted": false,
+<<<<<<< HEAD
     "current_brailler": "Aamod's Brailler"
+=======
+    "current_brailler": "xUnknown"
+>>>>>>> dd4604a1e31e97bab7413904a297c34aeb0ef244
 }

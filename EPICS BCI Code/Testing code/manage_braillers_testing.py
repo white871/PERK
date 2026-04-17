@@ -304,12 +304,15 @@ class ManageBraillersViewBase:
         if self.inverted:
             self.app.show_text_page_inverted(
                 self.current_brailler_name,
-                open_tab="contractions"
+                open_tab="contractions", 
+                ssh=self.ssh
+
             )
         else:
             self.app.show_text_page(
                 self.current_brailler_name,
-                open_tab="contractions"
+                open_tab="contractions", 
+                ssh=self.ssh
             )
 
     def remove_device(self):
@@ -435,6 +438,7 @@ class ManageBraillersViewBase:
 #Button actions
     def open_live_feed(self):
         if self.inverted:
+<<<<<<< HEAD
             self.app.show_text_page_inverted(
                 self.current_brailler_name, 
                 open_tab="live_feed"

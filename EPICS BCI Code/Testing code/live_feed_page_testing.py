@@ -7,7 +7,7 @@ from utility_functions import load_img, create_label, create_inverted_label, cre
 
 class IndividualBraillerViewBase:
 
-    def __init__(self, root, app, brailler_name, THEMES, open_tab, theme_name="light"):
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, ssh, theme_name="light"):
         self.root = root
         self.app = app
         self.brailler_name = brailler_name
@@ -28,6 +28,7 @@ class IndividualBraillerViewBase:
         #STATE MODIFIERS
         self.current_mode = "live"
         self.last_len = 0
+        self.ssh = ssh
 
         self.device_registry_path = "EPICS BCI Code/Data/device_registry.json"
         self.device_state_path = "EPICS BCI Code/Data/device_state.json"
@@ -165,28 +166,26 @@ class IndividualBraillerViewBase:
 
         # Choose file depending on mode
         if self.current_mode == "live":
-            file_path = "EPICS BCI Code/Data/brailler_output.txt"
+            current_contents = self.text_content
         elif self.current_mode == "braille":
-            file_path = "EPICS BCI Code/Data/braille_binary.txt"
+            current_contents = self.braille_content
 
         ###################################################
         #####################################################
         #EDIT HERE#### add function to get file from pi###############
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read().strip()
-        except FileNotFoundError:
-            content = ""
 
-        new_len = len(content)
+        new_len = len(current_contents)
 
         if new_len > self.last_len or force_full_refresh:
             if not force_full_refresh:
-                new_text = content[self.last_len:new_len]
+                new_text = current_contents[self.last_len:new_len]
             else:
-                new_text = content
+                new_text = current_contents
                 self.text_display.delete("1.0", tk.END)
             self.text_display.insert(tk.END, new_text)
+
+        if self.current_mode == "braille":
+            current_contents = self.binToBraille(current_contents)
 
         self.last_len = new_len
 
@@ -197,6 +196,38 @@ class IndividualBraillerViewBase:
         
         # Schedule next update after 150 ms
         self.after_id3 = self.root.after(500, self.update_live_feed)
+
+      
+    def binToBraille(self, bin_data):
+        out = ""
+
+        # Split by whitespace/newlines
+        chunks = bin_data.split()
+
+        for chunk in chunks:
+            if chunk in self.translations:
+                out += self.translations[chunk]
+            elif chunk == "":
+                out += " "
+            else:
+                # Unknown pattern (optional debug)
+                pass
+
+        return out
+
+    
+    def run_command(self, command):
+
+        if self.ssh is None:
+            self.create_error_popup("SSH is not connected.")
+            return ""
+        stdin, stdout, stderr = self.ssh.exec_command(command)
+        output = stdout.read().decode()
+        error = stderr.read().decode()
+
+        if error:
+            self.create_error_popup(error)
+        return output
 
     ####################EDIT HERE ##############remove these two functions that simulate output  
     def simulate_brailler_output(self):
@@ -210,7 +241,12 @@ class IndividualBraillerViewBase:
         # with open(self.text_file_path, "a", encoding="utf-8") as f:
         #     f.write(char)
 
+        cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt'"
+        self.text_content= self.run_command(cmd)
 
+        if self.braille_content == None:
+            self.root.after_cancel(self.after_id1)
+            print("Connection lost. Stopping updates.")
 
         # Schedule next write
         self.after_id1 = self.root.after(300, self.simulate_brailler_output)
@@ -227,6 +263,13 @@ class IndividualBraillerViewBase:
         # # Append it to the file with a space (to separate sequences)
         # with open(self.braille_file_path, "a", encoding="utf-8") as f:
         #     f.write(symbol)
+
+        cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/outputBin.txt'"
+        self.braille_content= self.run_command(cmd)
+
+        if self.braille_content == None:
+            self.root.after_cancel(self.after_id2)
+            print("Connection lost. Stopping updates.")
 
         # Schedule next write
         self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)
@@ -800,11 +843,45 @@ class IndividualBraillerViewBase:
         with open(self.enabled_contractions_path, "w", encoding="utf-8") as f:
             json.dump(self.enabled_contractions, f, indent=4, ensure_ascii=False)
 
+    
+    def create_error_popup(self, text):
+        error_popup = tk.Toplevel(self.root)
+        error_popup.title("Error or Output")
+        error_popup.geometry("400x200")
+        error_popup.grab_set()  # Make it modal
+        error_popup.configure(bg=self.bg)
+
+        max_width = 400
+
+        error_label = tk.Label(
+            error_popup,
+            text=text,
+            font=("Roboto Condensed", 14),
+            bg=self.bg,
+            fg=self.fg,
+            wraplength=max_width-40,
+            justify="left",
+            padx=20,
+            pady=20
+        )
+        error_label.pack(expand=True, fill="both")  # top padding, small gap below
+
+        okay_button = tk.Button(
+            error_popup, 
+            text="Okay", 
+            font=("Roboto Condensed", 12),
+            bg=self.bg,
+            fg=self.fg, 
+            command=error_popup.destroy
+        )
+        okay_button.pack(pady=(0,10))
+
+
 
 class IndividualBraillerView(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name, THEMES, open_tab):
-        super().__init__(root, app, brailler_name, THEMES, open_tab, theme_name="light")
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, ssh):
+        super().__init__(root, app, brailler_name, THEMES, open_tab, ssh, theme_name="light")
 
 class IndividualBraillerViewInverted(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name, THEMES, open_tab):
-        super().__init__(root, app, brailler_name, THEMES, open_tab, theme_name="dark")
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, ssh):
+        super().__init__(root, app, brailler_name, THEMES, open_tab, ssh, theme_name="dark")

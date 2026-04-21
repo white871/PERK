@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import random
 import json
+import threading
 import os
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_triangle_button, create_interactive_icon, make_interactive_image, create_display_frame_header, create_display_frame
 
@@ -29,6 +29,8 @@ class IndividualBraillerViewBase:
         self.current_mode = "live"
         self.last_len = 0
         self.ssh = ssh
+        self.text_content = ""
+        self.braille_content = ""
 
         self.device_registry_path = "EPICS BCI Code/Data/device_registry.json"
         self.device_state_path = "EPICS BCI Code/Data/device_state.json"
@@ -170,10 +172,6 @@ class IndividualBraillerViewBase:
         elif self.current_mode == "braille":
             current_contents = self.braille_content
 
-        ###################################################
-        #####################################################
-        #EDIT HERE#### add function to get file from pi###############
-
         new_len = len(current_contents)
 
         if new_len > self.last_len or force_full_refresh:
@@ -219,60 +217,61 @@ class IndividualBraillerViewBase:
     def run_command(self, command):
 
         if self.ssh is None:
-            self.create_error_popup("SSH is not connected.")
-            return ""
-        stdin, stdout, stderr = self.ssh.exec_command(command)
-        output = stdout.read().decode()
-        error = stderr.read().decode()
+            return None
+        
+        try: 
+            stdin, stdout, stderr = self.ssh.exec_command(command)
+            output = stdout.read().decode()
+            error = stderr.read().decode()
 
-        if error:
-            self.create_error_popup(error)
-        return output
+            if error:
+                self.root.after(0, lambda: self.create_error_popup(f"Command Error: {error}"))
+            return output
+        except Exception as e:
+            self.root.after(0, lambda: self.create_error_popup(f"Network Exception: {e}"))
+            return None
 
-    ####################EDIT HERE ##############remove these two functions that simulate output  
+    
     def simulate_brailler_output(self):
-        # """Simulate text arriving from Brailler device."""
-        # char = random.choice(
-        #     ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p",
-        #      "q","r","s","t","u","v","w","x","y","z"," ", " ", " "," ", " "]
-        # )
+        
+        def fetch_worker_ascii():
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt'"
+            result = self.run_command(cmd)
 
-        # # Append to the file
-        # with open(self.text_file_path, "a", encoding="utf-8") as f:
-        #     f.write(char)
+            self.root.after(0, lambda: self.process_fetch_result_ascii(result))
 
-        cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt'"
-        self.text_content= self.run_command(cmd)
+        threading.Thread(target=fetch_worker_ascii, daemon=True).start()
 
-        if self.braille_content == None:
-            self.root.after_cancel(self.after_id1)
-            print("Connection lost. Stopping updates.")
-
-        # Schedule next write
-        self.after_id1 = self.root.after(300, self.simulate_brailler_output)
+        
+    def process_fetch_result_ascii(self, result):
+        if result is None:
+            self.create_error_popup("Connection lost. Live feed updates stopped.")
+            return 
+        
+        self.text_content = result
+        # Schedule the NEXT fetch only after the current one finishes
+        self.after_id1 = self.root.after(1000, self.simulate_brailler_output)
 
     def simulate_braille_binary_output(self):
-        # """Simulate Braille binary sequences using only valid codes in the translations dictionary."""
-        # if not self.translations:
-        #     return  # safety check
 
-        # # Pick a random valid braille code from the dictionary keys
-        # binary_seq = random.choice(list(self.translations.keys()))
-        # symbol = self.translations[binary_seq]
+        def fetch_worker_braille():
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/outputBin.txt'"
+            result = self.run_command(cmd)
 
-        # # Append it to the file with a space (to separate sequences)
-        # with open(self.braille_file_path, "a", encoding="utf-8") as f:
-        #     f.write(symbol)
+            self.root.after(0, lambda: self.process_fetch_result_braille(result))
 
-        cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/outputBin.txt'"
-        self.braille_content= self.run_command(cmd)
+        threading.Thread(target=fetch_worker_braille, daemon=True).start()
 
-        if self.braille_content == None:
-            self.root.after_cancel(self.after_id2)
-            print("Connection lost. Stopping updates.")
+        
+    def process_fetch_result_braille(self, result):
+        if result is None:
+            self.create_error_popup("Connection lost. Live feed updates stopped.")
+            return 
+        
+        self.text_content = result
+        # Schedule the NEXT fetch only after the current one finishes
+        self.after_id1 = self.root.after(1000, self.simulate_braille_binary_output)
 
-        # Schedule next write
-        self.after_id2 = self.root.after(300, self.simulate_braille_binary_output)
 
     ###############EDIT HERE ############ somehow make it so new file action also clears file on client raspberry pi
     def new_file_action(self):
@@ -285,16 +284,14 @@ class IndividualBraillerViewBase:
         if not confirm:
             return #user clicked no
         
-        #Erasing everything on the 
-        with open(self.braille_file_path, "w") as f:
-            f.write("")
-        
-        with open(self.text_file_path, "w") as f:
-            f.write("")
+        self.run_command("sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/transliterateOutput.txt'")
+        self.run_command("sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/outputBin.txt'")
 
         self.text_display.config(state="normal")
         self.text_display.delete("1.0", tk.END)
 
+        self.text_content = ""
+        self.braille_content = ""
         self.last_len = 0
 
     def export_file_action(self):
@@ -380,6 +377,9 @@ class IndividualBraillerViewBase:
             self.app.show_settings()
 
     def build_navigation_buttons(self):
+        import utility_functions
+        utility_functions.triangle_buttons.clear()
+
         self.triangle_image_1 = load_img(
             os.path.join(self.image_path, "triangles_icon.png"), 
             size=(60,115)
@@ -542,10 +542,12 @@ class IndividualBraillerViewBase:
         if self.current_tab == "live_feed":
             self.triangle_live_feed.select(True)
             self.triangle_contraction_library.select(False)
+            self.live_feed_frame.tkraise()
     
         elif self.current_tab == "contractions":
             self.triangle_live_feed.select(False)
             self.triangle_contraction_library.select(True)
+            self.contraction_library_frame.tkraise()
           
     def build_live_feed(self):
         text_frame_height = 500-72-60

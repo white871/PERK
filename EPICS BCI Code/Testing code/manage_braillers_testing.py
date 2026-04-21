@@ -3,7 +3,7 @@ import math
 import os
 import paramiko
 import json
-from scp import SCPClient
+import threading
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
 class ManageBraillersViewBase:
@@ -371,8 +371,19 @@ class ManageBraillersViewBase:
 
     def refresh_ui(self):
 
-        self.scan_and_update_devices()
+        if hasattr(self, 'brailler_frame'):
+            self.brailler_frame.destroy()
 
+        def refresh_worker():
+            self.scan_and_update_devices()
+
+            self.root.after(0, self.build_brailler_list)
+            self.root.after(0, self.update_status_dots)
+
+        threading.Thread(target=refresh_worker, daemon=True).start()
+        
+
+    def update_status_dots(self):
         for device_id in self.registry:
             status = self.state.get(device_id, {}).get("status", "UNREACHABLE")
             self.set_brailler_status(device_id, status)
@@ -388,7 +399,11 @@ class ManageBraillersViewBase:
 
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
-        self.create_error_popup(out)
+        
+        if out is None:
+            print("Scan failed: run_command returned None (Check SSH Connection)")
+            return  # Exit the function early so the thread finishes safely
+        
         print(out)
 
         for line in out.splitlines():
@@ -713,27 +728,41 @@ class ManageBraillersViewBase:
     def run_command(self, command):
 
         if self.ssh is None:
-            self.create_error_popup("SSH is not connected.")
-            return ""
-        stdin, stdout, stderr = self.ssh.exec_command(command)
-        output = stdout.read().decode()
-        error = stderr.read().decode()
+            return None
+        
+        try: 
+            stdin, stdout, stderr = self.ssh.exec_command(command)
+            output = stdout.read().decode()
+            error = stderr.read().decode()
 
-        if error:
-            self.create_error_popup(error)
-        return output
+            if error:
+                self.root.after(0, lambda: self.create_error_popup(f"Command Error: {error}"))
+            return output
+        except Exception as e:
+            self.root.after(0, lambda: self.create_error_popup(f"Network Exception: {e}"))
+            return None
 
     def setup_wifi(self):
         self.FULLNAME = "perk-" + self.wifi_name
         self.PASSWORD = "perk12345"
 
-        set_up_wifi = f"sudo nmcli device wifi hotspot ssid {self.FULLNAME} password {self.PASSWORD}"
-        
-        out = self.run_command(set_up_wifi)
 
-        self.create_error_popup(out)
+        def wifi_worker():
 
-        self.refresh_ui()
+            set_up_wifi = f"sudo nmcli device wifi hotspot ssid {self.FULLNAME} password {self.PASSWORD}"
+            out = self.run_command(set_up_wifi)
+
+            if out is None:
+                # run_command already schedules its own error popup if it hits a 
+                # network exception or SSH failure, so we just exit here.
+                self.root.after(0, lambda: self.create_error_popup("Wifi setip failed. Please try again."))
+                return
+
+            self.root.after(0, lambda: self.create_error_popup("Wifi Enabled! Students can now connect."))
+            self.root.after(0, self.refresh_ui)
+
+        # Start the thread
+        threading.Thread(target=wifi_worker, daemon=True).start()
 
     def connect_ssh(self):
         try:

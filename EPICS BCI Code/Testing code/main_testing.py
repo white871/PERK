@@ -2,6 +2,7 @@ import tkinter as tk
 import sys
 import os
 import json
+import threading
 from utility_functions import create_label, create_inverted_label
 from filters_page_testing import SettingsView, SettingsViewInverted
 from manage_braillers_testing import ManageBraillersView, ManageBraillersViewInverted
@@ -17,7 +18,7 @@ class App:
             with open(self.settings_path, "r", encoding="utf-8") as f:
                 self.state = json.load(f)
         except FileNotFoundError:
-            self.state = {}
+            self.state = {"inverted": False, "current_brailler": None}
 
         self.THEMES = {
             "light": {
@@ -110,17 +111,17 @@ class App:
         self.root.geometry("1050x750")
         ManageBraillersViewInverted(self.root, self, self.THEMES)
 
-    def show_text_page(self, brailler_name, open_tab="live_feed"):
+    def show_text_page(self, brailler_name, open_tab="live_feed", ssh=None):
         self.clear()
         self.save_settings(False, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerView(self.root, self, brailler_name, self.THEMES, open_tab, ssh=None)
+        IndividualBraillerView(self.root, self, brailler_name, self.THEMES, open_tab, ssh=ssh)
 
-    def show_text_page_inverted(self, brailler_name, open_tab="live_feed"):
+    def show_text_page_inverted(self, brailler_name, open_tab="live_feed", ssh=None):
         self.clear()
         self.save_settings(True, brailler_name)
         self.root.geometry("1050x700")
-        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES, open_tab, ssh=None)
+        IndividualBraillerViewInverted(self.root, self, brailler_name, self.THEMES, open_tab, ssh=ssh)
 
 root = tk.Tk()
 root.geometry("1050x700")

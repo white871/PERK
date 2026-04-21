@@ -42,6 +42,6 @@
     },
     "xUnknown": {
         "ip": "10.42.0.220",
-        "status": "REACHABLE"
+        "status": "UNREACHABLE"
     }
 }

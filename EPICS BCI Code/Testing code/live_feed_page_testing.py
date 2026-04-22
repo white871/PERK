@@ -161,37 +161,46 @@ class IndividualBraillerViewBase:
     def update_live_feed(self, force_full_refresh=False):
         """Continuously update the text display."""
     
+        if hasattr(self, 'after_id3') and self.after_id3:
+            try:
+                self.root.after_cancel(self.after_id3)
+            except:
+                pass
+            self.after_id3 = None
+
+
         if not self.text_display.winfo_exists():
             # Stop the loop if widget is destroyed
             return
 
         # Choose file depending on mode
         if self.current_mode == "live":
-            current_contents = self.text_content
+            current_contents = self.text_content.rstrip('\n')
         elif self.current_mode == "braille":
-            current_contents = self.braille_content
-
-        print(current_contents)
-
+            current_contents = self.braille_content.rstrip('\n')
 
 
         if self.current_mode == "braille":
             current_contents = self.binToBraille(current_contents)
 
-            print(current_contents)
 
         new_len = len(current_contents)
 
-        print(f"{new_len}")
-        print(f"{self.last_len}")
+        #Case 1, text is shorter
+        if new_len < self.last_len:
+            self.text_display.delete("1.0", tk.END)
+            self.text_display.insert(tk.END, current_contents)
+            
 
-        if new_len > self.last_len or force_full_refresh:
-            if not force_full_refresh:
-                new_text = current_contents[self.last_len:new_len]
-            else:
-                new_text = current_contents
-                self.text_display.delete("1.0", tk.END)
-            self.text_display.insert("end-1c", new_text)
+        elif new_len > self.last_len:
+            new_text = current_contents[self.last_len:new_len]
+            self.text_display.insert(tk.END, new_text)
+            
+
+        elif force_full_refresh:
+            self.text_display.delete("1.0", tk.END)
+            self.text_display.insert(tk.END, current_contents)
+            
 
         self.last_len = new_len
 
@@ -200,7 +209,6 @@ class IndividualBraillerViewBase:
         if bottom >= 0.92:   # user is already at bottom
             self.text_display.see(tk.END)
         
-        print("Updating live feed")
 
         # Schedule next update after 150 ms
         self.after_id3 = self.root.after(1000, self.update_live_feed)
@@ -269,6 +277,11 @@ class IndividualBraillerViewBase:
 
     def change_mode(self):
         """Call this when clicking the 'Live' or 'Braille' buttons."""
+        if hasattr(self, 'after_id3'):
+            self.root.after_cancel(self.after_id3)
+            self.after_id3 = None
+
+
         if self.current_mode == "live":
             self.current_mode = "braille"
             self.braille_selection_box_icon.config(image=self.braille_selection_box_img_2)
@@ -278,14 +291,7 @@ class IndividualBraillerViewBase:
             self.braille_selection_box_icon.config(image=self.braille_selection_box_img)
             self.text_display.config(font=("Roboto Condensed", 14))
 
-        # self.root.after_cancel(self.after_id1)
-
         self.last_len = 0
-        
-        # Clear the UI box for the new mode
-        # self.text_display.configure(state='normal')
-        # self.text_display.delete('1.0', tk.END)
-        
 
         self.update_live_feed(force_full_refresh=True)
 

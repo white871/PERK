@@ -371,17 +371,26 @@ class ManageBraillersViewBase:
 
     def refresh_ui(self):
 
-        if hasattr(self, 'brailler_frame'):
-            self.brailler_frame.destroy()
-
         def refresh_worker():
             self.scan_and_update_devices()
 
-            self.root.after(0, self.build_brailler_list)
-            self.root.after(0, self.update_status_dots)
+            self.root.after(0, self.rebuild_list_after_scan)
 
         threading.Thread(target=refresh_worker, daemon=True).start()
         
+    def rebuild_list_after_scan(self):
+        """Helper to clear and rebuild the UI once data is ready."""
+        if hasattr(self, 'brailler_frame') and self.brailler_frame.winfo_exists():
+            # Clear all existing widgets inside the frame or destroy/recreate
+            self.brailler_frame.destroy()
+            
+        # Re-initialize the brailler status dots dictionary
+        self.brailler_status_dots = {}
+        
+        # Build the fresh list and update the dots
+        self.build_brailler_list()
+        self.update_status_dots()
+
 
     def update_status_dots(self):
         for device_id in self.registry:

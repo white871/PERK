@@ -455,12 +455,14 @@ class ManageBraillersViewBase:
         if self.inverted:
             self.app.show_text_page_inverted(
                 self.current_brailler_name, 
-                open_tab="live_feed"
+                open_tab="live_feed",
+                ssh=self.ssh
             )
         else:
             self.app.show_text_page(
                 self.current_brailler_name,
-                open_tab="live_feed"
+                open_tab="live_feed",
+                ssh=self.ssh
             )
 
     ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
@@ -682,15 +684,37 @@ class ManageBraillersViewBase:
 
         self.wifi_popup.destroy()
 
-        self.ssh = self.connect_ssh()
+        threading.Thread(target=self.threaded_connect_worker, daemon=True).start()
 
-        # if not self.ssh:
-        #     return
-        
+    def threaded_connect_worker(self):
+        """This runs in the background and won't freeze the UI."""
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            
+            # Try first IP
+            try:
+                ssh.connect(self.HOST, username=self.USER, password=self.PASS, timeout=5)
+                # Success! Back to main thread
+                self.root.after(0, lambda: self.on_connection_success(ssh))
+                return
+            except Exception:
+                # Try second IP
+                ssh.connect(self.HOST2, username=self.USER, password=self.PASS, timeout=5)
+                self.root.after(0, lambda: self.on_connection_success(ssh))
+                return
+
+        except Exception as e:
+            # Error! Back to main thread to show popup
+            error_msg = str(e)
+            
+            self.root.after(0, lambda m=error_msg: self.create_error_popup(f"BCI Connection Failed:\n{m}"))
+
+    def on_connection_success(self, ssh):
+        """This runs on the MAIN THREAD after the background thread finishes."""
+        self.ssh = ssh
+        # Now that we are connected, start the next step (like WiFi setup)
         self.setup_wifi()
-
-
-        #LOTS OF STUFF HAPPENS HERE
 
     def create_error_popup(self, text):
         error_popup = tk.Toplevel(self.root)

@@ -67,8 +67,7 @@ class IndividualBraillerViewBase:
 
         # Start background loops
         self.simulate_brailler_output()
-        self.simulate_braille_binary_output()
-        self.update_live_feed()
+        self.update_live_feed(force_full_refresh=True)
 
         self.sync_triangle_state()
 
@@ -172,7 +171,19 @@ class IndividualBraillerViewBase:
         elif self.current_mode == "braille":
             current_contents = self.braille_content
 
+        print(current_contents)
+
+
+
+        if self.current_mode == "braille":
+            current_contents = self.binToBraille(current_contents)
+
+            print(current_contents)
+
         new_len = len(current_contents)
+
+        print(f"{new_len}")
+        print(f"{self.last_len}")
 
         if new_len > self.last_len or force_full_refresh:
             if not force_full_refresh:
@@ -180,10 +191,7 @@ class IndividualBraillerViewBase:
             else:
                 new_text = current_contents
                 self.text_display.delete("1.0", tk.END)
-            self.text_display.insert(tk.END, new_text)
-
-        if self.current_mode == "braille":
-            current_contents = self.binToBraille(current_contents)
+            self.text_display.insert("end-1c", new_text)
 
         self.last_len = new_len
 
@@ -192,8 +200,10 @@ class IndividualBraillerViewBase:
         if bottom >= 0.92:   # user is already at bottom
             self.text_display.see(tk.END)
         
+        print("Updating live feed")
+
         # Schedule next update after 150 ms
-        self.after_id3 = self.root.after(500, self.update_live_feed)
+        self.after_id3 = self.root.after(1000, self.update_live_feed)
 
       
     def binToBraille(self, bin_data):
@@ -233,46 +243,54 @@ class IndividualBraillerViewBase:
 
     
     def simulate_brailler_output(self):
-        
-        def fetch_worker_ascii():
-            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt'"
+        def fetch_worker():
+            if self.current_mode == "live":
+                filename = "~/transliterateOutput.txt"
+            elif self.current_mode == "braille":
+                filename = "~/outputBin.txt"
+                
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat {filename}'"
             result = self.run_command(cmd)
+            print(result)
+            
+            if self.current_mode == "live":
+                self.text_content = result
+            elif self.current_mode == "braille":
+                self.braille_content = result
 
-            self.root.after(0, lambda: self.process_fetch_result_ascii(result))
+            if result is None:
+                return
 
-        threading.Thread(target=fetch_worker_ascii, daemon=True).start()
+
+            self.after_id1 = self.root.after(1000, self.simulate_brailler_output)
+
+        threading.Thread(target=fetch_worker, daemon=True).start()
+
+
+    def change_mode(self):
+        """Call this when clicking the 'Live' or 'Braille' buttons."""
+        if self.current_mode == "live":
+            self.current_mode = "braille"
+            self.braille_selection_box_icon.config(image=self.braille_selection_box_img_2)
+            self.text_display.config(font=("Cascadia Mono", 20))
+        else:
+            self.current_mode = "live"
+            self.braille_selection_box_icon.config(image=self.braille_selection_box_img)
+            self.text_display.config(font=("Roboto Condensed", 14))
+
+        # self.root.after_cancel(self.after_id1)
+
+        self.last_len = 0
+        
+        # Clear the UI box for the new mode
+        # self.text_display.configure(state='normal')
+        # self.text_display.delete('1.0', tk.END)
+        
+
+        self.update_live_feed(force_full_refresh=True)
 
         
-    def process_fetch_result_ascii(self, result):
-        if result is None:
-            self.create_error_popup("Connection lost. Live feed updates stopped.")
-            return 
-        
-        self.text_content = result
-        # Schedule the NEXT fetch only after the current one finishes
-        self.after_id1 = self.root.after(1000, self.simulate_brailler_output)
-
-    def simulate_braille_binary_output(self):
-
-        def fetch_worker_braille():
-            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/outputBin.txt'"
-            result = self.run_command(cmd)
-
-            self.root.after(0, lambda: self.process_fetch_result_braille(result))
-
-        threading.Thread(target=fetch_worker_braille, daemon=True).start()
-
-        
-    def process_fetch_result_braille(self, result):
-        if result is None:
-            self.create_error_popup("Connection lost. Live feed updates stopped.")
-            return 
-        
-        self.text_content = result
-        # Schedule the NEXT fetch only after the current one finishes
-        self.after_id1 = self.root.after(1000, self.simulate_braille_binary_output)
-
-
+       
     ###############EDIT HERE ############ somehow make it so new file action also clears file on client raspberry pi
     def new_file_action(self):
         #Making sure the user intended to click the new file button
@@ -629,7 +647,7 @@ class IndividualBraillerViewBase:
             button_canvas, 
             self.braille_selection_box_img, 
             330, 15, 
-            on_click=self.toggle_braille_selection
+            on_click=self.change_mode
         )
 
     def update_enabled(self, contraction, var):

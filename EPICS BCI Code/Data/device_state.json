@@ -43,5 +43,9 @@
     "xUnknown": {
         "ip": "10.42.0.220",
         "status": "UNREACHABLE"
+    },
+    "PoopyPi": {
+        "ip": "10.42.0.182",
+        "status": "REACHABLE"
     }
 }

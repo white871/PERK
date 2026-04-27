@@ -1,8 +1,4 @@
 {
-    "unknown": {
-        "ip": "192.168.1.10",
-        "status": "UNREACHABLE"
-    },
     "py2": {
         "ip": "192.168.1.08",
         "status": "UNREACHABLE"
@@ -40,11 +36,7 @@
     "py14": {
         "status": "UNREACHABLE"
     },
-    "xUnknown": {
-        "ip": "10.42.0.220",
-        "status": "UNREACHABLE"
-    },
-    "PoopyPi": {
+    "Diana's Brailler": {
         "ip": "10.42.0.182",
         "status": "REACHABLE"
     }

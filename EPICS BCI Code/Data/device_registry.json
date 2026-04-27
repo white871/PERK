@@ -1,7 +1,4 @@
 {
-    "unknown": {
-        "name": "Diana's Brailler"
-    },
     "py2": {
         "name": "Aamod's Brailler"
     },
@@ -38,10 +35,7 @@
     "py14": {
         "name": "Nash's Brailler"
     },
-    "xUnknown": {
-        "name": "xUnknown"
-    },
-    "PoopyPi": {
-        "name": "PoopyPi"
+    "Diana's Brailler": {
+        "name": "Diana's Brailler"
     }
 }

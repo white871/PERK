@@ -49,6 +49,14 @@ class IndividualBraillerViewBase:
                 break
 
         self.ip = self.state[self.brailler_id].get("ip")
+        self.state = self.state[self.brailler_id].get("status")
+
+        
+        if self.state == "REACHABLE":
+            self.status_image_path = "green_circle.png"
+        else:
+            self.status_image_path = "red_circle.png"
+
 
         self.after_id1 = None
         self.after_id2 = None
@@ -161,12 +169,12 @@ class IndividualBraillerViewBase:
     def update_live_feed(self, force_full_refresh=False):
         """Continuously update the text display."""
     
-        if hasattr(self, 'after_id3') and self.after_id3:
-            try:
-                self.root.after_cancel(self.after_id3)
-            except:
-                pass
-            self.after_id3 = None
+        # if hasattr(self, 'after_id3') and self.after_id3:
+        #     try:
+        #         self.root.after_cancel(self.after_id3)
+        #     except:
+        #         pass
+        #     self.after_id3 = None
 
 
         if not self.text_display.winfo_exists():
@@ -252,19 +260,15 @@ class IndividualBraillerViewBase:
     
     def simulate_brailler_output(self):
         def fetch_worker():
-            if self.current_mode == "live":
-                filename = "~/transliterateOutput.txt"
-            elif self.current_mode == "braille":
-                filename = "~/outputBin.txt"
-                
-            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat {filename}'"
+            
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt; echo '---SEP---'; cat ~/outputBin.txt'"
             result = self.run_command(cmd)
             print(result)
             
-            if self.current_mode == "live":
-                self.text_content = result
-            elif self.current_mode == "braille":
-                self.braille_content = result
+            if result and '---SEP---' in result:
+                live_part, braille_part = result.split('---SEP---')
+                self.text_content = live_part.strip()
+                self.braille_content = braille_part.strip()
 
             if result is None:
                 return
@@ -277,7 +281,7 @@ class IndividualBraillerViewBase:
 
     def change_mode(self):
         """Call this when clicking the 'Live' or 'Braille' buttons."""
-        if hasattr(self, 'after_id3'):
+        if hasattr(self, 'after_id3') and self.after_id3:
             self.root.after_cancel(self.after_id3)
             self.after_id3 = None
 
@@ -286,12 +290,13 @@ class IndividualBraillerViewBase:
             self.current_mode = "braille"
             self.braille_selection_box_icon.config(image=self.braille_selection_box_img_2)
             self.text_display.config(font=("Cascadia Mono", 20))
-        else:
+        elif self.current_mode == "braille":
             self.current_mode = "live"
             self.braille_selection_box_icon.config(image=self.braille_selection_box_img)
             self.text_display.config(font=("Roboto Condensed", 14))
 
         self.last_len = 0
+        self.text_display.delete("1.0", tk.END)
 
         self.update_live_feed(force_full_refresh=True)
 
@@ -382,7 +387,7 @@ class IndividualBraillerViewBase:
         )
 
     def cancel_loops(self):
-        for after_id in [self.after_id1, self.after_id2, self.after_id3]:
+        for after_id in [self.after_id1, self.after_id3]:
             if after_id:
                 self.root.after_cancel(after_id)
 
@@ -492,7 +497,7 @@ class IndividualBraillerViewBase:
         )
 
         self.online_dot = load_img(
-            os.path.join(self.image_path, "green_circle.png"), 
+            os.path.join(self.image_path, self.status_image_path), 
             size=(40,40)
         )
 
@@ -909,5 +914,5 @@ class IndividualBraillerView(IndividualBraillerViewBase):
         super().__init__(root, app, brailler_name, THEMES, open_tab, ssh, theme_name="light")
 
 class IndividualBraillerViewInverted(IndividualBraillerViewBase):
-    def __init__(self, root, app, brailler_name, THEMES, open_tab, ssh):
+    def __init__(self, root, app, brailler_name, THEMES, open_tab, ssh): 
         super().__init__(root, app, brailler_name, THEMES, open_tab, ssh, theme_name="dark")

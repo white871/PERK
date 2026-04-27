@@ -7,9 +7,10 @@ import threading
 from utility_functions import load_img, create_label, create_inverted_label, create_image_canvas, create_interactive_icon, create_display_frame, make_interactive_image
 
 class ManageBraillersViewBase:
-    def __init__(self, root, app, THEMES, theme_name="light"):
+    def __init__(self, root, app, THEMES, theme_name="light", ssh=None):
         self.root = root
         self.app = app
+        self.ssgh = ssh
 
         theme = THEMES[theme_name]
         self.bg = theme["bg"]
@@ -38,7 +39,7 @@ class ManageBraillersViewBase:
         self.CLIENT_USER = "perk"
         self.CLIENT_PASS = "perk"
 
-        self.ssh = None
+        self.ssh = ssh
 
         self.HOST = "perkhost.local"
         self.HOST2 = "perkhost"   # or IP
@@ -49,6 +50,8 @@ class ManageBraillersViewBase:
         self.load_state()
         self.build_header()
         self.build_brailler_list()
+        self.scan_and_update_devices()
+        self.rebuild_list_after_scan()
         self.build_popup_menu()
         self.build_bottom_actions() 
 
@@ -304,15 +307,13 @@ class ManageBraillersViewBase:
         if self.inverted:
             self.app.show_text_page_inverted(
                 self.current_brailler_name,
-                open_tab="contractions", 
-                ssh=self.ssh
+                open_tab="contractions"
 
             )
         else:
             self.app.show_text_page(
                 self.current_brailler_name,
-                open_tab="contractions", 
-                ssh=self.ssh
+                open_tab="contractions"
             )
 
     def remove_device(self):
@@ -384,6 +385,13 @@ class ManageBraillersViewBase:
             # Clear all existing widgets inside the frame or destroy/recreate
             self.brailler_frame.destroy()
             
+        self.current_brailler_label = None
+        self.current_brailler_id = None
+        self.current_brailler_name = None
+
+        if hasattr(self, 'popup'):
+            self.popup.place_forget()
+        
         # Re-initialize the brailler status dots dictionary
         self.brailler_status_dots = {}
         
@@ -405,6 +413,9 @@ class ManageBraillersViewBase:
             self.state[device_id]["status"] = "UNREACHABLE"
 
         #self.run_command("nmap -sn 192.168.4.0/24") # Or use fping
+
+        if self.ssh == None:
+            return
 
         scan_cmd = "ip neigh show dev wlan0"
         out = self.run_command(scan_cmd)
@@ -461,17 +472,18 @@ class ManageBraillersViewBase:
 
 #Button actions
     def open_live_feed(self):
+        self.save_registry()
+        self.save_state()
+        
         if self.inverted:
             self.app.show_text_page_inverted(
                 self.current_brailler_name, 
-                open_tab="live_feed",
-                ssh=self.ssh
+                open_tab="live_feed"
             )
         else:
             self.app.show_text_page(
                 self.current_brailler_name,
-                open_tab="live_feed",
-                ssh=self.ssh
+                open_tab="live_feed"
             )
 
     ###############EDIT HERE######### make it so when you rename something is passes that info to the host pi ???
@@ -722,6 +734,9 @@ class ManageBraillersViewBase:
     def on_connection_success(self, ssh):
         """This runs on the MAIN THREAD after the background thread finishes."""
         self.ssh = ssh
+
+        self.app.save_ssh(ssh)
+
         # Now that we are connected, start the next step (like WiFi setup)
         self.setup_wifi()
 
@@ -817,9 +832,9 @@ class ManageBraillersViewBase:
 
 
 class ManageBraillersView(ManageBraillersViewBase):
-    def __init__(self, root, app, THEMES):
-        super().__init__(root, app, THEMES, theme_name="light")
+    def __init__(self, root, app, THEMES, ssh=None):
+        super().__init__(root, app, THEMES, theme_name="light", ssh=ssh)
 
 class ManageBraillersViewInverted(ManageBraillersViewBase):
-    def __init__(self, root, app, THEMES):
-        super().__init__(root, app, THEMES, theme_name="dark")
+    def __init__(self, root, app, THEMES, ssh=None):
+        super().__init__(root, app, THEMES, theme_name="dark", ssh=ssh)

@@ -438,7 +438,9 @@ class ManageBraillersViewBase:
             if status == "REACHABLE":
                 try:
                     cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{ip} 'cat ~/name.txt'"
-                    device_id = self.run_command(cmd).strip()
+                    device_id = self.run_fetch_id_command(cmd, ip).strip()
+
+
 
                     if not device_id:
                         self.create_error_popup("No device ID available")
@@ -743,7 +745,7 @@ class ManageBraillersViewBase:
     def create_error_popup(self, text):
         error_popup = tk.Toplevel(self.root)
         error_popup.title("Error or Output")
-        error_popup.geometry("400x200")
+        error_popup.geometry("600x400")
         error_popup.grab_set()  # Make it modal
         error_popup.configure(bg=self.bg)
 
@@ -789,6 +791,30 @@ class ManageBraillersViewBase:
         except Exception as e:
             self.root.after(0, lambda: self.create_error_popup(f"Network Exception: {e}"))
             return None
+        
+    def run_fetch_id_command(self, command, ip):
+
+        if self.ssh is None:
+            return None
+        
+        try: 
+            stdin, stdout, stderr = self.ssh.exec_command(command)
+            output = stdout.read().decode()
+            error = stderr.read().decode()
+
+            if error:
+                
+                if error.startswith("@@@@@@"):
+                    self.run_command(f"ssh-keygen -R {ip}")
+                    self.run_fetch_id_command(command, ip)
+                
+                else:
+                    self.root.after(0, lambda: self.create_error_popup(f"Command Error: {error}"))
+            return output
+        except Exception as e:
+            self.root.after(0, lambda: self.create_error_popup(f"Network Exception: {e}"))
+            return None
+
 
     def setup_wifi(self):
         self.FULLNAME = "perk-" + self.wifi_name

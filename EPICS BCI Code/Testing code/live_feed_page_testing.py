@@ -183,9 +183,9 @@ class IndividualBraillerViewBase:
 
         # Choose file depending on mode
         if self.current_mode == "live":
-            current_contents = self.text_content.rstrip('\n')
+            current_contents = self.text_content
         elif self.current_mode == "braille":
-            current_contents = self.braille_content.rstrip('\n')
+            current_contents = self.braille_content
 
 
         if self.current_mode == "braille":
@@ -219,25 +219,40 @@ class IndividualBraillerViewBase:
         
 
         # Schedule next update after 150 ms
-        self.after_id3 = self.root.after(1000, self.update_live_feed)
+        self.after_id3 = self.root.after(2000, self.update_live_feed)
 
       
-    def binToBraille(self, bin_data):
+
+    def binToBraille(self, bin):
+        i = 0
         out = ""
-
-        # Split by whitespace/newlines
-        chunks = bin_data.split()
-
-        for chunk in chunks:
-            if chunk in self.translations:
-                out += self.translations[chunk]
-            elif chunk == "":
-                out += " "
-            else:
-                # Unknown pattern (optional debug)
+        while(i <= len(bin) - 6):
+            try:
+                while ("\n" in bin[i:i+6]):
+                    out += "\n"
+                    i += 1
+                out += self.translations[bin[i:i+6]]
+            except:
                 pass
-
+            i += 6
         return out
+
+    # def binToBraille(self, bin_data):
+    #     out = ""
+
+    #     # Split by whitespace/newlines
+    #     chunks = bin_data.split()
+
+    #     for chunk in chunks:
+    #         if chunk in self.translations:
+    #             out += self.translations[chunk]
+    #         elif chunk == "":
+    #             out += " "
+    #         else:
+    #             # Unknown pattern (optional debug)
+    #             pass
+
+    #     return out
 
     
     def run_command(self, command):
@@ -261,7 +276,7 @@ class IndividualBraillerViewBase:
     def simulate_brailler_output(self):
         def fetch_worker():
             
-            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt; echo '---SEP---'; cat ~/outputBin.txt'"
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'cat ~/transliterateOutput.txt; echo '---SEP---'; cat ~/tempbin.txt'"
             result = self.run_command(cmd)
             print(result)
             

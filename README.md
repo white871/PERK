@@ -28,12 +28,15 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - transfer setup.sh into the Pi AND Perk_RPI.zip (navigate to your directory containing setup.sh, then run "scp setup.sh perk@perk.local:~/setup.sh", then to the directory with Perk_RPI do the corresponding scp command)
 - When editing ANY file in Raspberry Pi Files, you MUST compress all files into Perk_RPI before committing and pushing. Please keep the zip file updated!!
 - With these two files, you can skip the below steps (besides building the exe) for setting up the client Pi.
+- Run "bash setup.sh" and you should be good to go
+- Next, for the program to run on boot, type "crontab -e", go to the bottom of the opened file and type "@reboot bash home/perk/bootup.sh"
 ### TLV320DAC3100 setup (speaker & headphones)
 - Setup is simple, go into boot/firmware/config.txt and add "dtoverlay=i2s-dac"
 - Uncomment 'dtparam=i2s=on'
 - Enable i2c: When done with the config file, type "sudo raspi-config", and go into interfacing options and enable i2c
 - Run 'sudo apt-get install -y i2c-tools'
 - Install the bash script on the repository onto the Pi, run it using (bash setup_tlv) before doing anything else
+- **Note, holding down the network search button switches between headphones and speaker. MAKE SURE THERE IS NO AUDIO JACK PLUGGED IN WHEN SWITCHING TO SPEAKER. It will blast your ears.**
 ### Max98357a setup (speaker only)
 - To use this audio chip, you must enable the I2S protocol in the config file.
 - Uncomment "dtparam=12s=on" and comment "dtparam=audio=on"

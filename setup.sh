@@ -1,23 +1,6 @@
-if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:unavailable" ]; then
-    echo "Network unavailable. Setting WLAN Country to US"
-    sudo raspi-config nonint do_wifi_country US
-fi
-if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:connected" ]; then
-    echo "Internet!"
-fi
-if [ nmcli -t -f DEVICE,STATE device | grep "^wlan:0:disconnected" ]; then
-    echo "You need an internet connection for this script."
-    exit 1
-fi
-echo -n "Fetching Perk Files..."
-if [-e Perk_RPI.zip]
-then 
-    echo "Zip folder found"
-    unzip Perk_RPI.zip
-    rm Perk_RPI.zip
-else 
-    echo "Please use transfer the zip file from the repository into the Pi."
-fi
+
+unzip Perk_RPI.zip
+rm Perk_RPI.zip
 echo "Done."
 
 echo -n "Setting up I2C..."

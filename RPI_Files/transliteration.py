@@ -31,7 +31,6 @@ def switchAudio():
     if speaker:
        TTS("Headphone", voice)
        subprocess.run('bash headphone.sh', shell = True)
-       #TTS("headphone", voice)
        speaker = False
     else:
        subprocess.run('bash speaker.sh', shell = True)
@@ -58,7 +57,6 @@ def networkSearch():
         if net[0][0:5] == "perk-":
             subprocess.run(f'sudo nmcli dev wifi connect {net[0]} password perk12345', shell = True)
             TTS(net[0], voice)
-            #beep_beep(1000, 1500)
             return
     subprocess.run("aplay fail.wav", shell = True)
 

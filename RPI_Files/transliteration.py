@@ -8,15 +8,44 @@ import wave
 from piper import PiperVoice, SynthesisConfig
 
 from transliterateBinary import transliterateBin
+
 def powerDown():
     subprocess.run("aplay off.wav", shell = True)
     subprocess.run('i2cset -y 1 0x18 0x00 0x01 && i2cset -y 1 0x18 0x2A 0x00', shell = True) # disable speaker
     subprocess.run('sudo shutdown now', shell = True)
+
 model = "en_US-amy-medium.onnx"
 global voice
+global pair
+global speaker
+global held
 voice = PiperVoice.load(model)
+pair = Button(24, bounce_time=0.1)
+speaker = True
+held = False
+def switchAudio():
+    global voice
+    global speaker
+    global held
+    held = True
+    if speaker:
+       TTS("Headphone", voice)
+       subprocess.run('bash headphone.sh', shell = True)
+       #TTS("headphone", voice)
+       speaker = False
+    else:
+       subprocess.run('bash speaker.sh', shell = True)
+       TTS("Speaker", voice)
+       speaker = True
+    time.sleep(0.2)
 def networkSearch():
     global voice
+    global speaker
+    global pair
+    global held
+    if held:
+        held = False
+        return
     subprocess.run('aplay search.wav', shell = True)
     out = subprocess.check_output('sudo nmcli -f NAME connection show', shell = True)
     for net in out.decode('utf-8').split("\n"):
@@ -29,11 +58,13 @@ def networkSearch():
         if net[0][0:5] == "perk-":
             subprocess.run(f'sudo nmcli dev wifi connect {net[0]} password perk12345', shell = True)
             TTS(net[0], voice)
-           
+            #beep_beep(1000, 1500)
             return
     subprocess.run("aplay fail.wav", shell = True)
 
-    
+#pair.when_pressed = networkSearch
+   
+
 def HallEffectRead(hallEffect, out):
     outputnum = ""
     for i in range(8):
@@ -53,21 +84,21 @@ def TTS(word, voice):
     except: 
         pass    
         
-model = "en_US-amy-medium.onnx"
+#model = "en_US-amy-medium.onnx"
 currentLine = 0
 lastWordList = []
-
+#voice = PiperVoice.load(model)
 open("output.txt", 'w').close()
 subprocess.run('aplay ready.wav', shell = True)
 
 hallEffect = [DigitalOutputDevice(f"BOARD{pin}", active_high = True) for pin in [31, 33, 37]]
 mux_out = DigitalInputDevice(f"BOARD36", pull_up = True)
 on_off = Button(23, bounce_time=0.1)
-pair = Button(24,bounce_time=0.1)
+#pair = Button(24,bounce_time=0.1)
 
 on_off.when_pressed = powerDown
-pair.when_pressed = networkSearch
-
+pair.when_released = networkSearch
+pair.when_held = switchAudio
 binArray = []
 space_press = 0
 line_press = 0

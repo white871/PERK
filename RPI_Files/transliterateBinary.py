@@ -192,7 +192,7 @@ def transliterateBin(inputB):
         pass
 
     translatedOutput = translatedOutput.strip()
-    f_out = open('transliterateOutput.txt', 'w')
+    f_out = open('transliterateOutput.txt', 'a')
     f_out.write(translatedOutput)
     f_out.close()
     #print(translatedOutput.split())

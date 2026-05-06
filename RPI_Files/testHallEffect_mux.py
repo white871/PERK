@@ -8,7 +8,7 @@ for pin in [31,33,37]:
 	hallEffect.append(gpiozero.DigitalOutputDevice(f"BOARD{pin}", active_high = True))
 output = gpiozero.DigitalInputDevice(f"BOARD36", pull_up = True)
 outputnum = []
-
+io = gpiozero.DigitalInputDevice(f"BOARD11")
 def hallEffectRefresh():
     global outputnum
     global hallEffect
@@ -19,7 +19,7 @@ def hallEffectRefresh():
         time.sleep(0.001)
         
         outputnum.append(str(output.value))
-	
+       # outputnum.append(str(io.value))
 
     print(' '.join(outputnum), end='\r', flush=True)
     threading.Timer(0.1, hallEffectRefresh).start()

@@ -30,15 +30,12 @@ write 0x40 0x00 # Unmute DAC channels, ind. volume control
 write 0x41 0xD4 # -22db Left - EDIT FOR VOLUME CONTROL
 write 0x42 0xD4 # -22db Right - EDIT FOR VOLUME CONTROL
 
-write 0x43 0x80 # Heatset det. enabled
-#write 0x74 0x80 # Set ADC for pot. vol control 
+write 0x74 0x80 # Set ADC for pot. vol control
 
-write 0x00 0x01 # Switch to Page 1
+write 0x00 0x01 # Pg 1
 
 # Speaker Config
 write 0x20 0x86 # Speaker Driver on
 write 0x23 0x44 # DAC Channels to mixer amps
 write 0x26 0x80 # Left analog volume to speaker
 write 0x2A 0x04 # Unmute driver
-
-

@@ -5,28 +5,33 @@ from gpiozero import DigitalInputDevice, DigitalOutputDevice, Button
 import subprocess
 import threading
 import wave
-from piper import PiperVoice
+from piper import PiperVoice, SynthesisConfig
 
 from transliterateBinary import transliterateBin
-def beep_beep(freq1, freq2):
-    subprocess.run(f'( speaker-test -t sine -f {freq1} )& pid=$! ; sleep 0.2s ; kill -9 $pid', shell = True)
-    subprocess.run(f'( speaker-test -t sine -f {freq2} )& pid=$! ; sleep 0.2s ; kill -9 $pid', shell = True)
-
 def powerDown():
-    beep_beep(1500, 1000)
+    subprocess.run("aplay off.wav", shell = True)
+    subprocess.run('i2cset -y 1 0x18 0x00 0x01 && i2cset -y 1 0x18 0x2A 0x00', shell = True) # disable speaker
     subprocess.run('sudo shutdown now', shell = True)
-    
+model = "en_US-amy-medium.onnx"
+global voice
+voice = PiperVoice.load(model)
 def networkSearch():
-    beep_beep(1500, 1500)
+    global voice
+    subprocess.run('aplay search.wav', shell = True)
+    out = subprocess.check_output('sudo nmcli -f NAME connection show', shell = True)
+    for net in out.decode('utf-8').split("\n"):
+        if net[0:5] == "perk-":
+            out = subprocess.check_output(f'sudo nmcli connection delete {net}', shell = True)
     out = subprocess.check_output('sudo nmcli -t -f SSID,SIGNAL dev wifi list', shell = True)
     print(out.decode('utf-8'))
     for net in out.decode('utf-8').split("\n"):
         net = net.split(":")
         if net[0][0:5] == "perk-":
             subprocess.run(f'sudo nmcli dev wifi connect {net[0]} password perk12345', shell = True)
-            beep_beep(1000, 1500)
+            TTS(net[0], voice)
+           
             return
-    beep_beep(1000,1000)
+    subprocess.run("aplay fail.wav", shell = True)
 
     
 def HallEffectRead(hallEffect, out):
@@ -37,12 +42,13 @@ def HallEffectRead(hallEffect, out):
         time.sleep(0.001)
         outputnum += str(out.value)
     return outputnum
-    
-
+     
+ 
 def TTS(word, voice):
+    syn = SynthesisConfig(volume = 1.5)
     try:
         with wave.open("output.wav", "wb") as f:
-            voice.synthesize_wav(word, f)
+            voice.synthesize_wav(word, f, syn_config=syn)
             subprocess.run('aplay output.wav', shell = True)
     except: 
         pass    
@@ -50,16 +56,14 @@ def TTS(word, voice):
 model = "en_US-amy-medium.onnx"
 currentLine = 0
 lastWordList = []
-voice = PiperVoice.load(model)
+
 open("output.txt", 'w').close()
-with wave.open("output.wav", "wb") as f:
-    voice.synthesize_wav("Ready", f)
-    subprocess.run('aplay output.wav', shell = True)
+subprocess.run('aplay ready.wav', shell = True)
 
 hallEffect = [DigitalOutputDevice(f"BOARD{pin}", active_high = True) for pin in [31, 33, 37]]
 mux_out = DigitalInputDevice(f"BOARD36", pull_up = True)
-on_off = Button(23)
-pair = Button(24)
+on_off = Button(23, bounce_time=0.1)
+pair = Button(24,bounce_time=0.1)
 
 on_off.when_pressed = powerDown
 pair.when_pressed = networkSearch
@@ -71,9 +75,9 @@ current_line = 0
 lastWord = ""
 while True:
     output = HallEffectRead(hallEffect, mux_out)
-    newline = int(output[3])
-    space = int(output[4])
-    keys = output[0:3] + output[5:8]
+    newline = int(output[4])
+    space = int(output[6])
+    keys = output[5] + output[7] + output[3] + output[2] + output[1] + output[0]
 	#keys = output[3] + output[2] + output[1] + output[5:8]
     if space:
         space_press = 1
@@ -87,8 +91,10 @@ while True:
             binArray.append(currentBinary)
         else:
             binArray[current_line] += currentBinary
-            print(binArray[current_line])
+        print(binArray[current_line])
         with open("tempbin.txt", 'w') as f:
+            with open("transliterateOutput.txt", "w") as f_t:
+                pass
             for line in binArray:
                 f.write(line + '\n')
                 lastWord = transliterateBin(line)

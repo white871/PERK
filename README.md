@@ -37,6 +37,8 @@ For more information on setting up RPI gadget mode, you can look at this guide: 
 - Run 'sudo apt-get install -y i2c-tools'
 - Install the bash script on the repository onto the Pi, run it using (bash setup_tlv) before doing anything else
 - **Note, holding down the network search button switches between headphones and speaker. MAKE SURE THERE IS NO AUDIO JACK PLUGGED IN WHEN SWITCHING TO SPEAKER. It will blast your ears.**
+### Files
+- Run testHallEffect_mux.py to ensure all hall effect sensors are working and in the correct position. If not, you will have to reorder them in the transliteration.py script. 
 ### Max98357a setup (speaker only)
 - To use this audio chip, you must enable the I2S protocol in the config file.
 - Uncomment "dtparam=12s=on" and comment "dtparam=audio=on"

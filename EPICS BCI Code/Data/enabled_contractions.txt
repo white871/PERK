@@ -17,17 +17,17 @@
     "across": {
         "binary": "100000100100111010",
         "braille": "⠁⠉⠗",
-        "enabled": 0
+        "enabled": 1
     },
     "after": {
         "binary": "100000110100",
         "braille": "⠁⠋",
-        "enabled": 0
+        "enabled": 1
     },
     "afternoon": {
         "binary": "100000110100101110",
         "braille": "⠁⠋⠝",
-        "enabled": 0
+        "enabled": 1
     },
     "afterward": {
         "binary": "100000110100010111",

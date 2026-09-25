@@ -48,6 +48,7 @@ class App:
         font_path_2 = "EPICS BCI Code/Fonts/RobotoCondensed-VariableFont_wght.ttf"
 
 
+
         self.load_fonts(font_path_1)
         self.load_fonts(font_path_2)
 

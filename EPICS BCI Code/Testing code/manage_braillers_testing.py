@@ -824,6 +824,19 @@ class ManageBraillersViewBase:
         def wifi_worker():
 
             set_up_wifi = f"sudo nmcli device wifi hotspot ssid {self.FULLNAME} password {self.PASSWORD}"
+            clear_old_hotspots = (
+                "sudo nmcli -t -f NAME,TYPE connection show | "
+                "while IFS=: read -r name type; do "
+                "case \"$name\" in "
+                "perk-*|Hotspot|perk-hotspot) "
+                "if [ \"$type\" = \"802-11-wireless\" ]; then "
+                "sudo nmcli connection delete \"$name\"; "
+                "fi ;; "
+                "esac; "
+                "done"
+            )
+
+            self.run_command(clear_old_hotspots)
             out = self.run_command(set_up_wifi)
 
             if out is None:

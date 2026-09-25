@@ -1,6 +1,7 @@
 import ast
 import csv
 import json
+import os
 
 with open('brailleLib.txt', 'r') as f:
     data = f.read()
@@ -10,7 +11,19 @@ brailleLib = ast.literal_eval(data)
 #    data = f.read()
 #b2b = ast.literal_eval(data)
 
-enabled_contractions = {}
+def load_enabled_contractions(json_path='enabled_contractions.txt'):
+    """Reads JSON library and returns set of enabled contraction words."""
+    if not os.path.exists(json_path):
+        return set()
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            contractions_data = json.load(f)
+            return {
+                word for word, details in contractions_data.items()
+                if details.get("enabled", 1) == 1
+            }
+    except Exception:
+        return set()
 
 def transliterateBin(inputB):
     global brailleLib
@@ -19,16 +32,9 @@ def transliterateBin(inputB):
     global translatedOutput
     global i
     global lastOutput
-    global enabled_contractions
-    
-    #with open('EPICS BCI Code\\Data\\enabled_contractions.txt', 'r') as f:
-    #    data = f.read()
-    #enabled_data = ast.literal_eval(data)
 
-    #enabled_contractions = {
-    #    word for word, info in enabled_data.items()
-    #    if info["enabled"] ==1
-    #}
+    # Load active contraction words dynamically
+    enabled_contractions = load_enabled_contractions()
 
     inputarr = []
     i = 0
@@ -80,8 +86,8 @@ def transliterateBin(inputB):
                     if "_" in possibleOut:
                         contraction_word = possibleOut.replace("_","")
 
-                        #if contraction_word not in enabled_contractions:
-                         #   continue
+                        if contraction_word not in enabled_contractions:
+                           continue
 
                         if i > 0 and i < len(inputarr) - 1:
                             expand = False

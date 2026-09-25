@@ -1,3 +1,4 @@
+import shlex
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import json
@@ -192,25 +193,47 @@ class IndividualBraillerViewBase:
             current_contents = self.binToBraille(current_contents)
 
 
-        new_len = len(current_contents)
+        # new_len = len(current_contents)
 
-        #Case 1, text is shorter
-        if new_len < self.last_len:
+        # #Case 1, text is shorter
+        # if new_len < self.last_len:
+        #     self.text_display.delete("1.0", tk.END)
+        #     self.text_display.insert(tk.END, current_contents)
+            
+
+        # elif new_len > self.last_len:
+        #     new_text = current_contents[self.last_len:new_len]
+        #     self.text_display.insert(tk.END, new_text)
+            
+
+        # elif force_full_refresh:
+        #     self.text_display.delete("1.0", tk.END)
+        #     self.text_display.insert(tk.END, current_contents)
+            
+        # self.last_len = new_len
+
+        # Initialize self.last_content in __init__ if not present: self.last_content = ""
+        last_contents = getattr(self, "last_content", "")
+
+        # 1. Full refresh forced or text completely replaced (same or shorter length, but different text)
+        if force_full_refresh or (len(current_contents) <= len(last_contents) and current_contents != last_contents):
             self.text_display.delete("1.0", tk.END)
             self.text_display.insert(tk.END, current_contents)
-            
 
-        elif new_len > self.last_len:
-            new_text = current_contents[self.last_len:new_len]
-            self.text_display.insert(tk.END, new_text)
-            
+        # 2. Text grew, but previous text was modified (e.g., auto-correct altered earlier characters)
+        elif len(current_contents) > len(last_contents):
+            if current_contents.startswith(last_contents):
+                # Pure append: append only the new ending slice
+                new_text = current_contents[len(last_contents):]
+                self.text_display.insert(tk.END, new_text)
+            else:
+                # Text grew, but earlier characters changed: full redraw required
+                self.text_display.delete("1.0", tk.END)
+                self.text_display.insert(tk.END, current_contents)
 
-        elif force_full_refresh:
-            self.text_display.delete("1.0", tk.END)
-            self.text_display.insert(tk.END, current_contents)
-            
+        # Store the exact text string for the next iteration
+        self.last_content = current_contents
 
-        self.last_len = new_len
 
         #Determines if user is at the bottom of the page, and keeps them there if so
         bottom = self.text_display.yview()[1]
@@ -219,7 +242,7 @@ class IndividualBraillerViewBase:
         
 
         # Schedule next update after 150 ms
-        self.after_id3 = self.root.after(2000, self.update_live_feed)
+        self.after_id3 = self.root.after(2500, self.update_live_feed)
 
       
 
@@ -272,6 +295,22 @@ class IndividualBraillerViewBase:
             self.root.after(0, lambda: self.create_error_popup(f"Network Exception: {e}"))
             return None
 
+    def sync_contractions_to_pi(self):
+        """
+        Transfers the updated local enabled_contractions.json to the Raspberry Pi 
+        via scp/sshpass and triggers a transliteration update.
+        """
+
+        def upload_worker():
+            with open(self.enabled_contractions_path, "r", encoding="utf-8") as f:
+                new_settings = f.read()
+
+            # Send file to home directory of client Raspberry Pi
+            cmd = f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} 'echo {shlex.quote(new_settings)} > ~/enabled_contractions.txt'"
+            
+            self.run_command(cmd)
+
+        threading.Thread(target=upload_worker, daemon=True).start()
     
     def simulate_brailler_output(self):
         def fetch_worker():
@@ -328,9 +367,26 @@ class IndividualBraillerViewBase:
         if not confirm:
             return #user clicked no
         
-        self.run_command("sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/transliterateOutput.txt'")
-        self.run_command("sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/outputBin.txt'")
+        self.run_command(f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/transliterateOutput.txt'")
+        self.run_command(f"sshpass -p 'perk' ssh -o StrictHostKeyChecking=no perk@{self.ip} '> ~/tempbin.txt'")
 
+        reset_client = (
+            "pkill -f '[t]ransliteration.py' || true; "
+            ": > ~/transliterateOutput.txt; "
+            ": > ~/tempbin.txt; "
+            "cd /home/perk && "
+            "nohup ./pyperk/bin/python transliteration.py "
+            ">/tmp/perk-transliteration.log 2>&1 &"
+        )
+        self.run_command(
+            "sshpass -p 'perk' ssh -o StrictHostKeyChecking=no "
+            f"perk@{self.ip} {shlex.quote(reset_client)}"
+        )
+
+        for local_path in (self.text_file_path, self.braille_file_path):
+            with open(local_path, "w", encoding="utf-8") as file:
+                file.write("")
+        
         self.text_display.config(state="normal")
         self.text_display.delete("1.0", tk.END)
 
@@ -682,6 +738,8 @@ class IndividualBraillerViewBase:
         with open(self.enabled_contractions_path, "w", encoding="utf-8") as f:
             json.dump(self.enabled_contractions, f, indent=4, ensure_ascii=False)
 
+        self.sync_contractions_to_pi()
+
     def on_search_focus_in(self, event):
         if self.search_var.get() == self.placeholder_text:
             self.search_var.set("")
@@ -879,6 +937,8 @@ class IndividualBraillerViewBase:
         with open(self.enabled_contractions_path, "w", encoding="utf-8") as f:
             json.dump(self.enabled_contractions, f, indent=4, ensure_ascii=False)
 
+        self.sync_contractions_to_pi()
+
 
     def deselect_all_contractions(self):
         for contraction, var in self.contraction_vars.items():
@@ -889,7 +949,8 @@ class IndividualBraillerViewBase:
         with open(self.enabled_contractions_path, "w", encoding="utf-8") as f:
             json.dump(self.enabled_contractions, f, indent=4, ensure_ascii=False)
 
-    
+        self.sync_contractions_to_pi()
+
     def create_error_popup(self, text):
         error_popup = tk.Toplevel(self.root)
         error_popup.title("Error or Output")
